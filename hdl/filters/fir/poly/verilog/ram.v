@@ -1,6 +1,6 @@
 `default_nettype none
 
-module rom #(
+module ram #(
    parameter ROMFILE       = "",
    parameter ADDRESS_WIDTH = 7,
    parameter DATA_WIDTH    = 16,
@@ -9,6 +9,8 @@ module rom #(
    input wire                          clk,
    input wire                          en1,
    input wire                          en2,
+   input wire                          we1,
+   input wire                          we2,
    input wire [ADDRESS_WIDTH-1:0]      addr1,
    input wire [ADDRESS_WIDTH-1:0]      addr2,
    output wire signed [DATA_WIDTH-1:0] do1,
@@ -40,8 +42,8 @@ module rom #(
       .ENB   (en2),
       .RSTA  (1'b0),
       .RSTB  (1'b0),
-      .WEA   (1'b0),
-      .WEB   (1'b0)
+      .WEA   (we1),
+      .WEB   (we2)
    );
 
 endmodule // rom

@@ -4,7 +4,7 @@
 // the FPGA.
 
 `include "bank.v"
-`include "rom.v"
+`include "ram.v"
 
 module fir_poly #(
    parameter N_TAPS         = 1200, /* total number of taps */
@@ -111,7 +111,7 @@ module fir_poly #(
    // Do I need to get better at Verilog or will it seriously not let
    // me wrap these in a generate statement because of the rom
    // files???
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps0_1.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -123,10 +123,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[0]),
-      .do2   (tap_mem_dout[1])
+      .do2   (tap_mem_dout[1]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps2_3.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -138,10 +140,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[2]),
-      .do2   (tap_mem_dout[3])
+      .do2   (tap_mem_dout[3]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps4_5.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -153,10 +157,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[4]),
-      .do2   (tap_mem_dout[5])
+      .do2   (tap_mem_dout[5]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps6_7.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -168,10 +174,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[6]),
-      .do2   (tap_mem_dout[7])
+      .do2   (tap_mem_dout[7]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps8_9.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -183,10 +191,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[8]),
-      .do2   (tap_mem_dout[9])
+      .do2   (tap_mem_dout[9]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps10_11.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -198,10 +208,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[10]),
-      .do2   (tap_mem_dout[11])
+      .do2   (tap_mem_dout[11]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps12_13.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -213,10 +225,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[12]),
-      .do2   (tap_mem_dout[13])
+      .do2   (tap_mem_dout[13]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps14_15.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -228,10 +242,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[14]),
-      .do2   (tap_mem_dout[15])
+      .do2   (tap_mem_dout[15]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps16_17.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -243,10 +259,12 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[16]),
-      .do2   (tap_mem_dout[17])
+      .do2   (tap_mem_dout[17]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
-   rom #(
+   ram #(
       .ROMFILE       ("taps/taps18_19.hex"),
       .ADDRESS_WIDTH (BANK_LEN_LOG2+1),
       .DATA_WIDTH    (TAP_WIDTH),
@@ -258,7 +276,9 @@ module fir_poly #(
       .addr1 (tap_mem_addr_port1),
       .addr2 (tap_mem_addr_port2),
       .do1   (tap_mem_dout[18]),
-      .do2   (tap_mem_dout[19])
+      .do2   (tap_mem_dout[19]),
+      .we1   (1'b0),
+      .we2   (1'b0)
    );
 
    wire signed [INTERNAL_WIDTH-1:0] bank_dout [0:M-1];
@@ -337,16 +357,23 @@ module fir_poly #(
 
    wire signed [INTERNAL_WIDTH-DROP_MSB_BITS-1:0] out_drop_msb = out_rounded[INTERNAL_WIDTH-DROP_MSB_BITS-1:0];
 
+   reg                                            dvalid_delay;
+
    // compute the sum of all bank outputs
    always @(posedge clk) begin
       if (!rst_n) begin
          dvalid <= 1'b0;
+         dvalid_delay <= 1'b0;
       end else begin
          if (clk_2mhz_pos_en) begin
-            dvalid <= 1'b1;
+            if (dvalid_delay)
+              dvalid <= 1'b1;
+            else
+              dvalid_delay <= 1'b1;
+
             // dout   <= out_drop_msb[INTERNAL_WIDTH-DROP_MSB_BITS-1:DROP_LSB_BITS];
             // TODO I'm not rounding well, which could give this a bit of a bias.
-            dout <= {out_tmp[INTERNAL_WIDTH-1], out_tmp[DROP_LSB_BITS+OUTPUT_WIDTH-3:DROP_LSB_BITS-1]};
+            dout     <= {out_tmp[INTERNAL_WIDTH-1], out_tmp[DROP_LSB_BITS+OUTPUT_WIDTH-3:DROP_LSB_BITS-1]};
          end
       end
    end
@@ -488,13 +515,9 @@ module fir_poly_tb;
       #100000 $finish;
    end
 
-   reg [1:0] wr_delay = 2'd0;
    always @(posedge clk) begin
-      if (rst_n && clk_2mhz_pos_en) begin
-         if (wr_delay == 2'd2)
-           $fwrite(f, "%d\n", $signed(dout));
-         else
-           wr_delay <= wr_delay + 1'b1;
+      if (dvalid && clk_2mhz_pos_en) begin
+         $fwrite(f, "%d\n", $signed(dout));
       end
    end
 
