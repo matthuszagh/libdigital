@@ -1,0 +1,5 @@
+* About
+libdigital is a personal collection of FPGA (and ASIC?) cores as well
+as a number of useful scripts for designing digital circuits. The
+implementations are currently done in Verilog, but in the future I
+hope to transition the focus to nMigen.
