@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Finite-impulse response filter."""
 
 from scipy import signal
@@ -24,10 +24,10 @@ class FIR:
         )
 
     def quantize_2s_comp(self, nbits, val, max_val=1):
-        """
-        Quantize a real number (val) for two's complement representation
+        """Quantize a real number (val) for two's complement representation
         using a supplied number of bits (nbits). The original range of
         values is [-max_val, max_val].
+
         """
         norm_val = val / max_val
         return round(norm_val * 2 ** (nbits - 1))
@@ -157,7 +157,12 @@ class FIR:
                 path_out_manual = d + "sample_out_manual.txt"
                 with open(path_out_manual, "w") as f:
                     for val in man_out_decimated:
-                        f.write("{}\n".format(int(val * 2 ** (nbits_in - 1))))
+                        f.write(
+                            "{:8d} {:8.2f}\n".format(
+                                int(val * 2 ** (nbits_in - 1)),
+                                val * 2 ** (nbits_in - 1),
+                            )
+                        )
 
         else:
             for d in dirs:
@@ -248,40 +253,62 @@ class FIR:
                     f.write("{}\n".format(val))
 
     def write_poly_taps_files(
-        self, dirs, nbits, downsample_factor, normalize_taps=True
+        self,
+        dirs,
+        nbits,
+        downsample_factor,
+        normalize_taps=True,
+        combine_adjacent_taps_files=False,
     ):
-        """Write taps separated into polyphase components. Each polyphase
+        """
+        Write taps separated into polyphase components. Each polyphase
         filter is written to its own file. This method uses normalized
         taps by default for more efficient bit representation. Note
         that if you use normalized taps you must scale the result by
         the normalization factor. See `normalization_shift' for the
-        factor.
-
+        factor. `combine_adjacent_taps_files' places the taps for two
+        filter banks in the same file. This is useful when storing the
+        taps in block ram, since it allows you to use the RAM as
+        dual-port RAM and cut the number of block RAMs in half.
         """
         if normalize_taps:
             fir_hex = self.as_hex(nbits, taps=self.normalized_taps())
         else:
             fir_hex = self.as_hex(nbits)
 
-        for d in dirs:
-            for filt in range(0, downsample_factor, 2):
-                path = d + "taps" + str(filt) + "_" + str(filt + 1) + ".hex"
-                with open(path, "w") as f:
-                    i = 0
-                    for val in fir_hex:
-                        if i % downsample_factor == filt:
-                            f.write("{}\n".format(val))
-                        i += 1
-                    # TODO this is not properly parameterized
-                    for _ in range(4):
-                        f.write("0000\n")
-                    i = 0
-                    for val in fir_hex:
-                        if i % downsample_factor == filt + 1:
-                            f.write("{}\n".format(val))
-                        i += 1
-                    for _ in range(4):
-                        f.write("0000\n")
+        if combine_adjacent_taps_files == False:
+            for d in dirs:
+                for filt in range(0, downsample_factor):
+                    path = d + "taps" + str(filt) + ".hex"
+                    with open(path, "w") as f:
+                        i = 0
+                        for val in fir_hex:
+                            if i % downsample_factor == filt:
+                                f.write("{}\n".format(val))
+                            i += 1
+
+        else:
+            for d in dirs:
+                for filt in range(0, downsample_factor, 2):
+                    path = (
+                        d + "taps" + str(filt) + "_" + str(filt + 1) + ".hex"
+                    )
+                    with open(path, "w") as f:
+                        i = 0
+                        for val in fir_hex:
+                            if i % downsample_factor == filt:
+                                f.write("{}\n".format(val))
+                            i += 1
+                        # TODO this is not properly parameterized
+                        for _ in range(4):
+                            f.write("0000\n")
+                        i = 0
+                        for val in fir_hex:
+                            if i % downsample_factor == filt + 1:
+                                f.write("{}\n".format(val))
+                            i += 1
+                        for _ in range(4):
+                            f.write("0000\n")
 
     def pass_ripple(self, taps, band, fs):
         """Compute peak passband ripple for an FIR filter specified by its
@@ -323,5 +350,37 @@ class FIR:
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Gain (dB)")
         ax.set_title("FIR Response")
-        # fig.show()
+        fig.show()
         fig.savefig(savefile)
+
+
+if __name__ == "__main__":
+    NUMTAPS = 120
+    FS = 40e6
+    FN = FS / 2
+    BANDS = [0, 1e6, 1.5e6, FN]
+    BAND_GAIN = [1, 0]
+    FIR = FIR(NUMTAPS, BANDS, BAND_GAIN, FS, pass_db=0.5)
+
+    FIR_INPUT_WIDTH = 12
+    FIR_OUTPUT_WIDTH = FIR.output_bit_width(FIR_INPUT_WIDTH)
+    FIR_TAP_WIDTH = 16
+    FIR_M = 20
+
+    quantized_taps = (
+        FIR.quantized_taps(10, taps=FIR.normalized_taps())
+        / 2 ** FIR.tap_normalization_shift()
+    )
+    FIR.plot_response("plot_response_quant.png", taps=quantized_taps)
+
+    FIR.write_poly_taps_files(
+        ["../hdl/filters/fir/poly/verilog/120taps/taps/"], FIR_TAP_WIDTH, FIR_M
+    )
+
+    FIR.write_input_sample_file(
+        10000,
+        FIR_M,
+        FIR_INPUT_WIDTH,
+        FIR_OUTPUT_WIDTH,
+        ["../hdl/filters/fir/poly/verilog/120taps/tb/"],
+    )

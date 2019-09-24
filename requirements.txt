@@ -3,3 +3,5 @@ numpy
 pip
 bitstring
 setuptools
+matplotlib
+scipy
