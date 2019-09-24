@@ -14,7 +14,6 @@ module bank #(
 ) (
    input wire                            clk,
    input wire                            rst_n,
-   input wire                            clk_3x,
    input wire                            clk_2mhz_pos_en,
    input wire signed [INPUT_WIDTH-1:0]   din,
    output wire signed [OUTPUT_WIDTH-1:0] dout,
@@ -53,7 +52,7 @@ module bank #(
       end
    end
 
-   wire dsp_acc = (tap_addr != {BANK_LEN_LOG2{1'b0}});
+   wire dsp_acc = (tap_addr != {M_LOG2{1'b0}});
    wire [DSP_P_WIDTH-OUTPUT_WIDTH-1:0] p_msbs_drop;
 
    reg signed [INPUT_WIDTH-1:0]       dsp_din;
@@ -64,13 +63,6 @@ module bank #(
       default: dsp_din = shift_reg[tap_addr[BANK_LEN_LOG2-1:0]];
       endcase
    end
-
-   // always @(*) begin
-   //    case (tap_addr)
-   //    {BANK_LEN_LOG2{1'b0}}: dsp_din = din;
-   //    default: dsp_din = shift_reg[tap_addr-{{BANK_LEN_LOG2-1{1'b0}},1'b1}];
-   //    endcase
-   // end
 
    // TODO parameterize
    dsp dsp (

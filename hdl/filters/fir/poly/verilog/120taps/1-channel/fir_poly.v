@@ -4,7 +4,6 @@
 // the FPGA.
 
 `include "bank.v"
-`include "ram.v"
 
 module fir_poly #(
    parameter N_TAPS         = 120, /* total number of taps */
@@ -20,7 +19,6 @@ module fir_poly #(
 ) (
    input wire                           clk,
    input wire                           rst_n,
-   input wire                           clk_12mhz,
    input wire                           clk_2mhz_pos_en,
    input wire signed [INPUT_WIDTH-1:0]  din,
    output reg signed [OUTPUT_WIDTH-1:0] dout,
@@ -104,7 +102,6 @@ module fir_poly #(
 
    wire signed [INTERNAL_WIDTH-1:0] bank_dout [0:M-1];
 
-   // TODO add M_LOG2
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
@@ -117,7 +114,6 @@ module fir_poly #(
    ) bank0 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (din),
       .dout            (bank_dout[0]),
@@ -137,7 +133,6 @@ module fir_poly #(
    ) bank1 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[0]),
       .dout            (bank_dout[1]),
@@ -157,7 +152,6 @@ module fir_poly #(
    ) bank2 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[1]),
       .dout            (bank_dout[2]),
@@ -177,7 +171,6 @@ module fir_poly #(
    ) bank3 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[2]),
       .dout            (bank_dout[3]),
@@ -197,7 +190,6 @@ module fir_poly #(
    ) bank4 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[3]),
       .dout            (bank_dout[4]),
@@ -217,7 +209,6 @@ module fir_poly #(
    ) bank5 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[4]),
       .dout            (bank_dout[5]),
@@ -237,7 +228,6 @@ module fir_poly #(
    ) bank6 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[5]),
       .dout            (bank_dout[6]),
@@ -257,7 +247,6 @@ module fir_poly #(
    ) bank7 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[6]),
       .dout            (bank_dout[7]),
@@ -277,7 +266,6 @@ module fir_poly #(
    ) bank8 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[7]),
       .dout            (bank_dout[8]),
@@ -297,7 +285,6 @@ module fir_poly #(
    ) bank9 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[8]),
       .dout            (bank_dout[9]),
@@ -317,7 +304,6 @@ module fir_poly #(
    ) bank10 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[9]),
       .dout            (bank_dout[10]),
@@ -337,7 +323,6 @@ module fir_poly #(
    ) bank11 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[10]),
       .dout            (bank_dout[11]),
@@ -357,7 +342,6 @@ module fir_poly #(
    ) bank12 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[11]),
       .dout            (bank_dout[12]),
@@ -377,7 +361,6 @@ module fir_poly #(
    ) bank13 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[12]),
       .dout            (bank_dout[13]),
@@ -397,7 +380,6 @@ module fir_poly #(
    ) bank14 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[13]),
       .dout            (bank_dout[14]),
@@ -417,7 +399,6 @@ module fir_poly #(
    ) bank15 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[14]),
       .dout            (bank_dout[15]),
@@ -437,7 +418,6 @@ module fir_poly #(
    ) bank16 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[15]),
       .dout            (bank_dout[16]),
@@ -457,7 +437,6 @@ module fir_poly #(
    ) bank17 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[16]),
       .dout            (bank_dout[17]),
@@ -477,7 +456,6 @@ module fir_poly #(
    ) bank18 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[17]),
       .dout            (bank_dout[18]),
@@ -497,7 +475,6 @@ module fir_poly #(
    ) bank19 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_3x          (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[18]),
       .dout            (bank_dout[19]),
@@ -562,17 +539,13 @@ endmodule
 `ifdef SIMULATE
 
 `include "DSP48E1.v"
-`include "BRAM_TDP_MACRO.v"
-`include "RAMB18E1.v"
-`include "PLLE2_BASE.v"
-`include "PLLE2_ADV.v"
 `include "glbl.v"
 
 `timescale 1ns/1ps
 module fir_poly_tb;
 
    localparam M              = 20; /* downsampling factor */
-   localparam M_WIDTH        = 5;
+   localparam M_LOG2         = 5;
    localparam INPUT_WIDTH    = 12;
    localparam INTERNAL_WIDTH = 35;
    localparam NORM_SHIFT     = 4;
@@ -583,19 +556,13 @@ module fir_poly_tb;
    localparam ADC_DATA_WIDTH = 12;
    localparam SAMPLE_LEN     = 10000;
 
-   wire clk_12mhz;
-   wire pll_lock;
    reg  clk = 0;
-   wire clk_fb;
    reg  rst_n = 0;
 
    always #12.5 clk = !clk;
 
-   always @(posedge clk) begin
-      if (pll_lock)
-        rst_n <= 1;
-      else
-        rst_n <= 0;
+   initial begin
+      #50 rst_n = 1;
    end
 
    // base clock 2mhz clock enable
@@ -621,7 +588,6 @@ module fir_poly_tb;
    wire signed [INPUT_WIDTH-1:0] sample_in = samples[ctr];
    wire signed [OUTPUT_WIDTH-1:0] dout;
    wire                           dvalid;
-   reg                            sample_in_start = 0;
 
    integer                      ctr = 0;
    reg                          ctr_delay = 1'b0;
@@ -659,34 +625,19 @@ module fir_poly_tb;
       end
    end
 
-   PLLE2_BASE #(
-      .CLKFBOUT_MULT  (24),
-      .DIVCLK_DIVIDE  (1),
-      .CLKOUT0_DIVIDE (80),
-      .CLKIN1_PERIOD  (25)
-   ) PLLE2_BASE_120mhz (
-      .CLKOUT0  (clk_12mhz),
-      .LOCKED   (pll_lock),
-      .CLKIN1   (clk),
-      .RST      (1'b0),
-      .CLKFBOUT (clk_fb),
-      .CLKFBIN  (clk_fb)
-   );
-
    fir_poly #(
       .M              (M),
+      .M_LOG2         (M_LOG2),
       .INPUT_WIDTH    (ADC_DATA_WIDTH),
       .INTERNAL_WIDTH (INTERNAL_WIDTH),
       .NORM_SHIFT     (NORM_SHIFT),
       .OUTPUT_WIDTH   (OUTPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
-      .ROM_SIZE       (ROM_SIZE)
+      .BANK_LEN_LOG2  (BANK_LEN_LOG2)
    ) dut (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_12mhz       (clk_12mhz),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (sample_in),
       .dout            (dout),
