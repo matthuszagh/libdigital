@@ -56,26 +56,18 @@ module fft_r22sdf_bf #(
       .z_im_o (z_im_o)
    );
 
-   always @(posedge sel1) begin
-      start_ctrii <= 1'b1;
-   end
-   always @(posedge sel2) begin
-      start_ctr_o <= 1'b1;
-   end
-
    always @(posedge clk_i) begin
-      if (start_ctrii) begin
-         ctrii <= ctrii + 1'b1;
-      end else begin
-         ctrii <= {FFT_NLOG2{1'b0}};
-      end
+      if (sel1)
+        start_ctrii <= 1'b1;
 
-      if (start_ctr_o) begin
-         cnt_o <= cnt_o + 1'b1;
-      end
-      else begin
-         cnt_o <= {FFT_NLOG2{1'b0}};
-      end
+      if (sel1 || start_ctrii)
+        ctrii <= ctrii + 1'b1;
+
+      if (sel2)
+        start_ctr_o <= 1'b1;
+
+      if (sel2 || start_ctr_o)
+        cnt_o <= cnt_o + 1'b1;
    end
 
 endmodule
