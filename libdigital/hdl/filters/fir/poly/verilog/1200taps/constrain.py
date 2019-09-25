@@ -3,7 +3,7 @@
 Parameterize the Verilog fir_poly file.
 """
 
-from ......scripts import fir
+from libdigital.utils import fir
 
 NUMTAPS = 1200
 SAMPLING_FREQ = 40e6

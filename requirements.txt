@@ -1,7 +1,0 @@
-git+git://github.com/m-labs/nmigen.git#egg=nmigen
-numpy
-pip
-bitstring
-setuptools
-matplotlib
-scipy
