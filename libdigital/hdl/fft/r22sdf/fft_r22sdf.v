@@ -26,17 +26,17 @@ module fft_r22sdf #(
    input wire                           clk_i,
    input wire                           clk_3x_i,
    input wire                           rst_n,
-   output reg                           sync_o = 1'b0, // output data ready
+   output reg                           sync_o, // output data ready
    // freq bin index of output data. only valid if `sync_o == 1'b1'
    output wire [N_LOG2-1:0]             data_ctr_o,
    input wire signed [INPUT_WIDTH-1:0]  data_re_i,
    input wire signed [INPUT_WIDTH-1:0]  data_im_i,
-   output reg signed [OUTPUT_WIDTH-1:0] data_re_o = {OUTPUT_WIDTH{1'b0}},
-   output reg signed [OUTPUT_WIDTH-1:0] data_im_o = {OUTPUT_WIDTH{1'b0}}
+   output reg signed [OUTPUT_WIDTH-1:0] data_re_o,
+   output reg signed [OUTPUT_WIDTH-1:0] data_im_o
    );
 
    // non bit-reversed output data count
-   reg [N_LOG2-1:0]                     data_ctr_bit_nrml = {N_LOG2{1'b0}};
+   reg [N_LOG2-1:0]                     data_ctr_bit_nrml;
 
    // twiddle factors
    reg signed [TWIDDLE_WIDTH-1:0]       w_s0_re [0:N-1];

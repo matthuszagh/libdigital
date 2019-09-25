@@ -9,8 +9,8 @@ module fft_r22sdf_bfi #(
    input wire                 sel_i,
    input wire signed [DW-1:0] x_re_i,
    input wire signed [DW-1:0] x_im_i,
-   output reg signed [DW-1:0] z_re_o = {DW{1'b0}},
-   output reg signed [DW-1:0] z_im_o = {DW{1'b0}}
+   output reg signed [DW-1:0] z_re_o,
+   output reg signed [DW-1:0] z_im_o
 );
 
    // shift register
@@ -19,8 +19,8 @@ module fft_r22sdf_bfi #(
 
    wire signed [DW-1:0]       xsr_re;
    wire signed [DW-1:0]       xsr_im;
-   reg signed [DW-1:0]        zsr_re = {DW{1'b0}};
-   reg signed [DW-1:0]        zsr_im = {DW{1'b0}};
+   reg signed [DW-1:0]        zsr_re;
+   reg signed [DW-1:0]        zsr_im;
 
    assign xsr_re = sr_re[SHIFT_REG_LEN-1];
    assign xsr_im = sr_im[SHIFT_REG_LEN-1];
