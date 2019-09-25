@@ -11,8 +11,9 @@ module fft_r22sdf_bf #(
    parameter STAGES    = 5
 ) (
    input wire                 clk_i,
+   input wire                 rst_n,
    input wire [FFT_NLOG2-1:0] cnt_i,
-   output reg [FFT_NLOG2-1:0] cnt_o = {FFT_NLOG2{1'b0}},
+   output reg [FFT_NLOG2-1:0] cnt_o,
    input wire [DW-1:0]        x_re_i,
    input wire [DW-1:0]        x_im_i,
    output wire [DW-1:0]       z_re_o,
@@ -21,9 +22,9 @@ module fft_r22sdf_bf #(
 
    wire                       sel1;
    wire                       sel2;
-   reg [FFT_NLOG2-1:0]        ctrii       = {FFT_NLOG2{1'b0}};
-   reg                        start_ctrii = 1'b0;
-   reg                        start_ctr_o = 1'b0;
+   reg [FFT_NLOG2-1:0]        ctrii;
+   reg                        start_ctrii;
+   reg                        start_ctr_o;
 
    wire signed [DW-1:0]  z_re;
    wire signed [DW-1:0]  z_im;
@@ -32,10 +33,11 @@ module fft_r22sdf_bf #(
    assign sel2 = ctrii[FFT_NLOG2-2-2*STAGE];
 
    fft_r22sdf_bfi #(
-      .DW      (DW),
-      .FSR_LEN (2**(2*(STAGES-STAGE)-1))
+      .DW            (DW),
+      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-1))
    ) bfi (
       .clk_i  (clk_i),
+      .rst_n  (rst_n),
       .sel_i  (sel1),
       .x_re_i (x_re_i),
       .x_im_i (x_im_i),
@@ -44,10 +46,11 @@ module fft_r22sdf_bf #(
    );
 
    fft_r22sdf_bfii #(
-      .DW      (DW),
-      .FSR_LEN (2**(2*(STAGES-STAGE)-2))
+      .DW            (DW),
+      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-2))
    ) bfii (
       .clk_i  (clk_i),
+      .rst_n  (rst_n),
       .sel_i  (sel2),
       .tsel_i (sel1),
       .x_re_i (z_re),
@@ -57,17 +60,24 @@ module fft_r22sdf_bf #(
    );
 
    always @(posedge clk_i) begin
-      if (sel1)
-        start_ctrii <= 1'b1;
+      if (!rst_n) begin
+         start_ctrii <= 1'b0;
+         ctrii       <= {FFT_NLOG2{1'b0}};
+         start_ctr_o <= 1'b0;
+         cnt_o       <= {FFT_NLOG2{1'b0}};
+      end else begin
+         if (sel1)
+           start_ctrii <= 1'b1;
 
-      if (sel1 || start_ctrii)
-        ctrii <= ctrii + 1'b1;
+         if (sel1 || start_ctrii)
+           ctrii <= ctrii + 1'b1;
 
-      if (sel2)
-        start_ctr_o <= 1'b1;
+         if (sel2)
+           start_ctr_o <= 1'b1;
 
-      if (sel2 || start_ctr_o)
-        cnt_o <= cnt_o + 1'b1;
+         if (sel2 || start_ctr_o)
+           cnt_o <= cnt_o + 1'b1;
+      end
    end
 
 endmodule

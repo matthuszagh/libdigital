@@ -7,16 +7,16 @@ module fft_r22sdf_wm #(
    parameter NLOG2         = 10
 ) (
    input wire                            clk_i,
+   input wire                            rst_n,
    input wire                            clk_3x_i,
-   input wire                            ce_i,
    input wire [NLOG2-1:0]                ctr_i,
-   output reg [NLOG2-1:0]                ctr_o = {NLOG2{1'b0}},
+   output reg [NLOG2-1:0]                ctr_o,
    input wire signed [DW-1:0]            x_re_i,
    input wire signed [DW-1:0]            x_im_i,
    input wire signed [TWIDDLE_WIDTH-1:0] w_re_i,
    input wire signed [TWIDDLE_WIDTH-1:0] w_im_i,
-   output reg signed [DW-1:0]            z_re_o = {DW{1'b0}},
-   output reg signed [DW-1:0]            z_im_o = {DW{1'b0}}
+   output reg signed [DW-1:0]            z_re_o,
+   output reg signed [DW-1:0]            z_im_o
 );
 
    /**
@@ -30,13 +30,18 @@ module fft_r22sdf_wm #(
     * I = a(c+d)-f
     */
    // compute multiplies in stages to share DSP.
-   reg [1:0] mul_state = 2'd0;
-   reg signed [DW+TWIDDLE_WIDTH-1:0] kar_f = {DW+TWIDDLE_WIDTH{1'b0}};
-   reg signed [DW+TWIDDLE_WIDTH-1:0] kar_r = {DW+TWIDDLE_WIDTH{1'b0}};
-   reg signed [DW+TWIDDLE_WIDTH-1:0] kar_i = {DW+TWIDDLE_WIDTH{1'b0}};
+   reg [1:0]                             mul_state;
+   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_f;
+   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_r;
+   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_i;
 
    always @(posedge clk_3x_i) begin
-      if (ce_i) begin
+      if (!rst_n) begin
+         kar_f     <= {DW+TWIDDLE_WIDTH{1'b0}};
+         kar_r     <= {DW+TWIDDLE_WIDTH{1'b0}};
+         kar_i     <= {DW+TWIDDLE_WIDTH{1'b0}};
+         mul_state <= 2'd0;
+      end else begin
          case (mul_state)
          2'd0:
            begin
@@ -66,18 +71,15 @@ module fft_r22sdf_wm #(
               kar_i     <= {DW+TWIDDLE_WIDTH{1'b0}};
               mul_state <= 2'd0;
            end
-         endcase // case (mul_state)
-      end else begin
-         kar_f     <= {DW+TWIDDLE_WIDTH{1'b0}};
-         kar_r     <= {DW+TWIDDLE_WIDTH{1'b0}};
-         kar_i     <= {DW+TWIDDLE_WIDTH{1'b0}};
-         mul_state <= 2'd0;
+         endcase
       end
    end
 
    always @(posedge clk_i) begin
-      ctr_o <= ctr_i;
-      if (ce_i) begin
+      if (!rst_n) begin
+         ctr_o <= {NLOG2{1'b0}};
+      end else begin
+         ctr_o <= ctr_i;
          // TODO does this cause rounding error? see the zipcpu blog
          // post about rounding.
 
@@ -90,4 +92,4 @@ module fft_r22sdf_wm #(
       end
    end
 
-endmodule // fft_sdf_tfm
+endmodule

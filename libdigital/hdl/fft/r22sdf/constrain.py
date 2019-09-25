@@ -17,6 +17,7 @@ N_STAGES = int(math.log(N, 4))
 # TODO this should be FIR output width
 INPUT_WIDTH = 14
 TWIDDLE_WIDTH = 10
+# +1 comes from complex multiply, which is really 2 multiplies
 INTERNAL_WIDTH = INPUT_WIDTH + N_LOG2 + 1
 OUTPUT_WIDTH = INTERNAL_WIDTH
 

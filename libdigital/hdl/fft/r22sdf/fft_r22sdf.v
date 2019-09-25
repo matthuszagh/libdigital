@@ -25,7 +25,7 @@ module fft_r22sdf #(
 ) (
    input wire                           clk_i,
    input wire                           clk_3x_i,
-   input wire                           ce_i, // input data ready
+   input wire                           rst_n,
    output reg                           sync_o = 1'b0, // output data ready
    // freq bin index of output data. only valid if `sync_o == 1'b1'
    output wire [N_LOG2-1:0]             data_ctr_o,
@@ -71,10 +71,6 @@ module fft_r22sdf #(
       $readmemh("fft_r22sdf_rom_s3_im.hex", w_s3_im);
    end
 
-   // function [OUTPUT_WIDTH-1:0] trunc_to_output(input [INTERNAL_WIDTH-1:0] expr);
-   //    trunc_to_output = expr[OUTPUT_WIDTH-1:0];
-   // endfunction // trunc_to_output
-
    // output data comes out in bit-reversed order
    genvar k;
    generate
@@ -97,6 +93,7 @@ module fft_r22sdf #(
       .STAGES    (N_STAGES)
    ) stage0_bf (
       .clk_i  (clk_i),
+      .rst_n  (rst_n),
       .cnt_i  (stage0_ctr),
       .cnt_o  (stage1_ctr_wm),
       .x_re_i (data_re_i),
@@ -123,7 +120,7 @@ module fft_r22sdf #(
             .clk_3x_i (clk_3x_i),
             .ctr_i    (stage1_ctr_wm),
             .ctr_o    (stage1_ctr),
-            .ce_i     (ce_i),
+            .rst_n    (rst_n),
             .x_re_i   (bf0_re),
             .x_im_i   (bf0_im),
             .w_re_i   (w_s0_re[stage1_ctr_wm]),
@@ -140,6 +137,7 @@ module fft_r22sdf #(
             .STAGES    (N_STAGES)
          ) stage1_bf (
             .clk_i  (clk_i),
+            .rst_n  (rst_n),
             .cnt_i  (stage1_ctr),
             .cnt_o  (stage2_ctr_wm),
             .x_re_i (w0_re),
@@ -168,7 +166,7 @@ module fft_r22sdf #(
             .clk_3x_i (clk_3x_i),
             .ctr_i    (stage2_ctr_wm),
             .ctr_o    (stage2_ctr),
-            .ce_i     (ce_i),
+            .rst_n    (rst_n),
             .x_re_i   (bf1_re),
             .x_im_i   (bf1_im),
             .w_re_i   (w_s1_re[stage2_ctr_wm[7:0]]),
@@ -185,6 +183,7 @@ module fft_r22sdf #(
             .STAGES    (N_STAGES)
          ) stage2_bf (
             .clk_i  (clk_i),
+            .rst_n  (rst_n),
             .cnt_i  (stage2_ctr),
             .cnt_o  (stage3_ctr_wm),
             .x_re_i (w1_re),
@@ -213,7 +212,7 @@ module fft_r22sdf #(
             .clk_3x_i (clk_3x_i),
             .ctr_i    (stage3_ctr_wm),
             .ctr_o    (stage3_ctr),
-            .ce_i     (ce_i),
+            .rst_n    (rst_n),
             .x_re_i   (bf2_re),
             .x_im_i   (bf2_im),
             .w_re_i   (w_s2_re[stage3_ctr_wm[5:0]]),
@@ -230,6 +229,7 @@ module fft_r22sdf #(
             .STAGES    (N_STAGES)
          ) stage3_bf (
             .clk_i  (clk_i),
+            .rst_n  (rst_n),
             .cnt_i  (stage3_ctr),
             .cnt_o  (stage4_ctr_wm),
             .x_re_i (w2_re),
@@ -256,7 +256,7 @@ module fft_r22sdf #(
             .clk_3x_i (clk_3x_i),
             .ctr_i    (stage4_ctr_wm),
             .ctr_o    (stage4_ctr),
-            .ce_i     (ce_i),
+            .rst_n    (rst_n),
             .x_re_i   (bf3_re),
             .x_im_i   (bf3_im),
             .w_re_i   (w_s3_re[stage4_ctr_wm[3:0]]),
@@ -273,6 +273,7 @@ module fft_r22sdf #(
             .STAGES    (N_STAGES)
          ) stage4_bf (
             .clk_i  (clk_i),
+            .rst_n  (rst_n),
             .cnt_i  (stage4_ctr),
             .x_re_i (w3_re),
             .x_im_i (w3_im),
@@ -316,9 +317,13 @@ module fft_r22sdf #(
    endgenerate
 
    always @(posedge clk_i) begin
-      if (ce_i) begin
-         data_re_o <= data_bf_last_re;
-         data_im_o <= data_bf_last_im;
+      if (!rst_n) begin
+         sync_o            <= 1'b0;
+         data_ctr_bit_nrml <= {N_LOG2{1'b0}};
+         stage0_ctr        <= {N_LOG2{1'b0}};
+      end else begin
+         data_re_o  <= data_bf_last_re;
+         data_im_o  <= data_bf_last_im;
          stage0_ctr <= stage0_ctr + 1'b1;
 
          if (sync_o == 1'b1) begin
@@ -332,12 +337,8 @@ module fft_r22sdf #(
          end else begin
             sync_o <= 1'b0;
          end
-      end else begin // if (ce_i)
-         stage0_ctr        <= {N_LOG2{1'b0}};
-         data_ctr_bit_nrml <= {N_LOG2{1'b0}};
-         sync_o            <= 1'b0;
-      end // else: !if(ce_i)
-   end // always @ (posedge clk_i)
+      end
+   end
 
 endmodule // fft_r22sdf
 
@@ -418,7 +419,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
    ) tb (
       .clk_i      (clk),
       .clk_3x_i   (clk_120mhz),
-      .ce_i       (pll_lock),
+      .rst_n      (pll_lock),
       .sync_o     (sync),
       .data_ctr_o (data_cnt),
       .data_re_i  ($signed(data_i)),
