@@ -35,6 +35,8 @@ module fft_r22sdf_wm #(
    reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_r;
    reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_i;
 
+   reg signed [DW-1:0] x_re_reg;
+   reg signed [DW-1:0] x_im_reg;
    always @(posedge clk_3x_i) begin
       if (!rst_n) begin
          kar_f     <= {DW+TWIDDLE_WIDTH{1'b0}};
@@ -45,7 +47,7 @@ module fft_r22sdf_wm #(
          case (mul_state)
          2'd0:
            begin
-              kar_f     <= w_re_i * (x_re_i - x_im_i);
+              kar_f     <= w_re_i * (x_re_reg - x_im_reg);
               kar_r     <= kar_r;
               kar_i     <= kar_i;
               mul_state <= 2'd1;
@@ -53,7 +55,7 @@ module fft_r22sdf_wm #(
          2'd1:
            begin
               kar_f     <= kar_f;
-              kar_r     <= x_im_i * (w_re_i - w_im_i) + kar_f;
+              kar_r     <= x_im_reg * (w_re_i - w_im_i) + kar_f;
               kar_i     <= kar_i;
               mul_state <= 2'd2;
            end
@@ -61,7 +63,7 @@ module fft_r22sdf_wm #(
            begin
               kar_f     <= kar_f;
               kar_r     <= kar_r;
-              kar_i     <= x_re_i * (w_re_i + w_im_i) - kar_f;
+              kar_i     <= x_re_reg * (w_re_i + w_im_i) - kar_f;
               mul_state <= 2'd0;
            end
          default:
@@ -75,11 +77,16 @@ module fft_r22sdf_wm #(
       end
    end
 
+   reg [NLOG2-1:0] ctr_reg;
    always @(posedge clk_i) begin
       if (!rst_n) begin
-         ctr_o <= {NLOG2{1'b0}};
+         ctr_o           <= {NLOG2{1'b0}};
       end else begin
-         ctr_o <= ctr_i;
+         x_re_reg <= x_re_i;
+         x_im_reg <= x_im_i;
+
+         ctr_reg <= ctr_i;
+         ctr_o <= ctr_reg;
          // TODO does this cause rounding error? see the zipcpu blog
          // post about rounding.
 

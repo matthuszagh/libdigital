@@ -3,6 +3,7 @@
 `include "fft_r22sdf_defines.vh"
 `include "fft_r22sdf_bf.v"
 `include "fft_r22sdf_wm.v"
+`include "ram_single_18k.v"
 
 /** Radix-2^2 SDF FFT implementation.
  *
@@ -39,14 +40,109 @@ module fft_r22sdf #(
    reg [N_LOG2-1:0]                     data_ctr_bit_nrml;
 
    // twiddle factors
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s0_re [0:N-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s0_im [0:N-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s1_re [0:N/4-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s1_im [0:N/4-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s2_re [0:N/16-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s2_im [0:N/16-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s3_re [0:N/64-1];
-   reg signed [TWIDDLE_WIDTH-1:0]       w_s3_im [0:N/64-1];
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s0_re;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s0_re.hex"),
+      .ADDRESS_WIDTH (N_LOG2),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s0_re (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage1_ctr_wm),
+      .data_o (w_s0_re)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s0_im;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s0_im.hex"),
+      .ADDRESS_WIDTH (N_LOG2),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s0_im (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage1_ctr_wm),
+      .data_o (w_s0_im)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s1_re;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s1_re.hex"),
+      .ADDRESS_WIDTH (N_LOG2-1),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s1_re (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage2_ctr_wm[N_LOG2-3:0]),
+      .data_o (w_s1_re)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s1_im;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s1_im.hex"),
+      .ADDRESS_WIDTH (N_LOG2-1),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s1_im (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage2_ctr_wm[N_LOG2-3:0]),
+      .data_o (w_s1_im)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s2_re;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s2_re.hex"),
+      .ADDRESS_WIDTH (N_LOG2-2),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s2_re (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage3_ctr_wm[N_LOG2-5:0]),
+      .data_o (w_s2_re)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s2_im;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s2_im.hex"),
+      .ADDRESS_WIDTH (N_LOG2-2),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s2_im (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage3_ctr_wm[N_LOG2-5:0]),
+      .data_o (w_s2_im)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s3_re;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s3_re.hex"),
+      .ADDRESS_WIDTH (N_LOG2-3),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s3_re (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage4_ctr_wm[N_LOG2-7:0]),
+      .data_o (w_s3_re)
+   );
+
+   wire signed [TWIDDLE_WIDTH-1:0]      w_s3_im;
+   ram_single_18k #(
+      .INITFILE      ("roms/fft_r22sdf_rom_s3_im.hex"),
+      .ADDRESS_WIDTH (N_LOG2-3),
+      .DATA_WIDTH    (TWIDDLE_WIDTH)
+   ) rom_w_s3_im (
+      .clk    (clk_i),
+      .en     (1'b1),
+      .we     (1'b0),
+      .addr   (stage4_ctr_wm[N_LOG2-7:0]),
+      .data_o (w_s3_im)
+   );
 
    // stage counters
    // provide control logic to each stage
@@ -59,17 +155,6 @@ module fft_r22sdf #(
    wire [N_LOG2-1:0]                    stage3_ctr;
    wire [N_LOG2-1:0]                    stage4_ctr_wm;
    wire [N_LOG2-1:0]                    stage4_ctr;
-
-   initial begin
-      $readmemh("fft_r22sdf_rom_s0_re.hex", w_s0_re);
-      $readmemh("fft_r22sdf_rom_s0_im.hex", w_s0_im);
-      $readmemh("fft_r22sdf_rom_s1_re.hex", w_s1_re);
-      $readmemh("fft_r22sdf_rom_s1_im.hex", w_s1_im);
-      $readmemh("fft_r22sdf_rom_s2_re.hex", w_s2_re);
-      $readmemh("fft_r22sdf_rom_s2_im.hex", w_s2_im);
-      $readmemh("fft_r22sdf_rom_s3_re.hex", w_s3_re);
-      $readmemh("fft_r22sdf_rom_s3_im.hex", w_s3_im);
-   end
 
    // output data comes out in bit-reversed order
    genvar k;
@@ -123,8 +208,8 @@ module fft_r22sdf #(
             .rst_n    (rst_n),
             .x_re_i   (bf0_re),
             .x_im_i   (bf0_im),
-            .w_re_i   (w_s0_re[stage1_ctr_wm]),
-            .w_im_i   (w_s0_im[stage1_ctr_wm]),
+            .w_re_i   (w_s0_re),
+            .w_im_i   (w_s0_im),
             .z_re_o   (w0_re),
             .z_im_o   (w0_im)
          );
@@ -169,8 +254,8 @@ module fft_r22sdf #(
             .rst_n    (rst_n),
             .x_re_i   (bf1_re),
             .x_im_i   (bf1_im),
-            .w_re_i   (w_s1_re[stage2_ctr_wm[7:0]]),
-            .w_im_i   (w_s1_im[stage2_ctr_wm[7:0]]),
+            .w_re_i   (w_s1_re),
+            .w_im_i   (w_s1_im),
             .z_re_o   (w1_re),
             .z_im_o   (w1_im)
          );
@@ -215,8 +300,8 @@ module fft_r22sdf #(
             .rst_n    (rst_n),
             .x_re_i   (bf2_re),
             .x_im_i   (bf2_im),
-            .w_re_i   (w_s2_re[stage3_ctr_wm[5:0]]),
-            .w_im_i   (w_s2_im[stage3_ctr_wm[5:0]]),
+            .w_re_i   (w_s2_re),
+            .w_im_i   (w_s2_im),
             .z_re_o   (w2_re),
             .z_im_o   (w2_im)
          );
@@ -259,8 +344,8 @@ module fft_r22sdf #(
             .rst_n    (rst_n),
             .x_re_i   (bf3_re),
             .x_im_i   (bf3_im),
-            .w_re_i   (w_s3_re[stage4_ctr_wm[3:0]]),
-            .w_im_i   (w_s3_im[stage4_ctr_wm[3:0]]),
+            .w_re_i   (w_s3_re),
+            .w_im_i   (w_s3_im),
             .z_re_o   (w3_re),
             .z_im_o   (w3_im)
          );
@@ -347,6 +432,8 @@ endmodule // fft_r22sdf
 `include "fft_r22sdf_defines.vh"
 `include "PLLE2_BASE.v"
 `include "PLLE2_ADV.v"
+`include "BRAM_SINGLE_MACRO.v"
+`include "RAMB18E1.v"
 `include "glbl.v"
 
 `timescale 1ns/1ps
@@ -363,7 +450,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
 
    assign data_i = samples[cnt];
 
-   integer                          idx;
+   integer                         idx;
    initial begin
       $dumpfile("tb/fft_r22sdf_tb.vcd");
       $dumpvars(0, fft_r22sdf_tb);
@@ -416,7 +503,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
       .TWIDDLE_WIDTH  (TWIDDLE_WIDTH),
       .INTERNAL_WIDTH (INTERNAL_WIDTH),
       .OUTPUT_WIDTH   (OUTPUT_WIDTH)
-   ) tb (
+   ) dut (
       .clk_i      (clk),
       .clk_3x_i   (clk_120mhz),
       .rst_n      (pll_lock),
@@ -434,5 +521,6 @@ endmodule
 // Local Variables:
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/")
+//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
+//                                  "/home/matt/src/libdigital/libdigital/hdl/ram/")
 // End:
