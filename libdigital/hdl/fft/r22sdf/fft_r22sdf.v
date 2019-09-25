@@ -146,7 +146,7 @@ module fft_r22sdf #(
 
    // stage counters
    // provide control logic to each stage
-   reg [N_LOG2-1:0]                     stage0_ctr = {N_LOG2{1'b0}};
+   reg [N_LOG2-1:0]                     stage0_ctr;
    wire [N_LOG2-1:0]                    stage1_ctr_wm;
    wire [N_LOG2-1:0]                    stage1_ctr;
    wire [N_LOG2-1:0]                    stage2_ctr_wm;
