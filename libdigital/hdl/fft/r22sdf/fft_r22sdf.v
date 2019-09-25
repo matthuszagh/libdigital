@@ -364,7 +364,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
 
    integer                          idx;
    initial begin
-      $dumpfile("fft_r22sdf_tb.vcd");
+      $dumpfile("tb/fft_r22sdf_tb.vcd");
       $dumpvars(0, fft_r22sdf_tb);
       // for (idx=0; idx<FFT_N; idx=idx+1) begin
       //    $dumpvars(0, tb.w_s0_re[idx]);

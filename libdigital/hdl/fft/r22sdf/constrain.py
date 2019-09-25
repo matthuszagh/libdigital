@@ -17,7 +17,7 @@ N_STAGES = int(math.log(N, 4))
 # TODO this should be FIR output width
 INPUT_WIDTH = 14
 TWIDDLE_WIDTH = 10
-INTERNAL_WIDTH = N_LOG2 + 1
+INTERNAL_WIDTH = INPUT_WIDTH + N_LOG2 + 1
 OUTPUT_WIDTH = INTERNAL_WIDTH
 
 with open("fft_r22sdf_defines.vh", "w") as f:
