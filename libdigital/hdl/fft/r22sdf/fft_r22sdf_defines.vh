@@ -1,0 +1,8 @@
+`define FFT_PARAMS parameter \
+N = 1024, \
+N_LOG2 = 10, \
+N_STAGES = 5, \
+INPUT_WIDTH = 14, \
+TWIDDLE_WIDTH = 10, \
+INTERNAL_WIDTH = 11, \
+OUTPUT_WIDTH = 11
