@@ -351,14 +351,14 @@ endmodule // fft_r22sdf
 `timescale 1ns/1ps
 module fft_r22sdf_tb #( `FFT_PARAMS );
 
-   reg clk = 0;
-   reg [INPUT_WIDTH-1:0] samples [0:N-1];
-   wire [INPUT_WIDTH-1:0] data_i;
+   reg                             clk = 0;
+   reg [INPUT_WIDTH-1:0]           samples [0:N-1];
+   wire [INPUT_WIDTH-1:0]          data_i;
    wire                            sync;
-   wire [N_LOG2-1:0]      data_cnt;
-   wire [OUTPUT_WIDTH-1:0] data_re_o;
-   wire [OUTPUT_WIDTH-1:0] data_im_o;
-   reg [N_LOG2-1:0]        cnt;
+   wire [N_LOG2-1:0]               data_cnt;
+   wire [OUTPUT_WIDTH-1:0]         data_re_o;
+   wire [OUTPUT_WIDTH-1:0]         data_im_o;
+   reg [N_LOG2-1:0]                cnt;
 
    assign data_i = samples[cnt];
 
@@ -366,30 +366,6 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
    initial begin
       $dumpfile("tb/fft_r22sdf_tb.vcd");
       $dumpvars(0, fft_r22sdf_tb);
-      // for (idx=0; idx<FFT_N; idx=idx+1) begin
-      //    $dumpvars(0, tb.w_s0_re[idx]);
-      //    $dumpvars(0, tb.w_s0_im[idx]);
-      // end
-      // $dumpvars(0, tb.stage0_bf.bfi.fsr_re[0]);
-      // $dumpvars(0, tb.stage0_bf.bfi.fsr_re[1]);
-      // $dumpvars(0, tb.stage0_bf.bfi.fsr_re[511]);
-      // $dumpvars(0, tb.stage0_bf.bfii.fsr_re[0]);
-      // $dumpvars(0, tb.stage0_bf.bfii.fsr_re[255]);
-      // $dumpvars(0, tb.stage1_bf.bfi.fsr_re[0]);
-      // $dumpvars(0, tb.stage1_bf.bfi.fsr_re[127]);
-      // $dumpvars(0, tb.stage1_bf.bfii.fsr_re[0]);
-      // $dumpvars(0, tb.stage1_bf.bfii.fsr_re[63]);
-      // $dumpvars(0, tb.stage2_bf.bfi.fsr_re[0]);
-      // $dumpvars(0, tb.stage2_bf.bfi.fsr_re[31]);
-      // $dumpvars(0, tb.stage2_bf.bfii.fsr_re[0]);
-      // $dumpvars(0, tb.stage2_bf.bfii.fsr_re[15]);
-      // $dumpvars(0, tb.stage3_bf.bfi.fsr_re[0]);
-      // $dumpvars(0, tb.stage3_bf.bfi.fsr_re[7]);
-      // $dumpvars(0, tb.stage3_bf.bfii.fsr_re[0]);
-      // $dumpvars(0, tb.stage3_bf.bfii.fsr_re[3]);
-      // $dumpvars(0, tb.stage4_bf.bfi.fsr_re[0]);
-      // $dumpvars(0, tb.stage4_bf.bfi.fsr_re[1]);
-      // $dumpvars(0, tb.stage4_bf.bfii.fsr_re[0]);
 
       $readmemh("tb/fft_samples_1024.hex", samples);
       cnt = 0;
