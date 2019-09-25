@@ -1,26 +1,26 @@
 `default_nettype none
 
 module fft_r22sdf_bfi #(
-   parameter DW            = 25,
+   parameter DATA_WIDTH    = 25,
    parameter SHIFT_REG_LEN = 0
 ) (
-   input wire                 clk_i,
-   input wire                 rst_n,
-   input wire                 sel_i,
-   input wire signed [DW-1:0] x_re_i,
-   input wire signed [DW-1:0] x_im_i,
-   output reg signed [DW-1:0] z_re_o,
-   output reg signed [DW-1:0] z_im_o
+   input wire                         clk_i,
+   input wire                         rst_n,
+   input wire                         sel_i,
+   input wire signed [DATA_WIDTH-1:0] x_re_i,
+   input wire signed [DATA_WIDTH-1:0] x_im_i,
+   output reg signed [DATA_WIDTH-1:0] z_re_o,
+   output reg signed [DATA_WIDTH-1:0] z_im_o
 );
 
    // shift register
-   reg signed [DW-1:0]        sr_re [0:SHIFT_REG_LEN-1];
-   reg signed [DW-1:0]        sr_im [0:SHIFT_REG_LEN-1];
+   reg signed [DATA_WIDTH-1:0]        sr_re [0:SHIFT_REG_LEN-1];
+   reg signed [DATA_WIDTH-1:0]        sr_im [0:SHIFT_REG_LEN-1];
 
-   wire signed [DW-1:0]       xsr_re;
-   wire signed [DW-1:0]       xsr_im;
-   reg signed [DW-1:0]        zsr_re;
-   reg signed [DW-1:0]        zsr_im;
+   wire signed [DATA_WIDTH-1:0]       xsr_re;
+   wire signed [DATA_WIDTH-1:0]       xsr_im;
+   reg signed [DATA_WIDTH-1:0]        zsr_re;
+   reg signed [DATA_WIDTH-1:0]        zsr_im;
 
    assign xsr_re = sr_re[SHIFT_REG_LEN-1];
    assign xsr_im = sr_im[SHIFT_REG_LEN-1];
@@ -43,8 +43,8 @@ module fft_r22sdf_bfi #(
    always @(posedge clk_i) begin
       if (!rst_n) begin
          for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
-            sr_re[i] = {DW{1'b0}};
-            sr_im[i] = {DW{1'b0}};
+            sr_re[i] = {DATA_WIDTH{1'b0}};
+            sr_im[i] = {DATA_WIDTH{1'b0}};
          end
       end else begin
          sr_re[0] <= zsr_re;

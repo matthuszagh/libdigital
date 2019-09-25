@@ -4,20 +4,20 @@
 `include "fft_r22sdf_bfii.v"
 
 module fft_r22sdf_bf #(
-   parameter DW        = 25,
-   parameter FFT_N     = 1024,
-   parameter FFT_NLOG2 = 10,
-   parameter STAGE     = 0,
-   parameter STAGES    = 5
+   parameter DATA_WIDTH = 25,
+   parameter FFT_N      = 1024,
+   parameter FFT_NLOG2  = 10,
+   parameter STAGE      = 0,
+   parameter STAGES     = 5
 ) (
-   input wire                 clk_i,
-   input wire                 rst_n,
-   input wire [FFT_NLOG2-1:0] cnt_i,
-   output reg [FFT_NLOG2-1:0] cnt_o,
-   input wire [DW-1:0]        x_re_i,
-   input wire [DW-1:0]        x_im_i,
-   output wire [DW-1:0]       z_re_o,
-   output wire [DW-1:0]       z_im_o
+   input wire                   clk_i,
+   input wire                   rst_n,
+   input wire [FFT_NLOG2-1:0]   cnt_i,
+   output reg [FFT_NLOG2-1:0]   cnt_o,
+   input wire [DATA_WIDTH-1:0]  x_re_i,
+   input wire [DATA_WIDTH-1:0]  x_im_i,
+   output wire [DATA_WIDTH-1:0] z_re_o,
+   output wire [DATA_WIDTH-1:0] z_im_o
 );
 
    wire                       sel1;
@@ -26,14 +26,14 @@ module fft_r22sdf_bf #(
    reg                        start_ctrii;
    reg                        start_ctr_o;
 
-   wire signed [DW-1:0]  z_re;
-   wire signed [DW-1:0]  z_im;
+   wire signed [DATA_WIDTH-1:0]  z_re;
+   wire signed [DATA_WIDTH-1:0]  z_im;
 
    assign sel1 = cnt_i[FFT_NLOG2-1-2*STAGE];
    assign sel2 = ctrii[FFT_NLOG2-2-2*STAGE];
 
    fft_r22sdf_bfi #(
-      .DW            (DW),
+      .DATA_WIDTH            (DATA_WIDTH),
       .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-1))
    ) bfi (
       .clk_i  (clk_i),
@@ -46,7 +46,7 @@ module fft_r22sdf_bf #(
    );
 
    fft_r22sdf_bfii #(
-      .DW            (DW),
+      .DATA_WIDTH            (DATA_WIDTH),
       .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-2))
    ) bfii (
       .clk_i  (clk_i),

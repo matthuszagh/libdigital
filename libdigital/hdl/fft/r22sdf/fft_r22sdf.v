@@ -171,11 +171,11 @@ module fft_r22sdf #(
    wire signed [INTERNAL_WIDTH-1:0] w0_im;
 
    fft_r22sdf_bf #(
-      .DW        (INTERNAL_WIDTH),
-      .FFT_N     (N),
-      .FFT_NLOG2 (N_LOG2),
-      .STAGE     (0),
-      .STAGES    (N_STAGES)
+      .DATA_WIDTH (INTERNAL_WIDTH),
+      .FFT_N      (N),
+      .FFT_NLOG2  (N_LOG2),
+      .STAGE      (0),
+      .STAGES     (N_STAGES)
    ) stage0_bf (
       .clk_i  (clk_i),
       .rst_n  (rst_n),
@@ -196,7 +196,7 @@ module fft_r22sdf #(
    generate
       if (N_STAGES > 1) begin
          fft_r22sdf_wm #(
-            .DW            (INTERNAL_WIDTH),
+            .DATA_WIDTH    (INTERNAL_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -215,11 +215,11 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DW        (INTERNAL_WIDTH),
-            .FFT_N     (N),
-            .FFT_NLOG2 (N_LOG2),
-            .STAGE     (1),
-            .STAGES    (N_STAGES)
+            .DATA_WIDTH (INTERNAL_WIDTH),
+            .FFT_N      (N),
+            .FFT_NLOG2  (N_LOG2),
+            .STAGE      (1),
+            .STAGES     (N_STAGES)
          ) stage1_bf (
             .clk_i  (clk_i),
             .rst_n  (rst_n),
@@ -242,7 +242,7 @@ module fft_r22sdf #(
    generate
       if (N_STAGES > 2) begin
          fft_r22sdf_wm #(
-            .DW            (INTERNAL_WIDTH),
+            .DATA_WIDTH    (INTERNAL_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -261,11 +261,11 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DW        (INTERNAL_WIDTH),
-            .FFT_N     (N),
-            .FFT_NLOG2 (N_LOG2),
-            .STAGE     (2),
-            .STAGES    (N_STAGES)
+            .DATA_WIDTH (INTERNAL_WIDTH),
+            .FFT_N      (N),
+            .FFT_NLOG2  (N_LOG2),
+            .STAGE      (2),
+            .STAGES     (N_STAGES)
          ) stage2_bf (
             .clk_i  (clk_i),
             .rst_n  (rst_n),
@@ -288,7 +288,7 @@ module fft_r22sdf #(
    generate
       if (N_STAGES > 3) begin
          fft_r22sdf_wm #(
-            .DW            (INTERNAL_WIDTH),
+            .DATA_WIDTH    (INTERNAL_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -307,11 +307,11 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DW        (INTERNAL_WIDTH),
-            .FFT_N     (N),
-            .FFT_NLOG2 (N_LOG2),
-            .STAGE     (3),
-            .STAGES    (N_STAGES)
+            .DATA_WIDTH (INTERNAL_WIDTH),
+            .FFT_N      (N),
+            .FFT_NLOG2  (N_LOG2),
+            .STAGE      (3),
+            .STAGES     (N_STAGES)
          ) stage3_bf (
             .clk_i  (clk_i),
             .rst_n  (rst_n),
@@ -332,7 +332,7 @@ module fft_r22sdf #(
    generate
       if (N_STAGES > 4) begin
          fft_r22sdf_wm #(
-            .DW            (INTERNAL_WIDTH),
+            .DATA_WIDTH    (INTERNAL_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -351,11 +351,11 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DW        (INTERNAL_WIDTH),
-            .FFT_N     (N),
-            .FFT_NLOG2 (N_LOG2),
-            .STAGE     (4),
-            .STAGES    (N_STAGES)
+            .DATA_WIDTH (INTERNAL_WIDTH),
+            .FFT_N      (N),
+            .FFT_NLOG2  (N_LOG2),
+            .STAGE      (4),
+            .STAGES     (N_STAGES)
          ) stage4_bf (
             .clk_i  (clk_i),
             .rst_n  (rst_n),
