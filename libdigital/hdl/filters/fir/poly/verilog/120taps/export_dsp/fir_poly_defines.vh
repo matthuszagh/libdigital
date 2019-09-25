@@ -1,0 +1,14 @@
+`define FIR_POLY_PARAMS parameter \
+N_TAPS = 120, \
+M = 20, \
+M_LOG2 = 5, \
+BANK_LEN = 6, \
+BANK_LEN_LOG2 = 3, \
+INPUT_WIDTH = 12, \
+TAP_WIDTH = 16, \
+INTERNAL_WIDTH = 35, \
+NORM_SHIFT = 4, \
+OUTPUT_WIDTH = 13, \
+DSP_A_WIDTH = 25, \
+DSP_B_WIDTH = 18, \
+DSP_P_WIDTH = 48
