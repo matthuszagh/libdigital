@@ -21,14 +21,10 @@ module shift_reg #(
    reg [LEN_LOG2-1:0]           addr;
 
    always @(posedge clk) begin
-      if (!rst_n) begin
+      if (!rst_n)
          addr <= {LEN_LOG2{1'b0}};
-      end else begin
-         if (addr == LEN-1)
-           addr <= {LEN_LOG2{1'b0}};
-         else
-           addr <= addr + 1'b1;
-      end
+      else
+         addr <= addr + 1'b1;
    end
 
    BRAM_SDP_MACRO #(
@@ -37,13 +33,13 @@ module shift_reg #(
       .DO_REG      (0),          // don't pipeline output
       .READ_WIDTH  (DATA_WIDTH),
       .WRITE_WIDTH (DATA_WIDTH),
-      .WRITE_MODE  ("READ_FIRST")
+      .WRITE_MODE  ("WRITE_FIRST")
    ) BRAM_SDP (
       .DO     (data_o),
       .DI     (di),
       .WRADDR (addr),
-      .RDADDR (addr),
-      .WE     ({rst_n, rst_n}),
+      .RDADDR (addr+1'b1),
+      .WE     ({rst_n, rst_n, rst_n, rst_n}),
       .WREN   (rst_n),
       .RDEN   (rst_n),
       .RST    (!rst_n),
@@ -61,6 +57,7 @@ endmodule
 module shift_reg_tb;
 
    localparam DATA_WIDTH = 25;
+   localparam LEN = 10;
 
    reg clk = 0;
    reg rst_n = 0;
@@ -87,8 +84,7 @@ module shift_reg_tb;
 
    shift_reg #(
       .DATA_WIDTH (DATA_WIDTH),
-      .LEN        (512),
-      .LEN_LOG2   (9)
+      .LEN        (LEN)
    ) dut (
       .clk      (clk),
       .rst_n    (rst_n),
