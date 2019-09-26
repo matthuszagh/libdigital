@@ -42,7 +42,7 @@ module mult_add #(
       .CREG       (0),
       .MREG       (0), // TODO don't need
       .OPMODEREG  (0), // TODO don't register OPMODE
-      .PREG       (1), // register P output
+      .PREG       (0), // register P output
       // always use the DSP for multiplication, so don't turn it off
       // to save power.
       .USE_MULT   ("MULTIPLY"),
