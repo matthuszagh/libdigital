@@ -2,6 +2,7 @@
 
 `include "fft_r22sdf_bfi.v"
 `include "fft_r22sdf_bfii.v"
+`include "shift_reg.v"
 
 module fft_r22sdf_bf #(
    parameter DATA_WIDTH = 25,
@@ -84,5 +85,6 @@ endmodule
 // Local Variables:
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/")
+//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
+//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg/")
 // End:
