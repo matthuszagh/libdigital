@@ -8,14 +8,15 @@
 
 module shift_reg #(
    parameter DATA_WIDTH = 25,
-   parameter LEN        = 512,
-   parameter LEN_LOG2   = 9
+   parameter LEN        = 512
 ) (
    input wire                   clk,
    input wire                   rst_n,
    input wire [DATA_WIDTH-1:0]  di,
    output wire [DATA_WIDTH-1:0] data_o
 );
+
+   localparam LEN_LOG2 = $clog2(LEN);
 
    reg [LEN_LOG2-1:0]           addr;
 
