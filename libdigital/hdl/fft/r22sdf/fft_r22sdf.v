@@ -435,6 +435,7 @@ endmodule // fft_r22sdf
 `include "BRAM_SINGLE_MACRO.v"
 `include "BRAM_SDP_MACRO.v"
 `include "RAMB18E1.v"
+`include "DSP48E1.v"
 `include "glbl.v"
 
 `timescale 1ns/1ps
@@ -523,5 +524,6 @@ endmodule
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/ram/")
+//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/ram/"
+//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg//")
 // End:
