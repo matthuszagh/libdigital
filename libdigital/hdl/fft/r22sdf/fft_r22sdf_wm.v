@@ -58,21 +58,15 @@ module fft_r22sdf_wm #(
          2'd0:
            begin
               kar_f     <= p_dsp;
-              kar_r     <= kar_r;
-              kar_i     <= kar_i;
               mul_state <= 2'd1;
            end
          2'd1:
            begin
-              kar_f     <= kar_f;
               kar_r     <= p_dsp;
-              kar_i     <= kar_i;
               mul_state <= 2'd2;
            end
          2'd2:
            begin
-              kar_f     <= kar_f;
-              kar_r     <= kar_r;
               kar_i     <= p_dsp;
               mul_state <= 2'd0;
               x_re_reg  <= x_re_i;
@@ -81,13 +75,6 @@ module fft_r22sdf_wm #(
               x_im_reg2 <= x_im_reg;
               w_re_reg  <= w_re_i;
               w_im_reg  <= w_im_i;
-           end
-         default:
-           begin
-              kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-              kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-              kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-              mul_state <= 2'd0;
            end
          endcase
       end
@@ -118,12 +105,6 @@ module fft_r22sdf_wm #(
            b_dsp = w_re_reg + w_im_reg;
            c_dsp = -kar_f;
         end
-      // default:
-      //   begin
-      //      a_dsp = {DATA_WIDTH{1'b0}};
-      //      b_dsp = {TWIDDLE_WIDTH{1'b0}};
-      //      c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-      //   end
       endcase
    end
 
@@ -144,14 +125,9 @@ module fft_r22sdf_wm #(
    always @(posedge clk_i) begin
       if (!rst_n) begin
          ctr_o    <= {NLOG2{1'b0}};
-         // x_re_reg <= {DATA_WIDTH{1'b0}};
-         // x_im_reg <= {DATA_WIDTH{1'b0}};
          z_re_o   <= {DATA_WIDTH{1'b0}};
          z_im_o   <= {DATA_WIDTH{1'b0}};
       end else begin
-         // x_re_reg <= x_re_i;
-         // x_im_reg <= x_im_i;
-
          ctr_reg  <= ctr_i;
          ctr_reg2 <= ctr_reg;
          ctr_o    <= ctr_reg2;
