@@ -105,6 +105,12 @@ module fft_r22sdf_wm #(
            b_dsp = w_re_reg + w_im_reg;
            c_dsp = -kar_f;
         end
+      default:
+        begin
+           a_dsp = {DATA_WIDTH{1'b0}};
+           b_dsp = {TWIDDLE_WIDTH+1{1'b0}};
+           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+        end
       endcase
    end
 
