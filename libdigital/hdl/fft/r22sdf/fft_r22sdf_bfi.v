@@ -1,8 +1,10 @@
 `default_nettype none
 
+`include "shift_reg.v"
+
 module fft_r22sdf_bfi #(
    parameter DATA_WIDTH    = 25,
-   parameter SHIFT_REG_LEN = 0
+   parameter SHIFT_REG_LEN = 512
 ) (
    input wire                         clk_i,
    input wire                         rst_n,
@@ -60,5 +62,6 @@ endmodule
 // Local Variables:
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/")
+//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
+//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg/")
 // End:

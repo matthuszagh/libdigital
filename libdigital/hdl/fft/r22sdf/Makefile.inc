@@ -5,6 +5,6 @@ UNISIMS_PATH	:= $(VIVADO_SRC_PATH)/unisims
 
 # local dirs
 HDL_ROOT        := $(shell git rev-parse --show-toplevel)/libdigital/hdl
-LOCAL_DIRS      := -I$(HDL_ROOT)/memory/ram
+LOCAL_DIRS      := -I$(HDL_ROOT)/memory/ram -I$(HDL_ROOT)/memory/shift_reg
 
 INCLUDE_DIRS	:= $(VIVADO_SRC_PATH) $(UNIMACRO_PATH) $(UNISIMS_PATH) $(LOCAL_DIRS)

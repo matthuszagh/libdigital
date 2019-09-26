@@ -1,7 +1,7 @@
 `default_nettype none
 
 module fft_r22sdf_wm #(
-   parameter DW            = 25,
+   parameter DATA_WIDTH    = 25,
    parameter TWIDDLE_WIDTH = 10,
    parameter FFT_N         = 1024,
    parameter NLOG2         = 10
@@ -11,12 +11,12 @@ module fft_r22sdf_wm #(
    input wire                            clk_3x_i,
    input wire [NLOG2-1:0]                ctr_i,
    output reg [NLOG2-1:0]                ctr_o,
-   input wire signed [DW-1:0]            x_re_i,
-   input wire signed [DW-1:0]            x_im_i,
+   input wire signed [DATA_WIDTH-1:0]    x_re_i,
+   input wire signed [DATA_WIDTH-1:0]    x_im_i,
    input wire signed [TWIDDLE_WIDTH-1:0] w_re_i,
    input wire signed [TWIDDLE_WIDTH-1:0] w_im_i,
-   output reg signed [DW-1:0]            z_re_o,
-   output reg signed [DW-1:0]            z_im_o
+   output reg signed [DATA_WIDTH-1:0]    z_re_o,
+   output reg signed [DATA_WIDTH-1:0]    z_im_o
 );
 
    /**
@@ -31,17 +31,17 @@ module fft_r22sdf_wm #(
     */
    // compute multiplies in stages to share DSP.
    reg [1:0]                             mul_state;
-   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_f;
-   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_r;
-   reg signed [DW+TWIDDLE_WIDTH-1:0]     kar_i;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0]     kar_f;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0]     kar_r;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0]     kar_i;
 
-   reg signed [DW-1:0] x_re_reg;
-   reg signed [DW-1:0] x_im_reg;
+   reg signed [DATA_WIDTH-1:0] x_re_reg;
+   reg signed [DATA_WIDTH-1:0] x_im_reg;
    always @(posedge clk_3x_i) begin
       if (!rst_n) begin
-         kar_f     <= {DW+TWIDDLE_WIDTH{1'b0}};
-         kar_r     <= {DW+TWIDDLE_WIDTH{1'b0}};
-         kar_i     <= {DW+TWIDDLE_WIDTH{1'b0}};
+         kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+         kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+         kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
          mul_state <= 2'd0;
       end else begin
          case (mul_state)
@@ -68,9 +68,9 @@ module fft_r22sdf_wm #(
            end
          default:
            begin
-              kar_f     <= {DW+TWIDDLE_WIDTH{1'b0}};
-              kar_r     <= {DW+TWIDDLE_WIDTH{1'b0}};
-              kar_i     <= {DW+TWIDDLE_WIDTH{1'b0}};
+              kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+              kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+              kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
               mul_state <= 2'd0;
            end
          endcase
@@ -94,8 +94,8 @@ module fft_r22sdf_wm #(
 
          // safe to ignore the msb since the greatest possible
          // absolute twiddle value is 2^(TWIDDLE_WIDTH-1)
-         z_re_o <= kar_r[DW+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
-         z_im_o <= kar_i[DW+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
+         z_re_o <= kar_r[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
+         z_im_o <= kar_i[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
       end
    end
 

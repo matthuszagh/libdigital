@@ -427,12 +427,13 @@ module fft_r22sdf #(
 
 endmodule // fft_r22sdf
 
-`ifdef SIMULATE
+`ifdef FFT_SIMULATE
 
 `include "fft_r22sdf_defines.vh"
 `include "PLLE2_BASE.v"
 `include "PLLE2_ADV.v"
 `include "BRAM_SINGLE_MACRO.v"
+`include "BRAM_SDP_MACRO.v"
 `include "RAMB18E1.v"
 `include "glbl.v"
 

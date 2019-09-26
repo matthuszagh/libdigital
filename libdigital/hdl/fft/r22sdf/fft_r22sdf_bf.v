@@ -33,7 +33,7 @@ module fft_r22sdf_bf #(
    assign sel2 = ctrii[FFT_NLOG2-2-2*STAGE];
 
    fft_r22sdf_bfi #(
-      .DATA_WIDTH            (DATA_WIDTH),
+      .DATA_WIDTH    (DATA_WIDTH),
       .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-1))
    ) bfi (
       .clk_i  (clk_i),
@@ -46,7 +46,7 @@ module fft_r22sdf_bf #(
    );
 
    fft_r22sdf_bfii #(
-      .DATA_WIDTH            (DATA_WIDTH),
+      .DATA_WIDTH    (DATA_WIDTH),
       .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-2))
    ) bfii (
       .clk_i  (clk_i),
