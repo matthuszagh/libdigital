@@ -13,15 +13,10 @@
 
 module fft_r22sdf #(
    parameter N              = 1024, /* FFT length */
-   parameter N_LOG2         = 10,
-   parameter N_STAGES       = 5,    /* log_4(N) */
    parameter INPUT_WIDTH    = 14,
    parameter TWIDDLE_WIDTH  = 10,
    // +1 comes from complex multiply, which is really 2 multiplies.
-   parameter INTERNAL_WIDTH = 25,   /* ceil(log_2(N)) + INPUT_WIDTH + 1 */
-   // output width is the same as internal width because we shift by
-   // the twiddle bit width as we go.
-   parameter OUTPUT_WIDTH   = 25
+   parameter OUTPUT_WIDTH   = 25   /* ceil(log_2(N)) + INPUT_WIDTH + 1 */
 ) (
    input wire                           clk_i,
    input wire                           clk_3x_i,
@@ -34,6 +29,9 @@ module fft_r22sdf #(
    output reg signed [OUTPUT_WIDTH-1:0] data_re_o,
    output reg signed [OUTPUT_WIDTH-1:0] data_im_o
    );
+
+   localparam N_LOG2 = $clog2(N);
+   localparam N_STAGES = N_LOG2/2;
 
    // non bit-reversed output data count
    reg [N_LOG2-1:0]                     data_ctr_bit_nrml;
@@ -164,13 +162,13 @@ module fft_r22sdf #(
    endgenerate
 
    // stage 0
-   wire signed [INTERNAL_WIDTH-1:0] bf0_re;
-   wire signed [INTERNAL_WIDTH-1:0] bf0_im;
-   wire signed [INTERNAL_WIDTH-1:0] w0_re;
-   wire signed [INTERNAL_WIDTH-1:0] w0_im;
+   wire signed [OUTPUT_WIDTH-1:0] bf0_re;
+   wire signed [OUTPUT_WIDTH-1:0] bf0_im;
+   wire signed [OUTPUT_WIDTH-1:0] w0_re;
+   wire signed [OUTPUT_WIDTH-1:0] w0_im;
 
    fft_r22sdf_bf #(
-      .DATA_WIDTH (INTERNAL_WIDTH),
+      .DATA_WIDTH (OUTPUT_WIDTH),
       .FFT_N      (N),
       .FFT_NLOG2  (N_LOG2),
       .STAGE      (0),
@@ -187,15 +185,15 @@ module fft_r22sdf #(
    );
 
    // stage 1
-   wire signed [INTERNAL_WIDTH-1:0] bf1_re;
-   wire signed [INTERNAL_WIDTH-1:0] bf1_im;
-   wire signed [INTERNAL_WIDTH-1:0] w1_re;
-   wire signed [INTERNAL_WIDTH-1:0] w1_im;
+   wire signed [OUTPUT_WIDTH-1:0] bf1_re;
+   wire signed [OUTPUT_WIDTH-1:0] bf1_im;
+   wire signed [OUTPUT_WIDTH-1:0] w1_re;
+   wire signed [OUTPUT_WIDTH-1:0] w1_im;
 
    generate
       if (N_STAGES > 1) begin
          fft_r22sdf_wm #(
-            .DATA_WIDTH    (INTERNAL_WIDTH),
+            .DATA_WIDTH    (OUTPUT_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -214,7 +212,7 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DATA_WIDTH (INTERNAL_WIDTH),
+            .DATA_WIDTH (OUTPUT_WIDTH),
             .FFT_N      (N),
             .FFT_NLOG2  (N_LOG2),
             .STAGE      (1),
@@ -233,15 +231,15 @@ module fft_r22sdf #(
    endgenerate
 
    // stage 2
-   wire signed [INTERNAL_WIDTH-1:0] bf2_re;
-   wire signed [INTERNAL_WIDTH-1:0] bf2_im;
-   wire signed [INTERNAL_WIDTH-1:0] w2_re;
-   wire signed [INTERNAL_WIDTH-1:0] w2_im;
+   wire signed [OUTPUT_WIDTH-1:0] bf2_re;
+   wire signed [OUTPUT_WIDTH-1:0] bf2_im;
+   wire signed [OUTPUT_WIDTH-1:0] w2_re;
+   wire signed [OUTPUT_WIDTH-1:0] w2_im;
 
    generate
       if (N_STAGES > 2) begin
          fft_r22sdf_wm #(
-            .DATA_WIDTH    (INTERNAL_WIDTH),
+            .DATA_WIDTH    (OUTPUT_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -260,7 +258,7 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DATA_WIDTH (INTERNAL_WIDTH),
+            .DATA_WIDTH (OUTPUT_WIDTH),
             .FFT_N      (N),
             .FFT_NLOG2  (N_LOG2),
             .STAGE      (2),
@@ -279,15 +277,15 @@ module fft_r22sdf #(
    endgenerate
 
    // stage 3
-   wire signed [INTERNAL_WIDTH-1:0] bf3_re;
-   wire signed [INTERNAL_WIDTH-1:0] bf3_im;
-   wire signed [INTERNAL_WIDTH-1:0] w3_re;
-   wire signed [INTERNAL_WIDTH-1:0] w3_im;
+   wire signed [OUTPUT_WIDTH-1:0] bf3_re;
+   wire signed [OUTPUT_WIDTH-1:0] bf3_im;
+   wire signed [OUTPUT_WIDTH-1:0] w3_re;
+   wire signed [OUTPUT_WIDTH-1:0] w3_im;
 
    generate
       if (N_STAGES > 3) begin
          fft_r22sdf_wm #(
-            .DATA_WIDTH    (INTERNAL_WIDTH),
+            .DATA_WIDTH    (OUTPUT_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -306,7 +304,7 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DATA_WIDTH (INTERNAL_WIDTH),
+            .DATA_WIDTH (OUTPUT_WIDTH),
             .FFT_N      (N),
             .FFT_NLOG2  (N_LOG2),
             .STAGE      (3),
@@ -325,13 +323,13 @@ module fft_r22sdf #(
    endgenerate
 
    // stage 4
-   wire signed [INTERNAL_WIDTH-1:0] bf4_re;
-   wire signed [INTERNAL_WIDTH-1:0] bf4_im;
+   wire signed [OUTPUT_WIDTH-1:0] bf4_re;
+   wire signed [OUTPUT_WIDTH-1:0] bf4_im;
 
    generate
       if (N_STAGES > 4) begin
          fft_r22sdf_wm #(
-            .DATA_WIDTH    (INTERNAL_WIDTH),
+            .DATA_WIDTH    (OUTPUT_WIDTH),
             .TWIDDLE_WIDTH (TWIDDLE_WIDTH),
             .FFT_N         (N),
             .NLOG2         (N_LOG2)
@@ -350,7 +348,7 @@ module fft_r22sdf #(
          );
 
          fft_r22sdf_bf #(
-            .DATA_WIDTH (INTERNAL_WIDTH),
+            .DATA_WIDTH (OUTPUT_WIDTH),
             .FFT_N      (N),
             .FFT_NLOG2  (N_LOG2),
             .STAGE      (4),
@@ -367,8 +365,8 @@ module fft_r22sdf #(
       end // if (N > 4)
    endgenerate
 
-   wire signed [INTERNAL_WIDTH-1:0] data_bf_last_re;
-   wire signed [INTERNAL_WIDTH-1:0] data_bf_last_im;
+   wire signed [OUTPUT_WIDTH-1:0] data_bf_last_re;
+   wire signed [OUTPUT_WIDTH-1:0] data_bf_last_im;
 
    generate
       case (N_STAGES)
@@ -498,11 +496,8 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
 
    fft_r22sdf #(
       .N              (N),
-      .N_LOG2         (N_LOG2),
-      .N_STAGES       (N_STAGES),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TWIDDLE_WIDTH  (TWIDDLE_WIDTH),
-      .INTERNAL_WIDTH (INTERNAL_WIDTH),
       .OUTPUT_WIDTH   (OUTPUT_WIDTH)
    ) dut (
       .clk_i      (clk),
@@ -524,5 +519,6 @@ endmodule
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
 //                                  "/home/matt/src/libdigital/libdigital/hdl/memory/ram/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg//")
+//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg/"
+//                                  "/home/matt/src/libdigital/libdigital/hdl/dsp/multiply_add/")
 // End:
