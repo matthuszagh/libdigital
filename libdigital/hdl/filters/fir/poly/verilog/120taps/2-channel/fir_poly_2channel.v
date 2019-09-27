@@ -29,6 +29,8 @@ module fir_poly_2channel #(
       end
    end
 
+   wire [M_LOG2-1:0] tap_mem_addr2 = tap_mem_addr - 5'd9;
+
    reg signed [TAP_WIDTH-1:0] taps0 [0:BANK_LEN-1];
    reg signed [TAP_WIDTH-1:0] taps1 [0:BANK_LEN-1];
    reg signed [TAP_WIDTH-1:0] taps2 [0:BANK_LEN-1];
@@ -93,25 +95,25 @@ module fir_poly_2channel #(
       .dvalid          (dvalid),
       .tap_addr        (tap_mem_addr),
       .tap0            (taps0[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap1            (taps1[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap1            (taps1[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap2            (taps2[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap3            (taps3[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap3            (taps3[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap4            (taps4[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap5            (taps5[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap5            (taps5[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap6            (taps6[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap7            (taps7[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap7            (taps7[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap8            (taps8[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap9            (taps9[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap9            (taps9[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap10           (taps10[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap11           (taps11[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap11           (taps11[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap12           (taps12[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap13           (taps13[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap13           (taps13[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap14           (taps14[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap15           (taps15[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap15           (taps15[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap16           (taps16[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap17           (taps17[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
+      .tap17           (taps17[tap_mem_addr2[BANK_LEN_LOG2-1:0]]),
       .tap18           (taps18[tap_mem_addr[BANK_LEN_LOG2-1:0]]),
-      .tap19           (taps19[tap_mem_addr[BANK_LEN_LOG2-1:0]])
+      .tap19           (taps19[tap_mem_addr2[BANK_LEN_LOG2-1:0]])
    );
 
    fir_poly #(
