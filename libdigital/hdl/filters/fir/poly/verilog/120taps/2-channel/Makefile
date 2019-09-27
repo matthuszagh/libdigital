@@ -1,6 +1,6 @@
 include Makefile.inc
 
-tb: fir_poly_2channel.v fir_poly.v bank.v dsp.v ram.v
+test:
 	iverilog $(INCLUDE_DIRS) -DSIMULATE fir_poly_2channel.v -o tb/fir_poly_2channel_tb
 	./tb/fir_poly_2channel_tb
 	gtkwave tb/fir_poly_2channel.vcd
