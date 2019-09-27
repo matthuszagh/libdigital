@@ -24,6 +24,7 @@ module fir_poly #(
    output reg signed [OUTPUT_WIDTH-1:0] dout,
    output reg                           dvalid,
    input wire signed [M_LOG2:0]         tap_addr,
+   input wire signed [M_LOG2:0]         tap_addr2,
    input wire signed [TAP_WIDTH-1:0]    tap0,
    input wire signed [TAP_WIDTH-1:0]    tap1,
    input wire signed [TAP_WIDTH-1:0]    tap2,
@@ -67,20 +68,19 @@ module fir_poly #(
       end
    end
 
-   reg signed [INPUT_WIDTH-1:0]     bank_din [0:M-2];
+   reg signed [INPUT_WIDTH-1:0]     bank_din [0:M/2-1];
    always @(posedge clk) begin
       if (!rst_n) begin
          for (i=0; i<M-1; i=i+1)
            bank_din[i] <= {INPUT_WIDTH{1'b0}};
       end else if (tap_addr == 5'd19) begin
          bank_din[0] <= din;
-         for (i=1; i<M-1; i=i+1)
-           bank_din[i] <= shift_reg[i-1];
+         for (i=2; i<M; i=i+2)
+           bank_din[i/2] <= shift_reg[i-1];
       end
    end
 
 
-   wire [M_LOG2-1:0] tap_addr2 = tap_addr - 5'd9;
    wire dsp_acc = ((tap_addr != {M_LOG2{1'b0}}) && (tap_addr2 != {M_LOG2{1'b0}}));
 
    wire signed [INTERNAL_WIDTH-1:0] bank_dout [0:M-1];
@@ -194,7 +194,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[2]),
+      .din             (bank_din[1]),
       .dout            (bank_dout[3]),
       .tap_addr        (tap_addr2),
       .tap             (tap3),
@@ -260,7 +260,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[4]),
+      .din             (bank_din[2]),
       .dout            (bank_dout[5]),
       .tap_addr        (tap_addr2),
       .tap             (tap5),
@@ -326,7 +326,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[6]),
+      .din             (bank_din[3]),
       .dout            (bank_dout[7]),
       .tap_addr        (tap_addr2),
       .tap             (tap7),
@@ -392,7 +392,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[8]),
+      .din             (bank_din[4]),
       .dout            (bank_dout[9]),
       .tap_addr        (tap_addr2),
       .tap             (tap9),
@@ -458,7 +458,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[10]),
+      .din             (bank_din[5]),
       .dout            (bank_dout[11]),
       .tap_addr        (tap_addr2),
       .tap             (tap11),
@@ -524,7 +524,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[12]),
+      .din             (bank_din[6]),
       .dout            (bank_dout[13]),
       .tap_addr        (tap_addr2),
       .tap             (tap13),
@@ -590,7 +590,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[14]),
+      .din             (bank_din[7]),
       .dout            (bank_dout[15]),
       .tap_addr        (tap_addr2),
       .tap             (tap15),
@@ -656,7 +656,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[16]),
+      .din             (bank_din[8]),
       .dout            (bank_dout[17]),
       .tap_addr        (tap_addr2),
       .tap             (tap17),
@@ -722,7 +722,7 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[18]),
+      .din             (bank_din[9]),
       .dout            (bank_dout[19]),
       .tap_addr        (tap_addr2),
       .tap             (tap19),
