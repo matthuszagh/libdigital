@@ -12,17 +12,16 @@
  */
 
 module fft_r22sdf #(
-   `FFT_PARAMS
-   // parameter N              = 1024, /* FFT length */
-   // parameter N_LOG2         = 10,
-   // parameter N_STAGES       = 5,    /* log_4(N) */
-   // parameter INPUT_WIDTH    = 14,
-   // parameter TWIDDLE_WIDTH  = 10,
-   // // +1 comes from complex multiply, which is really 2 multiplies.
-   // parameter INTERNAL_WIDTH = 25,   /* ceil(log_2(N)) + INPUT_WIDTH + 1 */
-   // // output width is the same as internal width because we shift by
-   // // the twiddle bit width as we go.
-   // parameter OUTPUT_WIDTH   = 25
+   parameter N              = 1024, /* FFT length */
+   parameter N_LOG2         = 10,
+   parameter N_STAGES       = 5,    /* log_4(N) */
+   parameter INPUT_WIDTH    = 14,
+   parameter TWIDDLE_WIDTH  = 10,
+   // +1 comes from complex multiply, which is really 2 multiplies.
+   parameter INTERNAL_WIDTH = 25,   /* ceil(log_2(N)) + INPUT_WIDTH + 1 */
+   // output width is the same as internal width because we shift by
+   // the twiddle bit width as we go.
+   parameter OUTPUT_WIDTH   = 25
 ) (
    input wire                           clk_i,
    input wire                           clk_3x_i,
