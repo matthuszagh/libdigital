@@ -106,6 +106,7 @@ module fir_poly #(
       .dout            (bank_dout[0]),
       .tap_addr        (tap_addr),
       .tap             (tap0),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank0_dsp_a),
       .dsp_b           (bank0_dsp_b),
       .dsp_p           (bank0_dsp_p)
@@ -132,6 +133,7 @@ module fir_poly #(
       .dout            (bank_dout[1]),
       .tap_addr        (tap_addr2),
       .tap             (tap1),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank1_dsp_a),
       .dsp_b           (bank1_dsp_b),
       .dsp_p           (bank1_dsp_p)
@@ -172,6 +174,7 @@ module fir_poly #(
       .dout            (bank_dout[2]),
       .tap_addr        (tap_addr),
       .tap             (tap2),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank2_dsp_a),
       .dsp_b           (bank2_dsp_b),
       .dsp_p           (bank2_dsp_p)
@@ -198,6 +201,7 @@ module fir_poly #(
       .dout            (bank_dout[3]),
       .tap_addr        (tap_addr2),
       .tap             (tap3),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank3_dsp_a),
       .dsp_b           (bank3_dsp_b),
       .dsp_p           (bank3_dsp_p)
@@ -238,6 +242,7 @@ module fir_poly #(
       .dout            (bank_dout[4]),
       .tap_addr        (tap_addr),
       .tap             (tap4),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank4_dsp_a),
       .dsp_b           (bank4_dsp_b),
       .dsp_p           (bank4_dsp_p)
@@ -264,6 +269,7 @@ module fir_poly #(
       .dout            (bank_dout[5]),
       .tap_addr        (tap_addr2),
       .tap             (tap5),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank5_dsp_a),
       .dsp_b           (bank5_dsp_b),
       .dsp_p           (bank5_dsp_p)
@@ -304,6 +310,7 @@ module fir_poly #(
       .dout            (bank_dout[6]),
       .tap_addr        (tap_addr),
       .tap             (tap6),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank6_dsp_a),
       .dsp_b           (bank6_dsp_b),
       .dsp_p           (bank6_dsp_p)
@@ -330,6 +337,7 @@ module fir_poly #(
       .dout            (bank_dout[7]),
       .tap_addr        (tap_addr2),
       .tap             (tap7),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank7_dsp_a),
       .dsp_b           (bank7_dsp_b),
       .dsp_p           (bank7_dsp_p)
@@ -370,6 +378,7 @@ module fir_poly #(
       .dout            (bank_dout[8]),
       .tap_addr        (tap_addr),
       .tap             (tap8),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank8_dsp_a),
       .dsp_b           (bank8_dsp_b),
       .dsp_p           (bank8_dsp_p)
@@ -396,6 +405,7 @@ module fir_poly #(
       .dout            (bank_dout[9]),
       .tap_addr        (tap_addr2),
       .tap             (tap9),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank9_dsp_a),
       .dsp_b           (bank9_dsp_b),
       .dsp_p           (bank9_dsp_p)
@@ -436,6 +446,7 @@ module fir_poly #(
       .dout            (bank_dout[10]),
       .tap_addr        (tap_addr),
       .tap             (tap10),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank10_dsp_a),
       .dsp_b           (bank10_dsp_b),
       .dsp_p           (bank10_dsp_p)
@@ -462,6 +473,7 @@ module fir_poly #(
       .dout            (bank_dout[11]),
       .tap_addr        (tap_addr2),
       .tap             (tap11),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank11_dsp_a),
       .dsp_b           (bank11_dsp_b),
       .dsp_p           (bank11_dsp_p)
@@ -502,6 +514,7 @@ module fir_poly #(
       .dout            (bank_dout[12]),
       .tap_addr        (tap_addr),
       .tap             (tap12),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank12_dsp_a),
       .dsp_b           (bank12_dsp_b),
       .dsp_p           (bank12_dsp_p)
@@ -528,6 +541,7 @@ module fir_poly #(
       .dout            (bank_dout[13]),
       .tap_addr        (tap_addr2),
       .tap             (tap13),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank13_dsp_a),
       .dsp_b           (bank13_dsp_b),
       .dsp_p           (bank13_dsp_p)
@@ -568,6 +582,7 @@ module fir_poly #(
       .dout            (bank_dout[14]),
       .tap_addr        (tap_addr),
       .tap             (tap14),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank14_dsp_a),
       .dsp_b           (bank14_dsp_b),
       .dsp_p           (bank14_dsp_p)
@@ -594,6 +609,7 @@ module fir_poly #(
       .dout            (bank_dout[15]),
       .tap_addr        (tap_addr2),
       .tap             (tap15),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank15_dsp_a),
       .dsp_b           (bank15_dsp_b),
       .dsp_p           (bank15_dsp_p)
@@ -634,6 +650,7 @@ module fir_poly #(
       .dout            (bank_dout[16]),
       .tap_addr        (tap_addr),
       .tap             (tap16),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank16_dsp_a),
       .dsp_b           (bank16_dsp_b),
       .dsp_p           (bank16_dsp_p)
@@ -660,6 +677,7 @@ module fir_poly #(
       .dout            (bank_dout[17]),
       .tap_addr        (tap_addr2),
       .tap             (tap17),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank17_dsp_a),
       .dsp_b           (bank17_dsp_b),
       .dsp_p           (bank17_dsp_p)
@@ -700,6 +718,7 @@ module fir_poly #(
       .dout            (bank_dout[18]),
       .tap_addr        (tap_addr),
       .tap             (tap18),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank18_dsp_a),
       .dsp_b           (bank18_dsp_b),
       .dsp_p           (bank18_dsp_p)
@@ -726,6 +745,7 @@ module fir_poly #(
       .dout            (bank_dout[19]),
       .tap_addr        (tap_addr2),
       .tap             (tap19),
+      .dsp_acc         (dsp_acc),
       .dsp_a           (bank19_dsp_a),
       .dsp_b           (bank19_dsp_b),
       .dsp_p           (bank19_dsp_p)

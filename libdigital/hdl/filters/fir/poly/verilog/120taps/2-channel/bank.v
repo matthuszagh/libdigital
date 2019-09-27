@@ -22,6 +22,7 @@ module bank #(
    output wire signed [OUTPUT_WIDTH-1:0] dout,
    input wire [M_LOG2-1:0]               tap_addr,
    input wire signed [TAP_WIDTH-1:0]     tap,
+   input wire                            dsp_acc,
    output wire signed [DSP_A_WIDTH-1:0]  dsp_a,
    output wire signed [DSP_B_WIDTH-1:0]  dsp_b,
    input wire signed [DSP_P_WIDTH-1:0]   dsp_p
@@ -38,8 +39,6 @@ module bank #(
 
    reg signed [INPUT_WIDTH-1:0]         shift_reg [0:BANK_LEN-2];
 
-   wire signed [OUTPUT_WIDTH-1:0]       dsp_out;
-
    integer i;
    always @(posedge clk) begin
       if (!rst_n) begin
@@ -53,9 +52,6 @@ module bank #(
          end
       end
    end
-
-   wire dsp_acc = (tap_addr != {M_LOG2{1'b0}});
-   wire [DSP_P_WIDTH-OUTPUT_WIDTH-1:0] p_msbs_drop;
 
    reg signed [INPUT_WIDTH-1:0]       dsp_din;
 
