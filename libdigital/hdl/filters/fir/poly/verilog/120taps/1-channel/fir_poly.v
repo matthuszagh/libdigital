@@ -25,6 +25,10 @@ module fir_poly #(
    output reg                           dvalid
 );
 
+   localparam DSP_A_WIDTH = 25;
+   localparam DSP_B_WIDTH = 18;
+   localparam DSP_P_WIDTH = 48;
+
    // Data is first passed through a shift register at the base clock
    // rate. The first polyphase bank gets its data directly from the
    // input and therefore doesn't need a shift register.
@@ -42,19 +46,34 @@ module fir_poly #(
       end
    end
 
-   // instantiate tap ROMs
-   reg [M_LOG2:0]     tap_mem_addr;
+   reg signed [INPUT_WIDTH-1:0]     bank_din [0:M/2-1];
+   always @(posedge clk) begin
+      if (!rst_n) begin
+         for (i=0; i<M-1; i=i+1)
+           bank_din[i] <= {INPUT_WIDTH{1'b0}};
+      end else if (tap_addr == 5'd19) begin
+         bank_din[0] <= din;
+         for (i=2; i<M; i=i+2)
+           bank_din[i/2] <= shift_reg[i-1];
+      end
+   end
+
+   wire dsp_acc = ((tap_addr != {M_LOG2{1'b0}}) && (tap_addr2 != {M_LOG2{1'b0}}));
+
+   reg [M_LOG2:0]     tap_addr;
 
    always @(posedge clk) begin
       if (!rst_n) begin
-         tap_mem_addr <= {M_LOG2{1'b0}};
+         tap_addr <= {M_LOG2+1{1'b0}};
       end else begin
-         tap_mem_addr <= tap_mem_addr + 1'b1;
+         tap_addr <= tap_addr + 1'b1;
          if (clk_2mhz_pos_en) begin
-            tap_mem_addr <= {M_LOG2{1'b0}};
+            tap_addr <= {M_LOG2+1{1'b0}};
          end
       end
    end
+
+   wire [M_LOG2-1:0] tap_addr2 = tap_addr - 5'd9;
 
    reg signed [TAP_WIDTH-1:0] taps0 [0:BANK_LEN-1];
    reg signed [TAP_WIDTH-1:0] taps1 [0:BANK_LEN-1];
@@ -100,7 +119,32 @@ module fir_poly #(
       $readmemh("taps/taps19.hex", taps19);
    end
 
+   wire signed [TAP_WIDTH-1:0] tap0 = taps0[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap1 = taps1[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap2 = taps2[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap3 = taps3[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap4 = taps4[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap5 = taps5[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap6 = taps6[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap7 = taps7[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap8 = taps8[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap9 = taps9[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap10 = taps10[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap11 = taps11[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap12 = taps12[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap13 = taps13[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap14 = taps14[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap15 = taps15[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap16 = taps16[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap17 = taps17[tap_addr2[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap18 = taps18[tap_addr[BANK_LEN_LOG2-1:0]];
+   wire signed [TAP_WIDTH-1:0] tap19 = taps19[tap_addr2[BANK_LEN_LOG2-1:0]];
+
    wire signed [INTERNAL_WIDTH-1:0] bank_dout [0:M-1];
+
+   wire signed [DSP_A_WIDTH-1:0]    bank0_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank0_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank0_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -117,9 +161,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (din),
       .dout            (bank_dout[0]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps0[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap0),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank0_dsp_a),
+      .dsp_b           (bank0_dsp_b),
+      .dsp_p           (bank0_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank1_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank1_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank1_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -134,11 +186,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[0]),
+      .din             (bank_din[0]),
       .dout            (bank_dout[1]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps1[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap1),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank1_dsp_a),
+      .dsp_b           (bank1_dsp_b),
+      .dsp_p           (bank1_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank0_1_dsp_a = tap_addr < 5'd8 ? bank0_dsp_a : bank1_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank0_1_dsp_b = tap_addr < 5'd8 ? bank0_dsp_b : bank1_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank0_1_dsp_p;
+   assign bank0_dsp_p = bank0_1_dsp_p;
+   assign bank1_dsp_p = bank0_1_dsp_p;
+
+   dsp bank0_1_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank0_1_dsp_a),
+      .b   (bank0_1_dsp_b),
+      .p   (bank0_1_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank2_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank2_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank2_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -155,9 +229,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[1]),
       .dout            (bank_dout[2]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps2[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap2),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank2_dsp_a),
+      .dsp_b           (bank2_dsp_b),
+      .dsp_p           (bank2_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank3_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank3_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank3_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -172,11 +254,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[2]),
+      .din             (bank_din[1]),
       .dout            (bank_dout[3]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps3[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap3),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank3_dsp_a),
+      .dsp_b           (bank3_dsp_b),
+      .dsp_p           (bank3_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank2_3_dsp_a = tap_addr < 5'd8 ? bank2_dsp_a : bank3_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank2_3_dsp_b = tap_addr < 5'd8 ? bank2_dsp_b : bank3_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank2_3_dsp_p;
+   assign bank2_dsp_p = bank2_3_dsp_p;
+   assign bank3_dsp_p = bank2_3_dsp_p;
+
+   dsp bank2_3_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank2_3_dsp_a),
+      .b   (bank2_3_dsp_b),
+      .p   (bank2_3_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank4_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank4_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank4_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -193,9 +297,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[3]),
       .dout            (bank_dout[4]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps4[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap4),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank4_dsp_a),
+      .dsp_b           (bank4_dsp_b),
+      .dsp_p           (bank4_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank5_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank5_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank5_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -210,11 +322,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[4]),
+      .din             (bank_din[2]),
       .dout            (bank_dout[5]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps5[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap5),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank5_dsp_a),
+      .dsp_b           (bank5_dsp_b),
+      .dsp_p           (bank5_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank4_5_dsp_a = tap_addr < 5'd8 ? bank4_dsp_a : bank5_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank4_5_dsp_b = tap_addr < 5'd8 ? bank4_dsp_b : bank5_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank4_5_dsp_p;
+   assign bank4_dsp_p = bank4_5_dsp_p;
+   assign bank5_dsp_p = bank4_5_dsp_p;
+
+   dsp bank4_5_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank4_5_dsp_a),
+      .b   (bank4_5_dsp_b),
+      .p   (bank4_5_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank6_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank6_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank6_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -231,9 +365,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[5]),
       .dout            (bank_dout[6]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps6[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap6),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank6_dsp_a),
+      .dsp_b           (bank6_dsp_b),
+      .dsp_p           (bank6_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank7_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank7_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank7_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -248,11 +390,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[6]),
+      .din             (bank_din[3]),
       .dout            (bank_dout[7]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps7[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap7),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank7_dsp_a),
+      .dsp_b           (bank7_dsp_b),
+      .dsp_p           (bank7_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank6_7_dsp_a = tap_addr < 5'd8 ? bank6_dsp_a : bank7_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank6_7_dsp_b = tap_addr < 5'd8 ? bank6_dsp_b : bank7_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank6_7_dsp_p;
+   assign bank6_dsp_p = bank6_7_dsp_p;
+   assign bank7_dsp_p = bank6_7_dsp_p;
+
+   dsp bank6_7_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank6_7_dsp_a),
+      .b   (bank6_7_dsp_b),
+      .p   (bank6_7_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank8_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank8_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank8_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -269,9 +433,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[7]),
       .dout            (bank_dout[8]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps8[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap8),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank8_dsp_a),
+      .dsp_b           (bank8_dsp_b),
+      .dsp_p           (bank8_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank9_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank9_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank9_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -286,11 +458,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[8]),
+      .din             (bank_din[4]),
       .dout            (bank_dout[9]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps9[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap9),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank9_dsp_a),
+      .dsp_b           (bank9_dsp_b),
+      .dsp_p           (bank9_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank8_9_dsp_a = tap_addr < 5'd8 ? bank8_dsp_a : bank9_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank8_9_dsp_b = tap_addr < 5'd8 ? bank8_dsp_b : bank9_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank8_9_dsp_p;
+   assign bank8_dsp_p = bank8_9_dsp_p;
+   assign bank9_dsp_p = bank8_9_dsp_p;
+
+   dsp bank8_9_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank8_9_dsp_a),
+      .b   (bank8_9_dsp_b),
+      .p   (bank8_9_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank10_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank10_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank10_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -307,9 +501,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[9]),
       .dout            (bank_dout[10]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps10[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap10),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank10_dsp_a),
+      .dsp_b           (bank10_dsp_b),
+      .dsp_p           (bank10_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank11_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank11_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank11_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -324,11 +526,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[10]),
+      .din             (bank_din[5]),
       .dout            (bank_dout[11]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps11[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap11),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank11_dsp_a),
+      .dsp_b           (bank11_dsp_b),
+      .dsp_p           (bank11_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank10_11_dsp_a = tap_addr < 5'd8 ? bank10_dsp_a : bank11_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank10_11_dsp_b = tap_addr < 5'd8 ? bank10_dsp_b : bank11_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank10_11_dsp_p;
+   assign bank10_dsp_p = bank10_11_dsp_p;
+   assign bank11_dsp_p = bank10_11_dsp_p;
+
+   dsp bank10_11_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank10_11_dsp_a),
+      .b   (bank10_11_dsp_b),
+      .p   (bank10_11_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank12_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank12_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank12_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -345,9 +569,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[11]),
       .dout            (bank_dout[12]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps12[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap12),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank12_dsp_a),
+      .dsp_b           (bank12_dsp_b),
+      .dsp_p           (bank12_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank13_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank13_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank13_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -362,11 +594,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[12]),
+      .din             (bank_din[6]),
       .dout            (bank_dout[13]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps13[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap13),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank13_dsp_a),
+      .dsp_b           (bank13_dsp_b),
+      .dsp_p           (bank13_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank12_13_dsp_a = tap_addr < 5'd8 ? bank12_dsp_a : bank13_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank12_13_dsp_b = tap_addr < 5'd8 ? bank12_dsp_b : bank13_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank12_13_dsp_p;
+   assign bank12_dsp_p = bank12_13_dsp_p;
+   assign bank13_dsp_p = bank12_13_dsp_p;
+
+   dsp bank12_13_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank12_13_dsp_a),
+      .b   (bank12_13_dsp_b),
+      .p   (bank12_13_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank14_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank14_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank14_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -383,9 +637,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[13]),
       .dout            (bank_dout[14]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps14[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap14),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank14_dsp_a),
+      .dsp_b           (bank14_dsp_b),
+      .dsp_p           (bank14_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank15_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank15_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank15_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -400,11 +662,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[14]),
+      .din             (bank_din[7]),
       .dout            (bank_dout[15]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps15[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap15),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank15_dsp_a),
+      .dsp_b           (bank15_dsp_b),
+      .dsp_p           (bank15_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank14_15_dsp_a = tap_addr < 5'd8 ? bank14_dsp_a : bank15_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank14_15_dsp_b = tap_addr < 5'd8 ? bank14_dsp_b : bank15_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank14_15_dsp_p;
+   assign bank14_dsp_p = bank14_15_dsp_p;
+   assign bank15_dsp_p = bank14_15_dsp_p;
+
+   dsp bank14_15_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank14_15_dsp_a),
+      .b   (bank14_15_dsp_b),
+      .p   (bank14_15_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank16_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank16_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank16_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -421,9 +705,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[15]),
       .dout            (bank_dout[16]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps16[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap16),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank16_dsp_a),
+      .dsp_b           (bank16_dsp_b),
+      .dsp_p           (bank16_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank17_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank17_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank17_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -438,11 +730,33 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[16]),
+      .din             (bank_din[8]),
       .dout            (bank_dout[17]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps17[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap17),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank17_dsp_a),
+      .dsp_b           (bank17_dsp_b),
+      .dsp_p           (bank17_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank16_17_dsp_a = tap_addr < 5'd8 ? bank16_dsp_a : bank17_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank16_17_dsp_b = tap_addr < 5'd8 ? bank16_dsp_b : bank17_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank16_17_dsp_p;
+   assign bank16_dsp_p = bank16_17_dsp_p;
+   assign bank17_dsp_p = bank16_17_dsp_p;
+
+   dsp bank16_17_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank16_17_dsp_a),
+      .b   (bank16_17_dsp_b),
+      .p   (bank16_17_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank18_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank18_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank18_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -459,9 +773,17 @@ module fir_poly #(
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[17]),
       .dout            (bank_dout[18]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps18[tap_mem_addr])
+      .tap_addr        (tap_addr),
+      .tap             (tap18),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank18_dsp_a),
+      .dsp_b           (bank18_dsp_b),
+      .dsp_p           (bank18_dsp_p)
    );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank19_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank19_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank19_dsp_p;
 
    bank #(
       .N_TAPS         (N_TAPS),
@@ -476,10 +798,28 @@ module fir_poly #(
       .clk             (clk),
       .rst_n           (rst_n),
       .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (shift_reg[18]),
+      .din             (bank_din[9]),
       .dout            (bank_dout[19]),
-      .tap_addr        (tap_mem_addr),
-      .tap             (taps19[tap_mem_addr])
+      .tap_addr        (tap_addr2),
+      .tap             (tap19),
+      .dsp_acc         (dsp_acc),
+      .dsp_a           (bank19_dsp_a),
+      .dsp_b           (bank19_dsp_b),
+      .dsp_p           (bank19_dsp_p)
+   );
+
+   wire signed [DSP_A_WIDTH-1:0]    bank18_19_dsp_a = tap_addr < 5'd8 ? bank18_dsp_a : bank19_dsp_a;
+   wire signed [DSP_B_WIDTH-1:0]    bank18_19_dsp_b = tap_addr < 5'd8 ? bank18_dsp_b : bank19_dsp_b;
+   wire signed [DSP_P_WIDTH-1:0]    bank18_19_dsp_p;
+   assign bank18_dsp_p = bank18_19_dsp_p;
+   assign bank19_dsp_p = bank18_19_dsp_p;
+
+   dsp bank18_19_dsp (
+      .clk (clk),
+      .acc (dsp_acc),
+      .a   (bank18_19_dsp_a),
+      .b   (bank18_19_dsp_b),
+      .p   (bank18_19_dsp_p)
    );
 
    wire signed [INTERNAL_WIDTH-1:0] out_tmp = bank_dout[0]
