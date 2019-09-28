@@ -8,9 +8,7 @@
 module fir_poly #(
    parameter N_TAPS         = 120, /* total number of taps */
    parameter M              = 20,  /* decimation factor */
-   parameter M_LOG2         = 5,
    parameter BANK_LEN       = 6,   /* N_TAPS/M */
-   parameter BANK_LEN_LOG2  = 3,   /* bits needed to hold a BANK_LEN counter */
    parameter INPUT_WIDTH    = 12,
    parameter TAP_WIDTH      = 16,
    parameter INTERNAL_WIDTH = 35,
@@ -24,6 +22,9 @@ module fir_poly #(
    output reg signed [OUTPUT_WIDTH-1:0] dout,
    output reg                           dvalid
 );
+
+   localparam M_LOG2        = $clog2(M);
+   localparam BANK_LEN_LOG2 = $clog2(BANK_LEN);
 
    localparam DSP_A_WIDTH = 25;
    localparam DSP_B_WIDTH = 18;
@@ -967,14 +968,12 @@ module fir_poly_tb;
 
    fir_poly #(
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .INPUT_WIDTH    (ADC_DATA_WIDTH),
       .INTERNAL_WIDTH (INTERNAL_WIDTH),
       .NORM_SHIFT     (NORM_SHIFT),
       .OUTPUT_WIDTH   (OUTPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
-      .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2)
+      .BANK_LEN       (BANK_LEN)
    ) dut (
       .clk             (clk),
       .rst_n           (rst_n),

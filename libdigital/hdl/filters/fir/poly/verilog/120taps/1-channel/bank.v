@@ -5,9 +5,7 @@
 module bank #(
    parameter N_TAPS         = 120, /* total number of taps */
    parameter M              = 20,  /* decimation factor */
-   parameter M_LOG2         = 5,
    parameter BANK_LEN       = 6,   /* N_TAPS/M */
-   parameter BANK_LEN_LOG2  = 3,   /* num bits needed to hold a BANK_LEN counter */
    parameter INPUT_WIDTH    = 12,
    parameter TAP_WIDTH      = 16,
    parameter OUTPUT_WIDTH   = 35,  /* same as internal width in fir_poly */
@@ -27,6 +25,9 @@ module bank #(
    output wire signed [DSP_B_WIDTH-1:0]  dsp_b,
    input wire signed [DSP_P_WIDTH-1:0]   dsp_p
 );
+
+   localparam M_LOG2        = $clog2(M);
+   localparam BANK_LEN_LOG2 = $clog2(BANK_LEN);
 
    function [DSP_A_WIDTH-1:0] sign_extend_a(input [TAP_WIDTH-1:0] expr);
       sign_extend_a = (expr[TAP_WIDTH-1] == 1'b1) ? {{DSP_A_WIDTH-TAP_WIDTH{1'b1}}, expr}
