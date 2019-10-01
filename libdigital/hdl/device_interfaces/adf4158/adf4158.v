@@ -79,16 +79,17 @@ module adf4158 (
    // write configuration data
    always @(negedge clk_20mhz) begin
       if (!rst_n) begin
-         state      <= IDLE_STATE;
-         ce         <= 1'b0;
-         le         <= 1'b1;
-         le_delay   <= 1'b0;
-         enabled    <= 1'b0;
-         configured <= 1'b0;
-         bit_ctr    <= 5'd31;
-         reg_ctr    <= 4'd9;
-         ramp_en    <= RAMP_EN_INIT;
-         txdata     <= 1'b0;
+         state       <= IDLE_STATE;
+         ce          <= 1'b0;
+         le          <= 1'b1;
+         le_delay    <= 1'b0;
+         enabled     <= 1'b0;
+         configured  <= 1'b0;
+         bit_ctr     <= 5'd31;
+         reg_ctr     <= 4'd9;
+         ramp_en     <= RAMP_EN_INIT;
+         txdata      <= 1'b0;
+         config_done <= 1'b0;
       end else begin
          data <= r[reg_ctr][bit_ctr];
          ce   <= 1'b1;
