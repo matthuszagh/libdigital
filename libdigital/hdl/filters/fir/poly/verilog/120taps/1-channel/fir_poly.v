@@ -150,9 +150,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -177,9 +175,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -218,9 +214,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -245,9 +239,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -286,9 +278,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -313,9 +303,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -354,9 +342,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -381,9 +367,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -422,9 +406,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -449,9 +431,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -490,9 +470,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -517,9 +495,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -558,9 +534,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -585,9 +559,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -626,9 +598,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -653,9 +623,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -694,9 +662,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -721,9 +687,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -762,9 +726,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -789,9 +751,7 @@ module fir_poly #(
    bank #(
       .N_TAPS         (N_TAPS),
       .M              (M),
-      .M_LOG2         (M_LOG2),
       .BANK_LEN       (BANK_LEN),
-      .BANK_LEN_LOG2  (BANK_LEN_LOG2),
       .INPUT_WIDTH    (INPUT_WIDTH),
       .TAP_WIDTH      (TAP_WIDTH),
       .OUTPUT_WIDTH   (INTERNAL_WIDTH)
@@ -942,7 +902,10 @@ module fir_poly_tb;
             if (clk_2mhz_pos_en)
               ctr_delay <= 1;
          end else begin
-            ctr <= ctr + 1;
+            if (ctr == SAMPLE_LEN-1)
+              ctr <= 0;
+            else
+              ctr <= ctr + 1;
          end
       end
    end
@@ -953,11 +916,11 @@ module fir_poly_tb;
       $dumpvars(0, fir_poly_tb);
       $dumpvars(0, dut.bank0.shift_reg[0]);
 
-      f = $fopen("tb/sample_out_verilog.txt", "w");
+      f = $fopen("tb/sample_out_real_verilog.txt", "w");
 
-      $readmemh("tb/sample_in.hex", samples);
+      $readmemh("tb/sample_in_real.hex", samples);
 
-      #100000 $finish;
+      #10000000 $finish;
    end
 
    always @(posedge clk) begin
