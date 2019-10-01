@@ -1,0 +1,29 @@
+[
+    {
+        "arguments": [
+            "/nix/store/wr5dlcw1asw8dwgm4bwjmga8f52m5lfx-gcc-7.4.0/bin/gcc",
+            "-c",
+            "-O3",
+            "-Wall",
+            "-Wextra",
+            "-Wshadow",
+            "-Wstrict-aliasing",
+            "-ansi",
+            "-pedantic",
+            "-Werror",
+            "-std=gnu11",
+            "-B/nix/store/pjx3f50x0qziyivs7rbg5s12p99nn2np-gcc-7.4.0-lib/lib",
+            "-B/nix/store/iykxb0bmfjmi7s53kfg6pjbfpd8jmza6-glibc-2.27/lib/",
+            "-idirafter",
+            "/nix/store/bniand9afisrgrsfi7kr093334iv3ibv-glibc-2.27-dev/include",
+            "-idirafter",
+            "/nix/store/wr5dlcw1asw8dwgm4bwjmga8f52m5lfx-gcc-7.4.0/lib/gcc/x86_64-unknown-linux-gnu/7.4.0/include-fixed",
+            "-B/nix/store/hpzj855nkgjvg58nrhq4910sb9q3kss1-gcc-wrapper-7.4.0/bin/",
+            "-o",
+            "hex_to_init",
+            "hex_to_init.c"
+        ],
+        "directory": "/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/scripts",
+        "file": "hex_to_init.c"
+    }
+]
