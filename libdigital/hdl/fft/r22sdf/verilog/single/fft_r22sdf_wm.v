@@ -151,9 +151,3 @@ module fft_r22sdf_wm #(
    end
 
 endmodule
-// Local Variables:
-// flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/dsp/multiply_add/")
-// End:
