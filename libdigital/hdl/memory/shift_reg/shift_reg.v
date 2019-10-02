@@ -16,7 +16,15 @@ module shift_reg #(
    output wire [DATA_WIDTH-1:0] data_o
 );
 
+   // TODO These should really be conditional on the chosen parameter
+   // values. However, verilog does not allow putting these in a
+   // generate block. Currently, they must be modified by hand until a
+   // better solution is found.
+   localparam ADDR_WIDTH = 9;
+   localparam WE_REPLICATE = 4;
+
    localparam LEN_LOG2 = $clog2(LEN);
+   localparam ADDR_PADDING = ADDR_WIDTH - LEN_LOG2;
 
    reg [LEN_LOG2-1:0]           addr;
 
@@ -37,9 +45,9 @@ module shift_reg #(
    ) BRAM_SDP (
       .DO     (data_o),
       .DI     (di),
-      .WRADDR (addr),
-      .RDADDR (addr+1'b1),
-      .WE     ({rst_n, rst_n, rst_n, rst_n}),
+      .WRADDR ({{ADDR_PADDING{1'b0}}, addr}),
+      .RDADDR ({{ADDR_PADDING{1'b0}}, addr+1'b1}),
+      .WE     ({WE_REPLICATE{rst_n}}),
       .WREN   (rst_n),
       .RDEN   (rst_n),
       .RST    (!rst_n),
