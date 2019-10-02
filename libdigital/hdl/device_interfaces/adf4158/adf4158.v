@@ -43,6 +43,7 @@ module adf4158 (
    localparam RAMP_EN_INIT = 1'b0;
    localparam RAMP_STEPS   = 20'd1024;
    localparam DELAY_STEPS  = 12'd4;
+   localparam DELAY_EN     = 1'b0;
    reg        ramp_en;
 
    /* Configuration registers.
@@ -60,7 +61,7 @@ module adf4158 (
       r[6] = {2'd0, 1'd0, 1'd0, 2'd0, 1'd0, 1'd0, 1'd0, 4'd4, 16'd31457, 3'd5}; /* reg 5 part 1 */
       r[7] = {8'd0, 1'd1, RAMP_STEPS, 3'd6}; /* reg 6 part 2 */
       r[8] = {8'd0, 1'd0, RAMP_STEPS, 3'd6}; /* reg 6 part 1 */
-      r[9] = {13'd0, 1'd0, 1'd1, 1'd1, 1'd0, DELAY_STEPS, 3'd7}; /* reg 7 */
+      r[9] = {13'd0, 1'd0, DELAY_EN, 1'd1, 1'd0, DELAY_STEPS, 3'd7}; /* reg 7 */
    end
 
    always @(posedge clk) begin
