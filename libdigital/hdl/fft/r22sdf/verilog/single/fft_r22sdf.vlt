@@ -1,0 +1,4 @@
+`verilator_config
+lint_off -msg STMTDLY -file "*/DSP48E1.v"
+lint_off -msg ASSIGNDLY -file "*/DSP48E1.v"
+lint_off -msg STMTDLY -file "*/BRAM_SDP_MACRO.v"
