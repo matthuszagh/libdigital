@@ -21,6 +21,16 @@ module fft_r22sdf_wm #(
    output reg signed [DATA_WIDTH-1:0]    z_im_o
 );
 
+   localparam A_DATA_WIDTH = DATA_WIDTH;
+   localparam B_DATA_WIDTH = TWIDDLE_WIDTH + 1;
+   localparam C_DATA_WIDTH = DATA_WIDTH + TWIDDLE_WIDTH + 1;
+   localparam P_DATA_WIDTH = DATA_WIDTH + TWIDDLE_WIDTH + 1;
+
+   function [B_DATA_WIDTH-1:0] sign_extend_b(input [TWIDDLE_WIDTH-1:0] expr);
+      sign_extend_b = (expr[TWIDDLE_WIDTH-1] == 1'b1) ? {{B_DATA_WIDTH-TWIDDLE_WIDTH{1'b1}}, expr}
+                      : {{B_DATA_WIDTH-TWIDDLE_WIDTH{1'b0}}, expr};
+   endfunction
+
    /**
     * Use the karatsuba algorithm to use 3 multiplies instead of 4.
     *
@@ -32,10 +42,10 @@ module fft_r22sdf_wm #(
     * I = a(c+d)-f
     */
    // compute multiplies in stages to share DSP.
-   reg [1:0]                                 mul_state;
-   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0] kar_f;
-   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0] kar_r;
-   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0] kar_i;
+   reg [1:0]                             mul_state;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH:0] kar_f;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH:0] kar_r;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH:0] kar_i;
 
    reg signed [DATA_WIDTH-1:0] x_re_reg;
    reg signed [DATA_WIDTH-1:0] x_im_reg;
@@ -45,9 +55,9 @@ module fft_r22sdf_wm #(
    reg signed [TWIDDLE_WIDTH-1:0] w_im_reg;
    always @(posedge clk_3x_i) begin
       if (!rst_n) begin
-         kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-         kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
-         kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+         kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
+         kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
+         kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
          mul_state <= 2'd0;
          x_re_reg  <= {DATA_WIDTH{1'b0}};
          x_im_reg  <= {DATA_WIDTH{1'b0}};
@@ -82,16 +92,16 @@ module fft_r22sdf_wm #(
 
    reg signed [DATA_WIDTH-1:0] a_dsp;
    reg signed [TWIDDLE_WIDTH:0] b_dsp;
-   reg signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0] c_dsp;
-   wire signed [DATA_WIDTH+TWIDDLE_WIDTH-1:0] p_dsp;
+   reg signed [DATA_WIDTH+TWIDDLE_WIDTH:0] c_dsp;
+   wire signed [DATA_WIDTH+TWIDDLE_WIDTH:0] p_dsp;
 
    always @(*) begin
       case (mul_state)
       2'd0:
         begin
            a_dsp = x_re_reg2 - x_im_reg2;
-           b_dsp = w_re_reg;
-           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+           b_dsp = sign_extend_b(w_re_reg);
+           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
         end
       2'd1:
         begin
@@ -109,7 +119,7 @@ module fft_r22sdf_wm #(
         begin
            a_dsp = {DATA_WIDTH{1'b0}};
            b_dsp = {TWIDDLE_WIDTH+1{1'b0}};
-           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH{1'b0}};
+           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
         end
       endcase
    end
@@ -117,8 +127,8 @@ module fft_r22sdf_wm #(
    mult_add #(
       .A_DATA_WIDTH (DATA_WIDTH),
       .B_DATA_WIDTH (TWIDDLE_WIDTH+1),
-      .C_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH),
-      .P_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH)
+      .C_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH+1),
+      .P_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH+1)
    ) twiddle_multiply (
       .a (a_dsp),
       .b (b_dsp),
