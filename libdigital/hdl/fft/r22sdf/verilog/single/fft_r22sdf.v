@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "fft_r22sdf_defines.vh"
 `include "fft_r22sdf_bf.v"
 `include "fft_r22sdf_wm.v"
 `include "ram_single_18k.v"
@@ -210,13 +209,13 @@ module fft_r22sdf #(
       .INIT_0E(256'h0219020F0207020202000200020302090212021D022B023C024F0264027C0295),
       .INIT_0F(256'h03DA03B4038F036B03470325030302E302C502A8028D0274025D024802360226),
       // .INITFILE      ("roms/fft_r22sdf_rom_s1_re.hex"),
-      .ADDRESS_WIDTH (N_LOG2-1),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s1_re (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage2_ctr_wm[N_LOG2-3:0]),
+      .addr   ({2'd0, stage2_ctr_wm[N_LOG2-3:0]}),
       .data_o (w_s1_re)
    );
 
@@ -239,13 +238,13 @@ module fft_r22sdf #(
       .INIT_0E(256'h00A0007C00570032000C03E603C1039C037703530330030E02EE02CF02B10295),
       .INIT_0F(256'h01FD01F901F201E801DC01CD01BC01A80192017A016001440126010600E500C3),
       // .INITFILE      ("roms/fft_r22sdf_rom_s1_im.hex"),
-      .ADDRESS_WIDTH (N_LOG2-1),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s1_im (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage2_ctr_wm[N_LOG2-3:0]),
+      .addr   ({2'd0, stage2_ctr_wm[N_LOG2-3:0]}),
       .data_o (w_s1_im)
    );
 
@@ -256,13 +255,13 @@ module fft_r22sdf #(
       .INIT_02(256'h00320063009400C300F0011B01440169018B01A801C201D801E801F501FC01FF),
       .INIT_03(256'h036B02E30274022602020209023C0295030E039C003200C3014401A801E801FF),
       // .INITFILE      ("roms/fft_r22sdf_rom_s2_re.hex"),
-      .ADDRESS_WIDTH (N_LOG2-2),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s2_re (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage3_ctr_wm[N_LOG2-5:0]),
+      .addr   ({4'd0, stage3_ctr_wm[N_LOG2-5:0]}),
       .data_o (w_s2_re)
    );
 
@@ -273,13 +272,13 @@ module fft_r22sdf #(
       .INIT_02(256'h0202020902160226023C02560274029502BB02E3030E033C036B039C03CD0000),
       .INIT_03(256'h01E801A8014400C30032039C030E0295023C020902020226027402E3036B0000),
       // .INITFILE      ("roms/fft_r22sdf_rom_s2_im.hex"),
-      .ADDRESS_WIDTH (N_LOG2-2),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s2_im (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage3_ctr_wm[N_LOG2-5:0]),
+      .addr   ({4'd0, stage3_ctr_wm[N_LOG2-5:0]}),
       .data_o (w_s2_im)
    );
 
@@ -287,13 +286,13 @@ module fft_r22sdf #(
    ram_single_18k #(
       .INIT_00(256'h0226029500C301FF00C3016901D801FF02950000016901FF01FF01FF01FF01FF),
       // .INITFILE      ("roms/fft_r22sdf_rom_s3_re.hex"),
-      .ADDRESS_WIDTH (N_LOG2-3),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s3_re (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage4_ctr_wm[N_LOG2-7:0]),
+      .addr   ({6'd0, stage4_ctr_wm[N_LOG2-7:0]}),
       .data_o (w_s3_re)
    );
 
@@ -301,13 +300,13 @@ module fft_r22sdf #(
    ram_single_18k #(
       .INIT_00(256'h00C302950226000002260295033C000002950200029500000000000000000000),
       // .INITFILE      ("roms/fft_r22sdf_rom_s3_im.hex"),
-      .ADDRESS_WIDTH (N_LOG2-3),
+      .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s3_im (
       .clk    (clk_i),
       .en     (1'b1),
       .we     (1'b0),
-      .addr   (stage4_ctr_wm[N_LOG2-7:0]),
+      .addr   ({6'd0, stage4_ctr_wm[N_LOG2-7:0]}),
       .data_o (w_s3_im)
    );
 
@@ -331,6 +330,11 @@ module fft_r22sdf #(
       end
    endgenerate
 
+   function [OUTPUT_WIDTH-1:0] sign_extend_input(input [INPUT_WIDTH-1:0] expr);
+      sign_extend_input = (expr[INPUT_WIDTH-1] == 1'b1) ? {{OUTPUT_WIDTH-INPUT_WIDTH{1'b1}}, expr}
+                      : {{OUTPUT_WIDTH-INPUT_WIDTH{1'b0}}, expr};
+   endfunction
+
    // stage 0
    wire signed [OUTPUT_WIDTH-1:0] bf0_re;
    wire signed [OUTPUT_WIDTH-1:0] bf0_im;
@@ -348,8 +352,8 @@ module fft_r22sdf #(
       .rst_n  (rst_n),
       .cnt_i  (stage0_ctr),
       .cnt_o  (stage1_ctr_wm),
-      .x_re_i (data_re_i),
-      .x_im_i (data_im_i),
+      .x_re_i (sign_extend_input(data_re_i)),
+      .x_im_i (sign_extend_input(data_im_i)),
       .z_re_o (bf0_re),
       .z_im_o (bf0_im)
    );
@@ -608,7 +612,7 @@ endmodule // fft_r22sdf
 `timescale 1ns/1ps
 module fft_r22sdf_tb #( `FFT_PARAMS );
 
-   localparam SAMPLE_LEN = 22258;
+   localparam SAMPLE_LEN = N;
 
    reg                             clk = 0;
    reg [INPUT_WIDTH-1:0]           samples [0:SAMPLE_LEN-1];
@@ -626,7 +630,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
       $dumpfile("tb/fft_r22sdf_tb.vcd");
       $dumpvars(0, fft_r22sdf_tb);
 
-      $readmemh("tb/real_samples.hex", samples);
+      $readmemh("tb/fft_samples_1024.hex", samples);
       cnt = 0;
 
       #120000 $finish;
