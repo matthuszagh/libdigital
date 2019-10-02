@@ -77,6 +77,13 @@ module ram_single_18k #(
    output wire signed [DATA_WIDTH-1:0] data_o
 );
 
+   // TODO These should really be conditional on the chosen parameter
+   // values. However, verilog does not allow putting these in a
+   // generate block. Currently, they must be modified by hand until a
+   // better solution is found.
+   localparam XILINX_ADDR_WIDTH = 10;
+   localparam ADDR_PADDING = XILINX_ADDR_WIDTH-ADDRESS_WIDTH;
+
    // TODO the address and write enable widths are incorrect. See the
    // Xilinx table for how to fix.
    BRAM_SINGLE_MACRO #(
@@ -154,7 +161,7 @@ module ram_single_18k #(
    ) BRAM (
       .DO   (data_o),
       .DI   (di),
-      .ADDR (addr),
+      .ADDR ({{ADDR_PADDING{1'b0}}, addr}),
       .CLK  (clk),
       .EN   (en),
       .RST  (1'b0),
