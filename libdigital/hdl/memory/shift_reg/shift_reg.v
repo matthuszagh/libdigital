@@ -1,3 +1,5 @@
+`ifndef _shift_reg_v_
+`define _shift_reg_v_
 `default_nettype none
 
 // Uses an 18k FIFO (via onboard block RAM) to implement a shift
@@ -101,4 +103,5 @@ module shift_reg_tb;
    );
 
 endmodule
+`endif
 `endif

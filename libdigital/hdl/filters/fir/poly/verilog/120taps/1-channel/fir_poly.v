@@ -50,7 +50,7 @@ module fir_poly #(
    reg signed [INPUT_WIDTH-1:0]     bank_din [0:M/2-1];
    always @(posedge clk) begin
       if (!rst_n) begin
-         for (i=0; i<M-1; i=i+1)
+         for (i=0; i<M/2; i=i+1)
            bank_din[i] <= {INPUT_WIDTH{1'b0}};
       end else if (tap_addr == 5'd19) begin
          bank_din[0] <= din;
@@ -61,15 +61,15 @@ module fir_poly #(
 
    wire dsp_acc = ((tap_addr != {M_LOG2{1'b0}}) && (tap_addr2 != {M_LOG2{1'b0}}));
 
-   reg [M_LOG2:0]     tap_addr;
+   reg [M_LOG2-1:0]     tap_addr;
 
    always @(posedge clk) begin
       if (!rst_n) begin
-         tap_addr <= {M_LOG2+1{1'b0}};
+         tap_addr <= {M_LOG2{1'b0}};
       end else begin
          tap_addr <= tap_addr + 1'b1;
          if (clk_2mhz_pos_en) begin
-            tap_addr <= {M_LOG2+1{1'b0}};
+            tap_addr <= {M_LOG2{1'b0}};
          end
       end
    end
