@@ -184,7 +184,7 @@ module adf4158 #(
    output reg config_done,
    output reg le,
    output reg ce,
-   input wire muxout,
+   input wire muxout, // TODO this should be connected to see when PLL locks
    output reg txdata,
    output reg data
 );
