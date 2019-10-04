@@ -46,7 +46,8 @@
 //             registers. Connect directly to corresponding device pin.
 
 // To determine the internal state of the ADF4158, look at the
-// descriptions next to MUXOUT, INTERRUPT and READBACK_MUXOUT.
+// descriptions next to MUXOUT, INTERRUPT and READBACK_MUXOUT. Also
+// see p31 of the datasheet, which provides the timing diagrams.
 
 module adf4158 #(
    // Initializes the ramp enable bit which enables a frequency
