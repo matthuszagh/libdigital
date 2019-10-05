@@ -12,10 +12,10 @@ module shift_reg #(
    parameter DATA_WIDTH = 25,
    parameter LEN        = 512
 ) (
-   input wire                   clk,
-   input wire                   rst_n,
-   input wire [DATA_WIDTH-1:0]  di,
-   output wire [DATA_WIDTH-1:0] data_o
+   input wire                          clk,
+   input wire                          rst_n,
+   input wire signed [DATA_WIDTH-1:0]  di,
+   output wire signed [DATA_WIDTH-1:0] data_o
 );
 
    // TODO These should really be conditional on the chosen parameter
@@ -73,7 +73,7 @@ module shift_reg_tb;
    reg rst_n = 0;
    always #1 clk = !clk;
    reg [DATA_WIDTH-1:0] sample = 0;
-   wire [DATA_WIDTH-1:0] data;
+   wire signed [DATA_WIDTH-1:0] data;
 
    always @(posedge clk) begin
       if (!dut.BRAM_SDP.bram18_sdp_bl_3.bram18_sdp_bl_3.GSR)
