@@ -11,14 +11,14 @@ module fft_r22sdf_bf #(
    parameter STAGE      = 0,
    parameter STAGES     = 5
 ) (
-   input wire                   clk_i,
-   input wire                   rst_n,
-   input wire [FFT_NLOG2-1:0]   cnt_i,
-   output reg [FFT_NLOG2-1:0]   cnt_o,
-   input wire [DATA_WIDTH-1:0]  x_re_i,
-   input wire [DATA_WIDTH-1:0]  x_im_i,
-   output wire [DATA_WIDTH-1:0] z_re_o,
-   output wire [DATA_WIDTH-1:0] z_im_o
+   input wire                          clk_i,
+   input wire                          rst_n,
+   input wire [FFT_NLOG2-1:0]          cnt_i,
+   output reg [FFT_NLOG2-1:0]          cnt_o,
+   input wire signed [DATA_WIDTH-1:0]  x_re_i,
+   input wire signed [DATA_WIDTH-1:0]  x_im_i,
+   output wire signed [DATA_WIDTH-1:0] z_re_o,
+   output wire signed [DATA_WIDTH-1:0] z_im_o
 );
 
    wire                       sel1;
