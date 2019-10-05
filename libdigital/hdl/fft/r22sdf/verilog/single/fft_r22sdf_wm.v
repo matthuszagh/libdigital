@@ -153,6 +153,9 @@ module fft_r22sdf_wm #(
 
          // TODO verify that dropping msb is ok
 
+         // TODO since this is signed, maybe I should take the MSB and
+         // then other bits?
+
          // safe to ignore the msb since the greatest possible
          // absolute twiddle value is 2^(TWIDDLE_WIDTH-1)
          z_re_o   <= kar_r[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
