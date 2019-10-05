@@ -76,6 +76,7 @@ module fft_r22sdf_bfi #(
          z_re_o = x_re_i + xsr_re;
          z_im_o = x_im_i + xsr_im;
 
+         zsr_re = xsr_re - x_re_i;
          zsr_im = xsr_im - x_im_i;
       end else begin
          z_re_o = xsr_re;
