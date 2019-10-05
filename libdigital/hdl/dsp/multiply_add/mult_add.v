@@ -41,9 +41,9 @@ module mult_add #(
                       : {{C_PADDING{1'b0}}, expr};
    endfunction
 
-   wire [A_TOTAL_DATA_WIDTH-1:0]         a_extended = sign_extend_a(a);
-   wire [B_TOTAL_DATA_WIDTH-1:0]         b_extended = sign_extend_b(b);
-   wire [C_TOTAL_DATA_WIDTH-1:0]         c_extended = sign_extend_c(c);
+   wire signed [A_TOTAL_DATA_WIDTH-1:0]  a_extended = sign_extend_a(a);
+   wire signed [B_TOTAL_DATA_WIDTH-1:0]  b_extended = sign_extend_b(b);
+   wire signed [C_TOTAL_DATA_WIDTH-1:0]  c_extended = sign_extend_c(c);
 
    DSP48E1 #(
       // TODO I think this should be set to 0 to use A as multiplier
