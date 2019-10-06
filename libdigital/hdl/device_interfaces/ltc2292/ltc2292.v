@@ -9,10 +9,10 @@
 module ltc2292 #(
    parameter MUX = "TRUE"
 ) (
-   input wire                clk,
-   input wire signed [11:0]  di,
-   output wire signed [11:0] dao,
-   output wire signed [11:0] dbo
+   input wire        clk,
+   input wire [11:0] di,
+   output reg [11:0] dao,
+   output reg [11:0] dbo
 );
 
    // When the ADC outputs are multiplexed, channel A should be
