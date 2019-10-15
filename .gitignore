@@ -4,3 +4,4 @@
 **/tb
 *.pyc
 **/.Xil
+*.ilang

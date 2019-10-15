@@ -10,5 +10,17 @@ in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     mh-python
+    yosys
+    symbiyosys
+    verilator
+    verilog
+    nextpnr
+    trellis
+    icestorm
+    gtkwave
+    openocd
+    libftdi1
+    python3Packages.xdot
+    graphviz
   ];
 }
