@@ -7,3 +7,4 @@
 *.ilang
 **/build
 **/compile_commands.json
+**/*.log

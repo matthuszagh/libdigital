@@ -1,0 +1,14 @@
+# running in ram/src/
+read -formal ram.v
+prep -top ram
+
+memory_nordff
+async2sync
+chformal -assume -early
+chformal -live -fair -cover -remove
+opt_clean
+setundef -anyseq
+opt -keepdc -fast
+check
+hierarchy -simcheck
+write_ilang ../model/design.il
