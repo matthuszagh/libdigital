@@ -16,7 +16,7 @@ CC_INCLUDES		:= $(addprefix -I,$(realpath $(HDL_ROOT)/../verilator/include))
 CC_HEADERS		:= $(realpath $(shell find $(CC_INCLUDE_DIR) -name '*.hh'))
 DEBUG                   := 0
 ifeq ($(DEBUG),1)
-VERILATOR_DEBUG_FLAGS   := -CFLAGS "-g -O0"
+VERILATOR_DEBUG_FLAGS   := -CFLAGS "-g3 -O0"
 else
 VERILATOR_DEBUG_FLAGS   :=
 endif
