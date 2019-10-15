@@ -8,9 +8,10 @@ template <typename Module>
 class Ft245 : public Testbench<Module>
 {
 public:
-	Ft245(std::vector<Clock> clocks, unsigned long max_t) : Testbench<Module>(clocks, max_t)
+	Ft245(std::vector<Clock> clocks, long max_t) : Testbench<Module>(clocks, max_t)
 	{
 		this->initialize_ports();
+		this->mod_->eval();
 	}
 
 	void initialize_ports()
@@ -28,9 +29,10 @@ public:
 	}
 
 	void set_rst_port(bool new_val) { this->mod_->tb_rst_n = new_val; }
-	void print_status(unsigned long t_now){};
 
-	void update_ports(unsigned long t_now)
+	void print_status(long t_now){};
+
+	void update_ports(long t_now)
 	{
 		// clocks
 		this->mod_->tb_ftclk = this->clocks_[0].current_val(t_now);
@@ -53,9 +55,9 @@ public:
 int main(int argc, char **argv)
 {
 	Verilated::commandArgs(argc, argv);
-	std::vector<Clock> clocks = {Clock(60), Clock(7.5, 58.333 / 133333.3333),
-				     Clock(40, 4166.666 / 25000)};
+	std::vector<Clock> clocks = {Clock(60), Clock(7.5), Clock(40)};
 	Ft245<Vft245_wrapper> *tb = new Ft245<Vft245_wrapper>(clocks, 1000000);
+	tb->align_clocks();
 	tb->opentrace("ft245.vcd");
 	// power-on reset
 	tb->reset();
