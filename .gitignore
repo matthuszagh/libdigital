@@ -5,3 +5,5 @@
 *.pyc
 **/.Xil
 *.ilang
+**/build
+**/compile_commands.json
