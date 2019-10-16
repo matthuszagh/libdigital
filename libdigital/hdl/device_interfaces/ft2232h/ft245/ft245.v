@@ -56,7 +56,8 @@ module ft245 #(
    input wire                  txe_n,
    // 0 makes read data from the FIFO available at the data pins.
    output reg                  rd_n,
-   // 0 registers write data from the data pins into the FIFO.
+   // Pull low to register write data from the data pins into the
+   // FIFO.
    output reg                  wr_n,
    // Drive low to read data from FIFO. Must be deasserted at least 1
    // clock period (`ft_clk') before driving `rd_n' low.
@@ -81,6 +82,7 @@ module ft245 #(
    assign ft_data = oe_n ? ft_data_reg : 8'bzzzz_zzzz;
 
    wire [DATA_WIDTH-1:0]        wrfifo_rddata;
+   wire                         wr_fifo_rd_en;
    // Write FIFO
    /* verilator lint_off PINMISSING */
    async_fifo #(
@@ -89,8 +91,8 @@ module ft245 #(
    ) fifo_write (
       .rst_n  (rst_n),
       .full   (wrfifo_full),
-      .rdclk  (ft_clk),
-      .rden   (!wr_n),
+      .rdclk  (slow_ft_clk),
+      .rden   (oe_n && wr_fifo_rd_en),
       .rddata (wrfifo_rddata),
       .wrclk  (clk),
       .wren   (wren && !wrfifo_full),
@@ -100,10 +102,10 @@ module ft245 #(
 
    reg [CTR_WIDTH-1:0]          ctr;
 
-   always @(posedge slow_ft_clk) begin
-      if (wr_n) begin
+   always @(negedge ft_clk) begin
+      if (!rst_n) begin
          ctr <= {CTR_WIDTH{1'b0}};
-      end else begin
+      end else if (oe_n) begin
          ctr <= ctr + 1'b1;
       end
    end
@@ -142,14 +144,22 @@ module ft245 #(
    generate
       if (DUPLICATE_TX == 1) begin
          reg duplicate;
+         always @(posedge slow_ft_clk) begin
+            if (!rst_n) begin
+               duplicate <= 1'b0;
+            end else begin
+               duplicate <= ~duplicate;
+            end
+         end
+
+         assign wr_fifo_rd_en = ~duplicate;
          always @(negedge ft_clk) begin
             if (!rst_n) begin
                rd_n <= 1'b1;
                wr_n <= 1'b1;
                oe_n <= 1'b1;
                ft_siwua_n <= 1'b1;
-               duplicate <= 1'b0;
-               // favor reads
+            // favor reads
             end else if (!rxf_n) begin
                oe_n <= 1'b0;
                wr_n <= 1'b1;
@@ -158,22 +168,19 @@ module ft245 #(
                end
             end else if (!txe_n) begin
                oe_n <= 1'b1;
-               duplicate <= ~duplicate;
-               if (duplicate) begin
-                  wr_n <= 1'b0;
-               end else begin
-                  wr_n <= 1'b1;
-               end
+               rd_n <= 1'b1;
+               if (oe_n)
+                 wr_n <= 1'b0;
             end
          end
       end else begin
+         assign wr_fifo_rd_en = 1'b1;
          always @(negedge ft_clk) begin
             if (!rst_n) begin
                rd_n <= 1'b1;
                wr_n <= 1'b1;
                oe_n <= 1'b1;
                ft_siwua_n <= 1'b1;
-               // favor reads
             end else if (!rxf_n) begin
                oe_n <= 1'b0;
                wr_n <= 1'b1;

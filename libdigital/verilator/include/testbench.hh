@@ -18,6 +18,7 @@ public:
 		: per_((unsigned long)(1e3 * period)), phi_((unsigned long)(1e3 * phase))
 	{
 	}
+
 	unsigned long next_edge(unsigned long t_now)
 	{
 		unsigned long per_2 = (double)this->per_ / 2.0f;
@@ -26,6 +27,7 @@ public:
 			t_inc = per_2;
 		return t_now + t_inc;
 	}
+
 	bool current_val(unsigned long t_now)
 	{
 		unsigned long per_2 = (double)this->per_ / 2.0f;
@@ -34,6 +36,19 @@ public:
 			return 0;
 		else
 			return 1;
+	}
+
+	bool posedge(unsigned long t_now)
+	{
+		unsigned long per_2 = (double)this->per_ / 2.0f;
+		double intoT = (t_now + this->phi_) % this->per_;
+		return intoT == per_2;
+	}
+
+	bool negedge(unsigned long t_now)
+	{
+		double intoT = (t_now + this->phi_) % this->per_;
+		return intoT == 0;
 	}
 
 	/**

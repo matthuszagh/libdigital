@@ -3,6 +3,7 @@ LOCAL_DIRS		:= $(HDL_ROOT)/memory/ram \
 	                   $(HDL_ROOT)/memory/fifo/sync
 
 VERILOG_INCLUDE_DIRS	:= $(addprefix -I,$(LOCAL_DIRS))
+VERILOG_INCLUDE_DEPS    := $(realpath $(shell find $(LOCAL_DIRS) -name '*.v'))
 
 SYNTH_DIR		:= synth
 YOSYS_SYNTH_DIR		:= $(SYNTH_DIR)/yosys
@@ -21,12 +22,15 @@ else
 VERILATOR_DEBUG_FLAGS   :=
 endif
 
+CC_DEPS                 := $(VERILATOR_SRC_DIR)/testbench.cc $(CC_HEADERS)
+VERILOG_DEPS            := $(VERILATOR_SRC_DIR)/ft245_wrapper.v ft245.v $(VERILOG_INCLUDE_DEPS)
+
 verilator_test: verilator_wrapper
 	./$(VERILATOR_OBJ_DIR)/Vft245_wrapper
 
 verilator_wrapper: $(VERILATOR_OBJ_DIR)/Vft245_wrapper
 
-$(VERILATOR_OBJ_DIR)/Vft245_wrapper: $(VERILATOR_SRC_DIR)/testbench.cc $(VERILATOR_SRC_DIR)/ft245_wrapper.v ft245.v Makefile $(CC_HEADERS)
+$(VERILATOR_OBJ_DIR)/Vft245_wrapper: $(CC_DEPS) $(VERILOG_DEPS) Makefile
 	verilator -sv -trace -Wall \
 		$(VERILOG_INCLUDE_DIRS) \
 		-CFLAGS "$(CC_INCLUDES)" \

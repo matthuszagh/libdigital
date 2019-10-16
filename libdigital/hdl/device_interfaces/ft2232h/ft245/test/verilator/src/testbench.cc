@@ -39,24 +39,39 @@ public:
 		this->mod_->tb_slow_ftclk = this->clocks_[1].current_val(t_now);
 		this->mod_->clk_40mhz = this->clocks_[2].current_val(t_now);
 		if (this->mod_->tb_rst_n) {
-			// FPGA/ASIC
-			if (!this->mod_->wrfifo_full) {
-				this->mod_->wren = 1;
-				++this->mod_->wrdata;
+			// write from FPGA/ASIC to FT2232H
+			if (this->clocks_[2].posedge(t_now)) {
+				if (this->mod_->wren) {
+					++this->mod_->wrdata;
+				}
+
+				if (!this->mod_->wrfifo_full) {
+					this->mod_->wren = 1;
+				} else {
+					this->mod_->wren = 0;
+				}
+
+				this->mod_->rden = 0;
 			}
-			this->mod_->rden = 0;
-			// host PC
-			this->mod_->usb_wr = 0;
-			this->mod_->usb_rd = 1;
+
+			// have host PC read from FT2232H
+			if (this->clocks_[0].posedge(t_now)) {
+				// host PC
+				this->mod_->usb_wr = 0;
+				this->mod_->usb_rd = 1;
+			}
 		}
 	}
 };
 
 int main(int argc, char **argv)
 {
-	Verilated::commandArgs(argc, argv);
+	unsigned long stop_time = 1e8;
 	std::vector<Clock> clocks = {Clock(50), Clock(400), Clock(75)};
-	Ft245<Vft245_wrapper> *tb = new Ft245<Vft245_wrapper>(clocks, 1000000);
+
+	Verilated::commandArgs(argc, argv);
+	Ft245<Vft245_wrapper> *tb = new Ft245<Vft245_wrapper>(clocks, stop_time);
+
 	tb->align_clocks();
 	tb->opentrace("ft245.vcd");
 	// power-on reset
