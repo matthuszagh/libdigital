@@ -44,19 +44,19 @@ module fft_r22sdf_bfi #(
          reg signed [DATA_WIDTH-1:0]        sr_im_reg [0:SHIFT_REG_LEN-1];
          integer                    i;
          always @(posedge clk_i) begin
-            if (!rst_n) begin
-               for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
-                  sr_re_reg[i] = {DATA_WIDTH{1'b0}};
-                  sr_im_reg[i] = {DATA_WIDTH{1'b0}};
-               end
-            end else begin
-               sr_re_reg[0] <= zsr_re;
-               sr_im_reg[0] <= zsr_im;
-               for (i=1; i<SHIFT_REG_LEN; i=i+1) begin
-                  sr_re_reg[i] <= sr_re_reg[i-1];
-                  sr_im_reg[i] <= sr_im_reg[i-1];
-               end
+            // if (!rst_n) begin
+               // for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
+               //    sr_re_reg[i] = {DATA_WIDTH{1'b0}};
+               //    sr_im_reg[i] = {DATA_WIDTH{1'b0}};
+               // end
+            // end else begin
+            sr_re_reg[0] <= zsr_re;
+            sr_im_reg[0] <= zsr_im;
+            for (i=1; i<SHIFT_REG_LEN; i=i+1) begin
+               sr_re_reg[i] <= sr_re_reg[i-1];
+               sr_im_reg[i] <= sr_im_reg[i-1];
             end
+            // end
          end
          assign sr_re = sr_re_reg[SHIFT_REG_LEN-1];
          assign sr_im = sr_im_reg[SHIFT_REG_LEN-1];
