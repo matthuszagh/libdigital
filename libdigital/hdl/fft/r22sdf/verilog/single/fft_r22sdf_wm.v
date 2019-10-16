@@ -55,14 +55,7 @@ module fft_r22sdf_wm #(
    reg signed [TWIDDLE_WIDTH-1:0] w_im_reg;
    always @(posedge clk_3x_i) begin
       if (!rst_n) begin
-         kar_f     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
-         kar_r     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
-         kar_i     <= {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
          mul_state <= 2'd0;
-         x_re_reg  <= {DATA_WIDTH{1'b0}};
-         x_im_reg  <= {DATA_WIDTH{1'b0}};
-         x_re_reg2 <= {DATA_WIDTH{1'b0}};
-         x_im_reg2 <= {DATA_WIDTH{1'b0}};
       end else begin
          case (mul_state)
          2'd0:
@@ -141,8 +134,6 @@ module fft_r22sdf_wm #(
    always @(posedge clk_i) begin
       if (!rst_n) begin
          ctr_o    <= {NLOG2{1'b0}};
-         z_re_o   <= {DATA_WIDTH{1'b0}};
-         z_im_o   <= {DATA_WIDTH{1'b0}};
       end else begin
          ctr_reg  <= ctr_i;
          ctr_reg2 <= ctr_reg;
