@@ -12,10 +12,10 @@ module shift_reg #(
    parameter DATA_WIDTH = 25,
    parameter LEN        = 512
 ) (
-   input wire                          clk,
-   input wire                          rst_n,
-   input wire signed [DATA_WIDTH-1:0]  di,
-   output wire signed [DATA_WIDTH-1:0] data_o
+   input wire                   clk,
+   input wire                   rst_n,
+   input wire [DATA_WIDTH-1:0]  di,
+   output wire [DATA_WIDTH-1:0] data_o
 );
 
    // TODO These should really be conditional on the chosen parameter
@@ -32,7 +32,7 @@ module shift_reg #(
 
    always @(posedge clk) begin
       if (!rst_n)
-         addr <= {LEN_LOG2{1'b0}};
+         addr <= addr;
       else
          addr <= addr + 1'b1;
    end
@@ -49,10 +49,10 @@ module shift_reg #(
       .DI     (di),
       .WRADDR ({{ADDR_PADDING{1'b0}}, addr}),
       .RDADDR ({{ADDR_PADDING{1'b0}}, addr+1'b1}),
-      .WE     ({WE_REPLICATE{rst_n}}),
-      .WREN   (rst_n),
-      .RDEN   (rst_n),
-      .RST    (!rst_n),
+      .WE     ({WE_REPLICATE{1'b1}}),
+      .WREN   (1'b1),
+      .RDEN   (1'b1),
+      .RST    (1'b0),
       .WRCLK  (clk),
       .RDCLK  (clk)
    );
@@ -73,7 +73,7 @@ module shift_reg_tb;
    reg rst_n = 0;
    always #1 clk = !clk;
    reg [DATA_WIDTH-1:0] sample = 0;
-   wire signed [DATA_WIDTH-1:0] data;
+   wire [DATA_WIDTH-1:0] data;
 
    always @(posedge clk) begin
       if (!dut.BRAM_SDP.bram18_sdp_bl_3.bram18_sdp_bl_3.GSR)
