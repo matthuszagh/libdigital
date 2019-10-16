@@ -134,8 +134,8 @@ public:
 	{
 		this->set_rst_port(0);
 		this->mod_->eval();
-		if (this->trace_)
-			this->trace_->dump(t_);
+		// if (this->trace_)
+		// 	this->trace_->dump(t_);
 		// ensure all clocks register the reset.
 		std::vector<double> edges(2 * this->clocks_.size(), 0);
 		auto edge_it = edges.begin();
