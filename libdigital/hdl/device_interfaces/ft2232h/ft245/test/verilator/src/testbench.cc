@@ -8,7 +8,7 @@ template <typename Module>
 class Ft245 : public Testbench<Module>
 {
 public:
-	Ft245(std::vector<Clock> clocks, long max_t) : Testbench<Module>(clocks, max_t)
+	Ft245(std::vector<Clock> clocks, double max_t) : Testbench<Module>(clocks, max_t)
 	{
 		this->initialize_ports();
 		this->mod_->eval();
@@ -30,9 +30,9 @@ public:
 
 	void set_rst_port(bool new_val) { this->mod_->tb_rst_n = new_val; }
 
-	void print_status(long t_now){};
+	void print_status(double t_now){};
 
-	void update_ports(long t_now)
+	void update_ports(double t_now)
 	{
 		// clocks
 		this->mod_->tb_ftclk = this->clocks_[0].current_val(t_now);

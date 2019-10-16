@@ -6,7 +6,7 @@
 #include <vector>
 #include <verilated_vcd_c.h>
 
-#define MOD(x, n) (((x) % (n) + (n)) % (n))
+double fmodp(double x, double n) { return std::fmod((std::fmod(x, n) + n), n); }
 
 /**
  * phase=0 corresponds to a clock spending a half-period at logic 0,
@@ -23,23 +23,23 @@
 class Clock
 {
 public:
-	Clock(double freq, long phase = 0l) : freq_(freq), phase_(phase) {}
+	Clock(double freq, double phase = 0l) : freq_(freq), phase_(phase) {}
 	// get period in ps
-	long period() { return 1e6 / freq_; }
-	long next_edge(long t_now)
+	double period() { return 1e6 / freq_; }
+	double next_edge(double t_now)
 	{
-		long T = this->period();
-		long T_2 = std::round((double)T / 2);
-		long t_inc = T_2 - MOD(t_now + this->phase_, T_2);
+		double T = this->period();
+		double T_2 = T / 2;
+		double t_inc = std::round(T_2 - fmodp(t_now + this->phase_, T_2));
 		if (t_inc == 0)
-			t_inc = T_2;
+			t_inc = std::round(T_2);
 		return t_now + t_inc;
 	}
-	bool current_val(long t_now)
+	bool current_val(double t_now)
 	{
-		long T = this->period();
-		long T_2 = std::round((double)T / 2);
-		long intoT = MOD(t_now + this->phase_, T);
+		double T = this->period();
+		double T_2 = std::round(T / 2);
+		double intoT = std::round(fmodp(t_now + this->phase_, 2 * T_2));
 		if (intoT < T_2)
 			return 0;
 		else
@@ -50,23 +50,22 @@ public:
 	 * Change the clock's phase so it's first positive edge occurs
 	 * at time t (ps).
 	 */
-	void align_edge(long t)
+	void align_edge(double t)
 	{
-		long T_2 = std::round((double)this->period() / 2);
+		double T_2 = std::round(this->period() / 2);
 		this->phase_ = T_2 - t;
 	}
-	// void align_edge(long t) { this->phase_ = t; }
 
 private:
-	double freq_; // in MHz
-	long phase_;  // in ps
+	double freq_;  // in MHz
+	double phase_; // in ps
 };
 
 template <typename Module>
 class Testbench
 {
 public:
-	explicit Testbench(std::vector<Clock> clocks, long max_t = 10000, int trace_depth = 99)
+	explicit Testbench(std::vector<Clock> clocks, double max_t = 10000, int trace_depth = 99)
 		: clocks_(clocks), mod_(new Module), max_t_(1000 * max_t),
 		  trace_depth_(trace_depth), t_(0l)
 	{
@@ -107,7 +106,7 @@ public:
 	 */
 	void align_clocks()
 	{
-		long first_edge = this->clocks_.begin()->next_edge(0);
+		double first_edge = this->clocks_.begin()->next_edge(0);
 		for (auto &clock : this->clocks_) {
 			clock.align_edge(first_edge);
 		}
@@ -116,11 +115,11 @@ public:
 	/**
 	 * Retrieve time of next clock edge.
 	 */
-	virtual long clock_inc()
+	virtual double clock_inc()
 	{
-		long t = this->max_t_;
+		double t = this->max_t_;
 		for (auto clk : clocks_) {
-			long edge = clk.next_edge(this->t_);
+			double edge = clk.next_edge(this->t_);
 			if (edge < t)
 				t = edge;
 		}
@@ -136,23 +135,23 @@ public:
 		this->set_rst_port(0);
 		this->mod_->eval();
 		if (this->trace_)
-			this->trace_->dump((unsigned long)t_);
+			this->trace_->dump(t_);
 		// ensure all clocks register the reset.
-		std::vector<long> edges(2 * this->clocks_.size(), 0l);
+		std::vector<double> edges(2 * this->clocks_.size(), 0);
 		auto edge_it = edges.begin();
 		for (auto it = this->clocks_.begin(); it < this->clocks_.end(); ++it) {
 			auto val = it->next_edge(this->t_);
 			*edge_it++ = val;
-			*edge_it++ = 2 * val;
+			*edge_it++ = it->next_edge(val);
 		}
-		long max_edge = *std::max_element(edges.begin(), edges.end());
+		double max_edge = *std::max_element(edges.begin(), edges.end());
 		while (this->t_ <= max_edge)
 			this->tick();
 
 		this->set_rst_port(1);
 		this->mod_->eval();
 		if (this->trace_)
-			this->trace_->dump((unsigned long)t_);
+			this->trace_->dump(t_);
 	}
 
 	virtual void tick()
@@ -162,13 +161,13 @@ public:
 		this->update_ports(this->t_);
 		this->mod_->eval();
 		if (this->trace_)
-			this->trace_->dump((unsigned long)t_);
+			this->trace_->dump(t_);
 		this->print_status(this->t_);
 	}
 
-	virtual void update_ports(long t_now) = 0;
+	virtual void update_ports(double t_now) = 0;
 
-	virtual void print_status(long t_now) = 0;
+	virtual void print_status(double t_now) = 0;
 
 	virtual bool done() { return this->t_ >= this->max_t_; }
 
@@ -176,9 +175,9 @@ protected:
 	Module *mod_;
 	std::vector<Clock> clocks_;
 	// current simulation time (ps)
-	long t_;
+	double t_;
 	// terminating simulation time (ps)
-	long max_t_;
+	double max_t_;
 	int trace_depth_;
 	VerilatedVcdC *trace_;
 };
