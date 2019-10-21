@@ -1,30 +1,44 @@
-LOCAL_DIRS   := -I$(HDL_ROOT)/memory/ram/
-INCLUDE_DIRS := $(LOCAL_DIRS)
-ICARUS_DIR   := tb
+export
+# Source files
+VERILOG_DIRS	:= $(shell pwd)
+VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
 
-# Test
-verilator:
-	verilator -sv -trace -Wall $(INCLUDE_DIRS) --cc async_fifo.v --exe async_fifo.cc
-	$(MAKE) -j$(shell nproc) -C obj_dir -f Vasync_fifo.mk Vasync_fifo
-	./obj_dir/Vasync_fifo
+VERILOG_INCS	= $(addprefix -I,$(VERILOG_DIRS))
+VERILOG_SRCS	:= $(shell find $(VERILOG_DIRS) -maxdepth 1 -name '*.v')
+TOP_MODULE      = async_fifo
+TOP_MODULE_SRC	:= $(realpath $(TOP_MODULE).v)
 
-icarus:
-	iverilog $(INCLUDE_DIRS) -DASYNC_FIFO_SIMULATE async_fifo.v -o $(ICARUS_DIR)/async_fifo_tb
-	./$(ICARUS_DIR)/async_fifo_tb
-	gtkwave $(ICARUS_DIR)/async_fifo_tb.vcd
+# Synthesis, place and route and formal verification
+SCRIPT_DIR	:= $(realpath scripts)
 
-# Synthesis
-synth: synth.ilang
+# Testing
+TEST_DIR	:= $(realpath test)
 
-synth.ilang: synth.ys async_fifo.v
-	yosys synth.ys
 
-xilinx: synth xilinx.ys
-	yosys xilinx.ys
+.PHONY: test
+test: test_cocotb
 
-# Misc
-clean:
-	rm *.ilang
-	rm -rf obj_dir
+.PHONY: test_cocotb
+test_cocotb:
+	$(MAKE) -C $(TEST_DIR) cocotb
 
-.PHONY: synth xilinx clean
+.PHONY: test_verilator
+test_verilator:
+	$(MAKE) -C $(TEST_DIR) verilator
+
+.PHONY: test_icarus
+test_icarus:
+	$(MAKE) -C $(TEST_DIR) icarus
+
+.PHONY: formal
+formal:
+	$(MAKE) -C $(SCRIPT_DIR) formal
+
+.PHONY: synth
+synth:
+	$(MAKE) -C $(SCRIPT_DIR) synth
+
+.PHONY: clean
+clean::
+	$(MAKE) -C $(TEST_DIR) clean
+	$(MAKE) -C $(SCRIPT_DIR) clean

@@ -1,4 +1,0 @@
-read_verilog -I../../ram async_fifo.v
-hierarchy
-proc;;
-write_ilang synth.ilang

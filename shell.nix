@@ -2,13 +2,15 @@
 
 let
   libdigital = pkgs.libdigital;
-  mh-python = pkgs.python3.withPackages (ps: with ps; [
+  mh-python = pkgs.python3Full.withPackages (ps: with ps; [
     libdigital
+    cocotb
   ]);
 
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    python3Full # necessary to get PYTHONPATH set
     mh-python
     yosys
     symbiyosys
@@ -20,7 +22,7 @@ pkgs.mkShell {
     gtkwave
     openocd
     libftdi1
-    python3Packages.xdot
+    # python3Packages.xdot # TODO needed?
     graphviz
   ];
 }

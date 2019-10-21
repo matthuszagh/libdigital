@@ -1,0 +1,20 @@
+[options]
+mode prove
+depth 100
+multiclock on
+
+[engines]
+smtbmc
+
+[script]
+--pycode-begin--
+import os
+output("read -formal %s" % os.environ['TOP_MODULE_SRC'])
+--pycode-end--
+prep -top async_fifo
+
+[files]
+--pycode-begin--
+import os
+output("%s" % os.environ['VERILOG_SRCS'])
+--pycode-end--
