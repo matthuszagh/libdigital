@@ -75,7 +75,9 @@ module ft245 #(
    localparam NBYTES = DATA_WIDTH/8;
    // TODO this should be parameterized to work with different word
    // sizes.
+`ifndef __ICARUS__
    if (NBYTES != 8) $error();
+`endif
 
    localparam CTR_WIDTH = $clog2(NBYTES);
 
