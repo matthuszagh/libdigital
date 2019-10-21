@@ -27,7 +27,7 @@ module ltc2292 #(
    end
 
    always @(negedge clk) begin
-      abuf <= dao;
+      abuf <= di;
    end
 
 endmodule
