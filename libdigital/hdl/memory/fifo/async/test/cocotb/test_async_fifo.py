@@ -78,6 +78,8 @@ async def read_val(dut):
 @cocotb.coroutine
 async def wait_n_cycles(dut, n, clk):
     """Wait n cycles for clock clk."""
+    dut.wren <= 0
+    dut.rden <= 0
     while n > 0:
         n -= 1
         await RisingEdge(clk)
@@ -142,11 +144,11 @@ async def write_single_val_delay_read(dut):
 
 
 @cocotb.test()
-async def write_sequence_contiguous_immediate_read_sequence_contiguous(dut):
+async def write_sequence_continuous_immediate_read_sequence_continuous(dut):
     """
     Write an uninterrupted sequence of values to the FIFO, then
-    immediately read them (also uninterrupted) and check the values
-    match.
+    immediately read them (also uninterrupted) and check that the
+    values match.
     """
     await setup_dut(dut)
     num_items = 500
@@ -167,11 +169,11 @@ async def write_sequence_contiguous_immediate_read_sequence_contiguous(dut):
 
 
 @cocotb.test()
-async def write_sequence_contiguous_delay_read_sequence_contiguous(dut):
+async def write_sequence_continuous_delay_read_sequence_continuous(dut):
     """
     Write an uninterrupted sequence of values to the FIFO, delay some
     number of read clock cycles then read them (also uninterrupted)
-    and check the values match.
+    and check that the values match.
     """
     await setup_dut(dut)
     num_items = 500
@@ -179,7 +181,45 @@ async def write_sequence_contiguous_delay_read_sequence_contiguous(dut):
     for i, _ in enumerate(wrvals):
         await write_val(dut, wrvals[i])
 
-    await wait_n_cycles(dut, 55, dut.rdclk)
+    await wait_n_cycles(dut, random.randint(0, 100), dut.rdclk)
+
+    for i in range(num_items):
+        rdval = await read_val(dut)
+        if wrvals[i] != rdval.integer:
+            raise TestFailure(
+                (
+                    "Sequence item %d: Write value differs from read value."
+                    " Write: %d, read: %d."
+                )
+                % (i, wrvals[i], rdval.integer)
+            )
+
+
+@cocotb.test()
+async def write_sequence_broken_delay_read_sequence_continuous(dut):
+    """
+    Write a sequence of values (interspersed with non-writes) to the
+    FIFO, delay some number of read clock cycles then read them
+    (uninterrupted) and check that the values match.
+    """
+    await setup_dut(dut)
+    num_items = 500
+    wrvals = [random.randint(0, 2 ** 64 - 1) for n in range(num_items)]
+    interrupt = 1
+    i = 0
+    while i < len(wrvals):
+        if i % 10 == 0:
+            if interrupt:
+                await wait_n_cycles(dut, 1, dut.wrclk)
+                interrupt = 0
+                continue
+            else:
+                interrupt = 1
+
+        await write_val(dut, wrvals[i])
+        i += 1
+
+    await wait_n_cycles(dut, random.randint(0, 100), dut.rdclk)
 
     for i in range(num_items):
         rdval = await read_val(dut)
