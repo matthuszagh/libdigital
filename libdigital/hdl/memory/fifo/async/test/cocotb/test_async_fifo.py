@@ -68,10 +68,19 @@ async def write_val(dut, val):
 @cocotb.coroutine
 async def read_val(dut):
     """Read a value from the FIFO."""
+    await NextTimeStep()
     dut.rden <= 1
     await RisingEdge(dut.rdclk)
     await ReadOnly()
     return dut.rddata.value
+
+
+@cocotb.coroutine
+async def wait_n_cycles(dut, n, clk):
+    """Wait n cycles for clock clk."""
+    while n > 0:
+        n -= 1
+        await RisingEdge(clk)
 
 
 @cocotb.test()
@@ -95,7 +104,6 @@ async def write_and_check_addr(dut):
             )
             % (dut.wraddr.value.integer, old_addr.value.integer + 1)
         )
-    await Timer(10000)
 
 
 @cocotb.test()
@@ -113,4 +121,73 @@ async def write_single_val_immediate_read(dut):
             ("Write value differs from read value." " Write: %d, read: %d.")
             % (wrval, rdval.integer)
         )
-    await Timer(10000)
+
+
+@cocotb.test()
+async def write_single_val_delay_read(dut):
+    """
+    Write a single value to the FIFO, wait some number of clock cycles
+    and then read and check that the values match.
+    """
+    await setup_dut(dut)
+    wrval = random.randint(0, 2 ** 64 - 1)
+    await write_val(dut, wrval)
+    await wait_n_cycles(dut, 20, dut.rdclk)
+    rdval = await read_val(dut)
+    if wrval != rdval.integer:
+        raise TestFailure(
+            ("Write value differs from read value." " Write: %d, read: %d.")
+            % (wrval, rdval.integer)
+        )
+
+
+@cocotb.test()
+async def write_sequence_contiguous_immediate_read_sequence_contiguous(dut):
+    """
+    Write an uninterrupted sequence of values to the FIFO, then
+    immediately read them (also uninterrupted) and check the values
+    match.
+    """
+    await setup_dut(dut)
+    num_items = 500
+    wrvals = [random.randint(0, 2 ** 64 - 1) for n in range(num_items)]
+    for i, _ in enumerate(wrvals):
+        await write_val(dut, wrvals[i])
+
+    for i in range(num_items):
+        rdval = await read_val(dut)
+        if wrvals[i] != rdval.integer:
+            raise TestFailure(
+                (
+                    "Sequence item %d: Write value differs from read value."
+                    " Write: %d, read: %d."
+                )
+                % (i, wrvals[i], rdval.integer)
+            )
+
+
+@cocotb.test()
+async def write_sequence_contiguous_delay_read_sequence_contiguous(dut):
+    """
+    Write an uninterrupted sequence of values to the FIFO, delay some
+    number of read clock cycles then read them (also uninterrupted)
+    and check the values match.
+    """
+    await setup_dut(dut)
+    num_items = 500
+    wrvals = [random.randint(0, 2 ** 64 - 1) for n in range(num_items)]
+    for i, _ in enumerate(wrvals):
+        await write_val(dut, wrvals[i])
+
+    await wait_n_cycles(dut, 55, dut.rdclk)
+
+    for i in range(num_items):
+        rdval = await read_val(dut)
+        if wrvals[i] != rdval.integer:
+            raise TestFailure(
+                (
+                    "Sequence item %d: Write value differs from read value."
+                    " Write: %d, read: %d."
+                )
+                % (i, wrvals[i], rdval.integer)
+            )
