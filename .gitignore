@@ -10,3 +10,4 @@
 **/*.log
 **/obj_dir
 **/formal
+**/results.xml
