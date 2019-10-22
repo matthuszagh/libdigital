@@ -5,6 +5,7 @@ let
   mh-python = pkgs.python3Full.withPackages (ps: with ps; [
     libdigital
     cocotb
+    pytest
   ]);
 
 in
