@@ -2,9 +2,61 @@
 A collection of useful functions for extending cocotb.
 """
 
+import cocotb
+from cocotb import clock
+from cocotb.triggers import Timer
 
-def periods_integral(periods):
-    """Test whether supplied list of clock periods are integral."""
+
+class Clock:
+    """
+    A wrapper around cocotb.clock.Clock, which provides enhanced
+    functionality.
+    """
+
+    def __init__(self, clk, freq, phase=0):
+        """
+        Arguments
+
+        clk: the dut port object for the clock (e.g. dut.clk)
+        freq: frequency in MHz
+        phase: phase in ns
+
+        Class members
+
+        clk: same as argument
+        period: period in ps
+        phase: phase in ps
+        """
+        self.clk = clk
+        self.period = 1e6 / freq
+        self.phase = 1e3 * phase
+
+    def scale(self, factor):
+        """Scale the clock period and phase shift by factor."""
+        self.period *= factor
+        self.phase *= factor
+
+    @cocotb.coroutine
+    async def start(self):
+        """
+        Generates a clock signal for clock. This is analagous to
+        cocotb.clock.Clock.start(), but with the enhanced flexibility
+        of this Clock class.
+        """
+        self.clk <= 0
+        await Timer(self.period / 2 - self.phase)
+        while True:
+            self.clk <= 1
+            await Timer(self.period / 2)
+            self.clk <= 0
+            await Timer(self.period / 2)
+
+
+def check_periods_integral(periods):
+    """
+    Test whether supplied list of clock periods are of integral
+    value.
+    """
     delta = 0.1
     for period in periods:
         if abs(period - round(period)) > delta:
@@ -13,35 +65,63 @@ def periods_integral(periods):
     return True
 
 
-def clock_valid_periods(freqs):
+class MultiClock:
     """
-    From a list of clock frequencies (MHz) return a list of periods
-    with integral half-period ps timesteps.
-
-    If the original clock frequencies don't require any modification,
-    they will be returned as is. If any frequency corresponds to a
-    non-integral half-period, the minimum integral half frequencies
-    will be returned.
-
-    Parameters
-
-    freqs : list of clock frequencies in ns. ps resolution is
-            supported, so any decimal past the 3rd is ignored
-
-    Returns
-
-    A list containing the period of each clock in ps.
+    A Clock wrapper for multiclock designs. This can be used to
+    synchronize multiple clocks.
     """
-    freqs_ps = [freq / 1e6 for freq in freqs]
-    periods = [1 / freq for freq in freqs_ps]
-    if not periods_integral(periods):
-        min_per = min(periods)
-        norm_periods = [period / min_per for period in periods]
-        periods = norm_periods
-        while True:
-            if not periods_integral(periods):
-                periods = [sum(x) for x in zip(periods, norm_periods)]
-            else:
-                break
 
-    return [int(round(period)) for period in periods]
+    def __init__(self, clocks):
+        """
+        clocks: A list of Clock objects. The clock frequencies and phase
+        shift will be adjusted if necessary in order to be mutually
+        combatible and able to be simulated (due to ps precision).
+        """
+        self.clocks = clocks
+        self._normalize_periods_for_simulation()
+        self.align_first_posedge()
+
+    def clock_periods(self):
+        """Retrieve list of all clock periods."""
+        return [clk.period for clk in self.clocks]
+
+    def _normalize_periods_for_simulation(self):
+        """
+        Scale clock periods so they can be accurately represented with ps
+        resolution.
+        """
+        periods = self.clock_periods()
+        if not check_periods_integral(periods):
+            min_p = min(periods)
+            # keep the period in ps
+            norm_periods = [1e3 * p / min_p for p in periods]
+            periods = norm_periods
+            while True:
+                if not check_periods_integral(periods):
+                    periods = [sum(x) for x in zip(periods, norm_periods)]
+                else:
+                    break
+
+        for clk, period in zip(self.clocks, periods):
+            clk.scale(int(round(period)) / clk.period)
+
+    def align_first_posedge(self):
+        """
+        Set the first positive edge of all clocks to occur at the same
+        time.
+        """
+        min_half_period = min([clk.period / 2 for clk in self.clocks])
+        for clk in self.clocks:
+            clk.phase = clk.period / 2 - min_half_period
+
+    def start_all_clocks(self):
+        """Generates a clock signal for all clocks."""
+        for clk in self.clocks:
+            cocotb.fork(clk.start())
+
+    def max_period(self):
+        """
+        Return the max period of all clocks. This is useful for ensuring
+        resets are registered by memory elements in all clock domains.
+        """
+        return max([clk.period for clk in self.clocks])
