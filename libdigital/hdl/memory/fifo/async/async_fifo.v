@@ -1,5 +1,8 @@
 `default_nettype none
 
+`ifndef _ASYNC_FIFO_V_
+`define _ASYNC_FIFO_V_
+
 `include "ram.v"
 
 /** async_fifo.v
@@ -57,16 +60,21 @@ module async_fifo #(
       end
    end
 
+   // We guard reads when the FIFO is empty and guard writes when it
+   // is full. This is critical to allowing reads to occur when
+   // simultaneously reading and writing from/to the FIFO. The reason
+   // for this is that the underlying RAM module prevents simultaneous
+   // access to the same data.
    ram #(
       .WIDTH (WIDTH),
       .SIZE  (SIZE)
    ) ram (
       .rdclk  (rdclk),
-      .rden   (rden),
+      .rden   (rden && !empty),
       .rdaddr (rdaddr),
       .rddata (rddata),
       .wrclk  (wrclk),
-      .wren   (wren),
+      .wren   (wren && !full),
       .wraddr (wraddr),
       .wrdata (wrdata)
    );
@@ -148,14 +156,18 @@ module async_fifo #(
 `endif
 
 `ifdef COCOTB_SIM
+   // integer i;
    initial begin
       $dumpfile ("cocotb/build/async_fifo.vcd");
       $dumpvars (0, async_fifo);
+      // for (i=0; i<100; i=i+1)
+      //   $dumpvars (0, ram.mem[i]);
       #1;
    end
 `endif
 
 endmodule
+`endif
 
 `ifdef ASYNC_FIFO_SIMULATE
 `timescale 1ns/1ps

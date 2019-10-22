@@ -27,7 +27,6 @@ class AsyncFifoTB:
         wrclk = Clock(dut.wrclk, 40)
         self.multiclock = MultiClock([rdclk, wrclk])
         self.dut = dut
-        self.setup()
 
     @cocotb.coroutine
     async def setup(self):
@@ -262,32 +261,39 @@ async def write_sequence_broken_delay_read_sequence_continuous(dut):
             )
 
 
-# @cocotb.test()
-# async def write_read_simultaneous(dut):
-#     """
-#     Simultaneously write to and read from the FIFO. Ensure data
-#     validity.
-#     """
-#     await setup_dut(dut)
-#     depth = 2000
-#     queue = deque([])
-#     while depth > 0:
-#         depth -= 1
-#         wrval = random.randint(0, 2 ** 64 - 1)
-#         # await ReadOnly()
-#         if not dut.full.value.integer:
-#             await write_val(dut, wrval)
-#             queue.append(wrval)
+@cocotb.test()
+async def write_read_simultaneous(dut):
+    """
+    Simultaneously write to and read from the FIFO. Ensure data
+    validity.
+    """
+    fifo = AsyncFifoTB(dut)
+    await fifo.setup()
+    depth = 2000
+    queue = deque([])
+    while depth > 0:
+        depth -= 1
+        wrval = random.randint(0, 2 ** 64 - 1)
+        await ReadOnly()
+        full = fifo.dut.full.value.integer
+        empty = fifo.dut.empty.value.integer
 
-#         # await ReadOnly()
-#         if not dut.empty.value.integer:
-#             rdval = await read_val(dut)
-#             top_queue = queue.popleft()
-#             if rdval.integer != top_queue:
-#                 raise TestFailure(
-#                     (
-#                         "Write value differs from read value."
-#                         " Write: %d, read: %d."
-#                     )
-#                     % (top_queue, rdval.integer)
-#                 )
+        write = fifo.write(wrval)
+        read = fifo.read()
+
+        result = await First(write, read)
+        # read returns a value, write doesn't
+        if result is None and not full:
+            queue.append(wrval)
+        else:
+            if result is not None and not empty:
+                rdval = result
+                top_queue = queue.popleft()
+                if rdval.integer != top_queue:
+                    raise TestFailure(
+                        (
+                            "Write value differs from read value."
+                            " Write: %d, read: %d."
+                        )
+                        % (top_queue, rdval.integer)
+                    )
