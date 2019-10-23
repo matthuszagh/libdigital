@@ -38,6 +38,13 @@ formal:
 synth:
 	$(MAKE) -C $(SCRIPT_DIR) synth
 
+.PHONY: lint
+lint:
+	verilator $(VERILOG_INCS) \
+		--lint-only \
+		--Wall \
+		$(TOP_MODULE_SRC)
+
 .PHONY: clean
 clean::
 	$(MAKE) -C $(TEST_DIR) clean
