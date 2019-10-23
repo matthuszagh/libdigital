@@ -10,8 +10,8 @@ smtbmc
 --pycode-begin--
 import os
 output("read -formal %s" % os.environ['TOP_MODULE_SRC'])
+output("prep -top %s" % os.environ['TOP_MODULE'])
 --pycode-end--
-prep -top async_fifo
 
 [files]
 --pycode-begin--
