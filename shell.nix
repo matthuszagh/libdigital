@@ -4,7 +4,7 @@ let
   libdigital = pkgs.libdigital;
   mh-python = pkgs.python3Full.withPackages (ps: with ps; [
     libdigital
-    cocotb
+    pkgs.cocotb
     pytest
   ]);
 
@@ -25,5 +25,6 @@ pkgs.mkShell {
     libftdi1
     # python3Packages.xdot # TODO needed?
     graphviz
+    vivado-2017-2
   ];
 }
