@@ -1,6 +1,9 @@
 `ifndef _SHIFT_REG_V_
 `define _SHIFT_REG_V_
+
 `default_nettype none
+
+`include "ram.v"
 
 // Uses an 18k FIFO (via onboard block RAM) to implement a shift
 // register. Note that this module only supports reading from the end
@@ -14,6 +17,7 @@ module shift_reg #(
 ) (
    input wire                   clk,
    input wire                   rst_n,
+   input wire                   ce,
    input wire [DATA_WIDTH-1:0]  di,
    output wire [DATA_WIDTH-1:0] data_o
 );
@@ -32,30 +36,49 @@ module shift_reg #(
 
    always @(posedge clk) begin
       if (!rst_n)
-         addr <= addr;
-      else
+         addr <= {LEN_LOG2{1'b0}};
+      else if (ce)
          addr <= addr + 1'b1;
    end
 
-   BRAM_SDP_MACRO #(
-      .BRAM_SIZE   ("18Kb"),
-      .DEVICE      ("7SERIES"),
-      .DO_REG      (0),          // don't pipeline output
-      .READ_WIDTH  (DATA_WIDTH),
-      .WRITE_WIDTH (DATA_WIDTH),
-      .WRITE_MODE  ("WRITE_FIRST")
-   ) BRAM_SDP (
-      .DO     (data_o),
-      .DI     (di),
-      .WRADDR ({{ADDR_PADDING{1'b0}}, addr}),
-      .RDADDR ({{ADDR_PADDING{1'b0}}, addr+1'b1}),
-      .WE     ({WE_REPLICATE{1'b1}}),
-      .WREN   (1'b1),
-      .RDEN   (1'b1),
-      .RST    (1'b0),
-      .WRCLK  (clk),
-      .RDCLK  (clk)
+   // It's possible to keep read and write enables asserted
+   // simultaneously because the read and write addresses will always
+   // be different.
+   ram #(
+      .WIDTH (DATA_WIDTH ),
+      .SIZE  (LEN        )
+   ) ram (
+      .rdclk  (clk       ),
+      .rden   (ce        ),
+      .rdaddr (addr+1'b1 ),
+      .rddata (data_o    ),
+      .wrclk  (clk       ),
+      .wren   (ce        ),
+      .wraddr (addr      ),
+      .wrdata (di        )
    );
+
+// `ifdef VIVADO
+//    BRAM_SDP_MACRO #(
+//       .BRAM_SIZE   ("18Kb"),
+//       .DEVICE      ("7SERIES"),
+//       .DO_REG      (0),          // don't pipeline output
+//       .READ_WIDTH  (DATA_WIDTH),
+//       .WRITE_WIDTH (DATA_WIDTH),
+//       .WRITE_MODE  ("WRITE_FIRST")
+//    ) BRAM_SDP (
+//       .DO     (data_o),
+//       .DI     (di),
+//       .WRADDR ({{ADDR_PADDING{1'b0}}, addr}),
+//       .RDADDR ({{ADDR_PADDING{1'b0}}, addr+1'b1}),
+//       .WE     ({WE_REPLICATE{1'b1}}),
+//       .WREN   (1'b1),
+//       .RDEN   (1'b1),
+//       .RST    (1'b0),
+//       .WRCLK  (clk),
+//       .RDCLK  (clk)
+//    );
+// `endif
 
 endmodule
 

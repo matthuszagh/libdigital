@@ -1,15 +1,54 @@
-# formal:
-# 	sby ram.sby
+export
+# source files
+VERILOG_DIRS	:= $(shell pwd)
+VERILOG_INCS	= $(addprefix -I,$(VERILOG_DIRS))
+VERILOG_SRCS	:= $(shell find $(VERILOG_DIRS) -maxdepth 1 -name '*.v')
 
-synth: synth.ilang
+TOP_MODULE      = ram
+TOP_MODULE_SRC	:= $(realpath $(TOP_MODULE).v)
 
-synth.ilang: synth.ys
-	yosys synth.ys
+# Synthesis, place and route and formal verification
+SCRIPT_DIR	:= $(realpath scripts)
 
-xilinx: synth xilinx.ys
-	yosys xilinx.ys
+# Testing
+TEST_DIR	:= $(realpath test)
 
-clean:
-	rm *.ilang
 
-.PHONY: clean synth xilinx
+.PHONY: test
+test: test_cocotb
+
+.PHONY: test_cocotb
+test_cocotb:
+	$(MAKE) -C $(TEST_DIR) cocotb
+
+.PHONY: test_verilator
+test_verilator:
+	$(MAKE) -C $(TEST_DIR) verilator
+
+.PHONY: test_icarus
+test_icarus:
+	$(MAKE) -C $(TEST_DIR) icarus
+
+.PHONY: formal
+formal:
+	$(MAKE) -C $(SCRIPT_DIR) formal
+
+.PHONY: synth
+synth:
+	$(MAKE) -C $(SCRIPT_DIR) synth
+
+.PHONY: synth_vivado
+synth_vivado:
+	$(MAKE) -C $(SCRIPT_DIR) vivado
+
+.PHONY: lint
+lint:
+	verilator $(VERILOG_INCS) \
+		--lint-only \
+		--Wall \
+		$(TOP_MODULE_SRC)
+
+.PHONY: clean
+clean::
+	$(MAKE) -C $(TEST_DIR) clean
+	$(MAKE) -C $(SCRIPT_DIR) clean

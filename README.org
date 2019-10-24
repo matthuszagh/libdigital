@@ -2,4 +2,16 @@
 libdigital is a personal collection of FPGA (and ASIC?) cores as well
 as a number of useful scripts for designing digital circuits. The
 implementations are currently done in Verilog, but in the future I
-hope to transition the focus to nMigen.
+intend to port them to nMigen.
+
+* TODO
+** Run all unit tests / formal verification from a toplevel Makefile
+** Incorporate resource usage reports into unit tests
+This relates to the next item, since edalize will probably support
+this functionality at a nearterm date.
+
+** Consider using edalize as an abstraction interface
+Among other things (such as?) this could be used to automatically
+check resource usage and incorporate this information into into
+automated testing. For instance, some HDL change causes a module to
+stop inferring block RAM in some architectures.

@@ -2,7 +2,8 @@ export
 # Source files
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/shift_reg
-VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram/single_port
+VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
+VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram/old/single_port
 VERILOG_DIRS	+= $(HDL_ROOT)/dsp/multiply_add
 
 VERILOG_INCS	= $(addprefix -I,$(VERILOG_DIRS))
@@ -23,10 +24,8 @@ test: test_cocotb
 # test_cocotb:
 # 	$(MAKE) -C $(TEST_DIR) cocotb
 
-# test_icarus:
-# 	iverilog $(INCLUDE_DIRS) -DFFT_SIMULATE fft_r22sdf.v -o tb/fft_r22sdf_tb
-# 	./tb/fft_r22sdf_tb
-# 	gtkwave tb/fft_r22sdf_tb.vcd
+test_icarus:
+	$(MAKE) -C $(TEST_DIR) icarus
 
 .PHONY: formal
 formal:

@@ -1,3 +1,5 @@
+`ifndef _FFT_R22SDF_V_
+`define _FFT_R22SDF_V_
 `default_nettype none
 
 `include "fft_r22sdf_bf.v"
@@ -206,7 +208,6 @@ module fft_r22sdf #(
       .INIT_0D(256'h02B102CF02EE030E033003530377039C03C103E6000C00320057007C00A000C3),
       .INIT_0E(256'h0219020F0207020202000200020302090212021D022B023C024F0264027C0295),
       .INIT_0F(256'h03DA03B4038F036B03470325030302E302C502A8028D0274025D024802360226),
-      // .INITFILE      ("roms/fft_r22sdf_rom_s1_re.hex"),
       .ADDRESS_WIDTH (N_LOG2),
       .DATA_WIDTH    (TWIDDLE_WIDTH)
    ) rom_w_s1_re (
@@ -591,19 +592,26 @@ module fft_r22sdf #(
 
 endmodule
 
-`ifdef FFT_SIMULATE
+`ifdef ICARUS
 
-`include "fft_r22sdf_defines.vh"
 `include "PLLE2_BASE.v"
 `include "PLLE2_ADV.v"
 `include "BRAM_SINGLE_MACRO.v"
-`include "BRAM_SDP_MACRO.v"
+// `include "BRAM_SDP_MACRO.v"
 `include "RAMB18E1.v"
 `include "DSP48E1.v"
 `include "glbl.v"
 
 `timescale 1ns/1ps
-module fft_r22sdf_tb #( `FFT_PARAMS );
+module fft_r22sdf_tb #(
+   parameter N              = 1024,
+   parameter N_LOG2         = 10,
+   parameter N_STAGES       = 5,
+   parameter INPUT_WIDTH    = 14,
+   parameter TWIDDLE_WIDTH  = 10,
+   parameter INTERNAL_WIDTH = 25,
+   parameter OUTPUT_WIDTH   = 25
+ );
 
    localparam SAMPLE_LEN = N;
 
@@ -620,10 +628,10 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
 
    integer                         idx;
    initial begin
-      $dumpfile("tb/fft_r22sdf_tb.vcd");
+      $dumpfile("icarus/build/fft_r22sdf_tb.vcd");
       $dumpvars(0, fft_r22sdf_tb);
 
-      $readmemh("tb/fft_samples_1024.hex", samples);
+      $readmemh("icarus/fft_samples_1024.hex", samples);
       cnt = 0;
 
       #120000 $finish;
@@ -682,6 +690,7 @@ module fft_r22sdf_tb #( `FFT_PARAMS );
 
 endmodule
 
+`endif
 `endif
 // Local Variables:
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"

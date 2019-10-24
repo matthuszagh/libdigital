@@ -1,4 +1,0 @@
-read_verilog ram.v
-proc
-opt
-write_ilang synth.ilang
