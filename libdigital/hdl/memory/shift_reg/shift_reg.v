@@ -1,5 +1,5 @@
-`ifndef _shift_reg_v_
-`define _shift_reg_v_
+`ifndef _SHIFT_REG_V_
+`define _SHIFT_REG_V_
 `default_nettype none
 
 // Uses an 18k FIFO (via onboard block RAM) to implement a shift
