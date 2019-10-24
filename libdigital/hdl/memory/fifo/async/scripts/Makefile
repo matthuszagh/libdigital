@@ -1,5 +1,7 @@
 YOSYS_DIR	= yosys
-TOP_MODULE_DIR	= $(filter-out $(TOP_MODULE).v,$(TOP_MODULE_SRC))
+# abspath is needed to remove trailing '/' which prevents the
+# subsequent filter command from working
+TOP_MODULE_DIR	= $(abspath $(dir $(TOP_MODULE_SRC)))
 # yosys doesn't like when the top module directory is also specified
 # as an include directory.
 VERILOG_INCS	:= $(filter-out -I$(TOP_MODULE_DIR),$(VERILOG_INCS))

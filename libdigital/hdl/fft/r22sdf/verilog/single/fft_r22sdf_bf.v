@@ -2,7 +2,7 @@
 
 `include "fft_r22sdf_bfi.v"
 `include "fft_r22sdf_bfii.v"
-`include "shift_reg.v"
+// `include "shift_reg.v"
 
 module fft_r22sdf_bf #(
    parameter DATA_WIDTH = 25,

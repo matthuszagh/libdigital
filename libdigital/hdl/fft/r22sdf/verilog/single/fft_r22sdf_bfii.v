@@ -1,5 +1,7 @@
 `default_nettype none
 
+`include "shift_reg.v"
+
 module fft_r22sdf_bfii #(
    parameter DATA_WIDTH    = 25,
    parameter SHIFT_REG_LEN = 256
