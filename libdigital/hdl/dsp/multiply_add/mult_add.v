@@ -1,4 +1,9 @@
+`ifndef _MULT_ADD_V_
+`define _MULT_ADD_V_
 `default_nettype none
+
+`include "DSP48E1.v"
+`include "glbl.v"
 
 // `mult_add' uses a DSP element to perform the operation p = a*b+c
 
@@ -104,7 +109,7 @@ endmodule
 
 `ifdef MULT_ADD_SIMULATE
 `include "DSP48E1.v"
-`include "glbl.v"
+// `include "glbl.v"
 
 `timescale 1ns/1ps
 module mult_add_tb;
@@ -151,4 +156,5 @@ module mult_add_tb;
    );
 
 endmodule
+`endif
 `endif
