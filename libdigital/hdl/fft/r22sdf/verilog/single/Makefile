@@ -20,9 +20,9 @@ TEST_DIR	:= $(realpath test)
 .PHONY: test
 test: test_cocotb
 
-# .PHONY: test_cocotb
-# test_cocotb:
-# 	$(MAKE) -C $(TEST_DIR) cocotb
+.PHONY: test_cocotb
+test_cocotb:
+	$(MAKE) -C $(TEST_DIR) cocotb
 
 test_icarus:
 	$(MAKE) -C $(TEST_DIR) icarus
@@ -49,3 +49,8 @@ lint:
 .PHONY: resources
 resources:
 	vivado -nolog -nojournal -mode batch -source vivado_resources.tcl
+
+.PHONY: clean
+clean::
+	$(MAKE) -C $(TEST_DIR) clean
+	$(MAKE) -C $(SCRIPT_DIR) clean

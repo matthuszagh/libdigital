@@ -1,3 +1,5 @@
+`ifndef _FFT_R22SDF_BFI_V_
+`define _FFT_R22SDF_BFI_V_
 `default_nettype none
 
 `include "shift_reg.v"
@@ -89,3 +91,4 @@ module fft_r22sdf_bfi #(
    end
 
 endmodule
+`endif

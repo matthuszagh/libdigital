@@ -1,3 +1,5 @@
+`ifndef _FFT_R22SDF_BF_V_
+`define _FFT_R22SDF_BF_V_
 `default_nettype none
 
 `include "fft_r22sdf_bfi.v"
@@ -81,6 +83,7 @@ module fft_r22sdf_bf #(
    end
 
 endmodule
+`endif
 // Local Variables:
 // flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
 //                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"

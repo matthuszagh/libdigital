@@ -2,9 +2,6 @@
 `define _MULT_ADD_V_
 `default_nettype none
 
-`include "DSP48E1.v"
-`include "glbl.v"
-
 // `mult_add' uses a DSP element to perform the operation p = a*b+c
 
 module mult_add #(

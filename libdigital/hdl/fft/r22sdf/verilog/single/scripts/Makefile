@@ -6,6 +6,7 @@ TOP_MODULE_DIR	= $(abspath $(dir $(TOP_MODULE_SRC)))
 VERILOG_INCS	:= $(filter-out -I$(TOP_MODULE_DIR),$(VERILOG_INCS))
 VERILOG_SRCS    := $(filter-out $(TOP_MODULE_SRC),$(VERILOG_SRCS))
 
+VIVADO_DIR	= vivado
 VIVADO_INCS	:= $(filter-out -I,)
 
 .PHONY: synth
@@ -20,7 +21,7 @@ $(TOP_MODULE).ilang: $(YOSYS_DIR)/synth.tcl $(VERILOG_SRCS)
 
 .PHONY: synth_vivado
 synth_vivado:
-	vivado -nolog -nojournal -mode batch -source vivado/vivado_resources.tcl
+	vivado -nolog -nojournal -mode batch -source $(VIVADO_DIR)/resources.tcl
 
 .PHONY: formal
 formal:

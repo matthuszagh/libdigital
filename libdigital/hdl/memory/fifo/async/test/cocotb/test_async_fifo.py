@@ -11,8 +11,6 @@ from libdigital.tools.cocotb_helpers import Clock, MultiClock
 import cocotb
 from cocotb.result import TestFailure
 from cocotb.triggers import *
-
-# from cocotb.clock import *
 from cocotb.binary import *
 
 

@@ -12,6 +12,7 @@
  * supported, but this could easily be extended to greater lengths.
  */
 
+`timescale 1ns/1ps
 module fft_r22sdf #(
    parameter N              = 1024, /* FFT length */
    parameter INPUT_WIDTH    = 14,
@@ -589,6 +590,17 @@ module fft_r22sdf #(
          end
       end
    end
+
+`ifdef COCOTB_SIM
+   // integer i;
+   initial begin
+      $dumpfile ("cocotb/build/fft_r22sdf_tb.vcd");
+      $dumpvars (0, fft_r22sdf);
+      // for (i=0; i<100; i=i+1)
+      //   $dumpvars (0, ram.mem[i]);
+      #1;
+   end
+`endif
 
 endmodule
 

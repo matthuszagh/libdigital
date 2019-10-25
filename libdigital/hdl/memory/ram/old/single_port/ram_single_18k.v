@@ -1,3 +1,5 @@
+`ifndef _RAM_SINGLE_18K_V_
+`define _RAM_SINGLE_18K_V_
 `default_nettype none
 
 module ram_single_18k #(
@@ -212,4 +214,5 @@ module ram_single_18k_tb;
    );
 
 endmodule
+`endif
 `endif

@@ -1,3 +1,5 @@
+`ifndef _FFT_R22SDF_WM_V_
+`define _FFT_R22SDF_WM_V_
 `default_nettype none
 
 `include "mult_add.v"
@@ -155,3 +157,4 @@ module fft_r22sdf_wm #(
    end
 
 endmodule
+`endif
