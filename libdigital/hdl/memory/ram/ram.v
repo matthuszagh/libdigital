@@ -8,12 +8,14 @@
 // is designed to infer block RAM on devices that support it.
 
 // This module guards against read/write collisions by prioritizing
-// reads. Make sure that you only assert `rden' and `wren' when
-// necessary.
+// reads. In other words, if you attempt to read and write to the same
+// address in the same clock period, the write will be ignored. Make
+// sure that you only assert `rden' and `wren' when necessary.
 
 module ram #(
-   parameter WIDTH = 64,
-   parameter SIZE  = 512
+   parameter INITFILE = "",
+   parameter WIDTH    = 64,
+   parameter SIZE     = 512
 ) (
    input wire             rdclk,
    input wire             rden,
@@ -30,10 +32,18 @@ module ram #(
    reg [WIDTH-1:0]        mem [0:SIZE-1];
 
    integer                i;
-   initial begin
-      for (i=0; i<SIZE; i=i+1)
-        mem[i] = {WIDTH{1'b0}};
-   end
+   generate
+      if (INITFILE == "") begin
+         initial begin
+            for (i=0; i<SIZE; i=i+1)
+              mem[i] = {WIDTH{1'b0}};
+         end
+      end else begin
+         initial begin
+            $readmemh(INITFILE, mem);
+         end
+      end
+   endgenerate
 
    wire                   conflict = (rden && wren) ? (rdaddr == wraddr) : 1'b0;
 
