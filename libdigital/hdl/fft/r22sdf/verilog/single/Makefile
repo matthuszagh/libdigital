@@ -51,9 +51,9 @@ lint:
 roms:
 	$(MAKE) -C $(SCRIPT_DIR) roms
 
-.PHONY: resources
-resources:
-	vivado -nolog -nojournal -mode batch -source vivado_resources.tcl
+# .PHONY: resources
+# resources:
+# 	vivado -nolog -nojournal -mode batch -source vivado_resources.tcl
 
 .PHONY: clean
 clean::

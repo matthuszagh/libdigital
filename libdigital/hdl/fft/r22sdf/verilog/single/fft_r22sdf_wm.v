@@ -2,8 +2,6 @@
 `define _FFT_R22SDF_WM_V_
 `default_nettype none
 
-`include "mult_add.v"
-
 module fft_r22sdf_wm #(
    parameter DATA_WIDTH    = 25,
    parameter TWIDDLE_WIDTH = 10,
@@ -55,31 +53,44 @@ module fft_r22sdf_wm #(
    reg signed [DATA_WIDTH-1:0] x_im_reg2;
    reg signed [TWIDDLE_WIDTH-1:0] w_re_reg;
    reg signed [TWIDDLE_WIDTH-1:0] w_im_reg;
+
+   // `mul_state_start' ensures that `mul_state' is not dependent on
+   // when `rst_n' is released.
+   reg                            mul_state_start;
+   always @(posedge clk_i) begin
+      if (!rst_n)
+        mul_state_start <= 1'b0;
+      else
+        mul_state_start <= 1'b1;
+   end
+
    always @(posedge clk_3x_i) begin
-      if (!rst_n) begin
+      if (!mul_state_start) begin
          mul_state <= 2'd0;
       end else begin
          case (mul_state)
          2'd0:
            begin
-              kar_f     <= p_dsp;
+              kar_r     <= p_dsp;
               mul_state <= 2'd1;
            end
          2'd1:
            begin
-              kar_r     <= p_dsp;
-              mul_state <= 2'd2;
-           end
-         2'd2:
-           begin
               kar_i     <= p_dsp;
-              mul_state <= 2'd0;
+              mul_state <= 2'd2;
+              // updating the regs on `mul_state==2'd1' ensures that
+              // `kar_i' is not set before `kar_f'.
               x_re_reg  <= x_re_i;
               x_im_reg  <= x_im_i;
               x_re_reg2 <= x_re_reg;
               x_im_reg2 <= x_im_reg;
               w_re_reg  <= w_re_i;
               w_im_reg  <= w_im_i;
+           end
+         2'd2:
+           begin
+              kar_f     <= p_dsp;
+              mul_state <= 2'd0;
            end
          endcase
       end
@@ -94,21 +105,21 @@ module fft_r22sdf_wm #(
       case (mul_state)
       2'd0:
         begin
-           a_dsp = x_re_reg2 - x_im_reg2;
-           b_dsp = sign_extend_b(w_re_reg);
-           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
-        end
-      2'd1:
-        begin
            a_dsp = x_im_reg2;
            b_dsp = w_re_reg - w_im_reg;
            c_dsp = kar_f;
         end
-      2'd2:
+      2'd1:
         begin
            a_dsp = x_re_reg2;
            b_dsp = w_re_reg + w_im_reg;
            c_dsp = -kar_f;
+        end
+      2'd2:
+        begin
+           a_dsp = x_re_reg2 - x_im_reg2;
+           b_dsp = sign_extend_b(w_re_reg);
+           c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
         end
       default:
         begin
@@ -119,17 +130,7 @@ module fft_r22sdf_wm #(
       endcase
    end
 
-   mult_add #(
-      .A_DATA_WIDTH (DATA_WIDTH),
-      .B_DATA_WIDTH (TWIDDLE_WIDTH+1),
-      .C_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH+1),
-      .P_DATA_WIDTH (DATA_WIDTH+TWIDDLE_WIDTH+1)
-   ) twiddle_multiply (
-      .a (a_dsp),
-      .b (b_dsp),
-      .c (c_dsp),
-      .p (p_dsp)
-   );
+   assign p_dsp = (a_dsp * b_dsp) + c_dsp;
 
    reg [NLOG2-1:0] ctr_reg;
    reg [NLOG2-1:0] ctr_reg2;
