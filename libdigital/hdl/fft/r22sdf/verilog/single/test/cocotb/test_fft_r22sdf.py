@@ -58,20 +58,14 @@ async def check_sequence(dut):
     await fft.setup()
     num_samples = 1024
     input_width = 14
-    # scale_factor = 2**input_width
 
     # low bound is inclusive and upper bound is exclusive
     input_seq = np.zeros(num_samples)
-    with open(
-        "/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/test/icarus/fft_samples_1024.hex",
-        "r",
-    ) as f:
-        for i, line in enumerate(f):
-            hex_str = line.split("\n")[0]
-            val = bit.hex_to_sint(hex_str, input_width)
-            input_seq[i] = val
+    for i, _ in enumerate(input_seq):
+        input_seq[i] = np.random.randint(
+            -2 ** (input_width - 1), 2 ** (input_width - 1)
+        )
 
-    # input_seq = np.random.randint(-2**(input_width-1), 2**(input_width-1))
     input_seq = input_seq.astype(int)
     outputs = np.fft.fft(input_seq)
     reals = outputs.real.astype(int)
