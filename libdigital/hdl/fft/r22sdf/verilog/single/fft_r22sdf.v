@@ -396,7 +396,7 @@ module fft_r22sdf #(
             .z_re_o (bf1_re),
             .z_im_o (bf1_im)
          );
-      end // if (N > 1)
+      end
    endgenerate
 
    // stage 2

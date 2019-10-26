@@ -27,6 +27,11 @@ synth_vivado:
 formal:
 	sby -f $(YOSYS_DIR)/formal.sby
 
+.PHONY: roms
+roms:
+	python twiddle_rom.py
+
 .PHONY: clean
 clean::
 	rm -f *.ilang
+	rm -rf .Xil

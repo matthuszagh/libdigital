@@ -24,6 +24,7 @@ test: test_cocotb
 test_cocotb:
 	$(MAKE) -C $(TEST_DIR) cocotb
 
+.PHONY: test_icarus
 test_icarus:
 	$(MAKE) -C $(TEST_DIR) icarus
 
@@ -32,7 +33,7 @@ formal:
 	$(MAKE) -C $(SCRIPT_DIR) formal
 
 .PHONY: synth
-synth:
+synth: roms
 	$(MAKE) -C $(SCRIPT_DIR) synth
 
 .PHONY: synth_vivado
@@ -45,6 +46,10 @@ lint:
 		--lint-only \
 		--Wall \
 		$(TOP_MODULE_SRC)
+
+.PHONY: roms
+roms:
+	$(MAKE) -C $(SCRIPT_DIR) roms
 
 .PHONY: resources
 resources:
