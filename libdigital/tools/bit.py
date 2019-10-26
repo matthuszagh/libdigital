@@ -24,3 +24,21 @@ def int_to_hex(i, prec):
 
     hex_str = format(i, "x")
     return hex_str
+
+def hex_to_sint(s, prec):
+    """
+    Return the signed integer value of a hexadecimal string with bit
+    precision @prec.
+    """
+    int_val = int(s, 16)
+    min_val = -2**(prec-1)
+    max_val = 2**(prec-1)-1
+    if int_val > max_val:
+        int_val = -2**(prec) + int_val
+        if int_val > 0:
+            raise ValueError(
+                """Value is outside the range supported by"""
+                """ specified precision."""
+            )
+
+    return int_val
