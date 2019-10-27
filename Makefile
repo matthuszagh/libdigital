@@ -1,6 +1,13 @@
-env: reqs
+FFT_DIR		= libdigital/hdl/fft/r22sdf/verilog/single
+FIFO_DIR	= libdigital/hdl/memory/fifo/async
 
-reqs: requirements.txt
-	nix run -f https://github.com/nix-community/pypi2nix/archive/master.tar.gz --command pypi2nix -r requirements.txt
+.PHONY: test
+test: test_fft test_fifo
 
-.PHONY: env reqs
+.PHONY: test_fft
+test_fft:
+	$(MAKE) -C $(FFT_DIR) test
+
+.PHONY: test_fifo
+test_fifo:
+	$(MAKE) -C $(FIFO_DIR) test
