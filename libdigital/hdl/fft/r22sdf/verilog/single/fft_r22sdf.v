@@ -570,11 +570,3 @@ endmodule
 
 `endif
 `endif
-// Local Variables:
-// flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/ram/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/memory/shift_reg/"
-//                                  "/home/matt/src/libdigital/libdigital/hdl/dsp/multiply_add/")
-// End:
