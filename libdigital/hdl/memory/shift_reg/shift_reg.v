@@ -58,28 +58,6 @@ module shift_reg #(
       .wrdata (di        )
    );
 
-// `ifdef VIVADO
-//    BRAM_SDP_MACRO #(
-//       .BRAM_SIZE   ("18Kb"),
-//       .DEVICE      ("7SERIES"),
-//       .DO_REG      (0),          // don't pipeline output
-//       .READ_WIDTH  (DATA_WIDTH),
-//       .WRITE_WIDTH (DATA_WIDTH),
-//       .WRITE_MODE  ("WRITE_FIRST")
-//    ) BRAM_SDP (
-//       .DO     (data_o),
-//       .DI     (di),
-//       .WRADDR ({{ADDR_PADDING{1'b0}}, addr}),
-//       .RDADDR ({{ADDR_PADDING{1'b0}}, addr+1'b1}),
-//       .WE     ({WE_REPLICATE{1'b1}}),
-//       .WREN   (1'b1),
-//       .RDEN   (1'b1),
-//       .RST    (1'b0),
-//       .WRCLK  (clk),
-//       .RDCLK  (clk)
-//    );
-// `endif
-
 endmodule
 
 `ifdef SHIFT_REG_SIMULATE
