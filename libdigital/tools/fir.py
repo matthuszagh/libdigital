@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Finite-impulse response filter."""
 
 from scipy import signal
@@ -352,35 +351,3 @@ class FIR:
         ax.set_title("FIR Response")
         fig.show()
         fig.savefig(savefile)
-
-
-if __name__ == "__main__":
-    NUMTAPS = 120
-    FS = 40e6
-    FN = FS / 2
-    BANDS = [0, 1e6, 1.5e6, FN]
-    BAND_GAIN = [1, 0]
-    FIR = FIR(NUMTAPS, BANDS, BAND_GAIN, FS, pass_db=0.5)
-
-    FIR_INPUT_WIDTH = 12
-    FIR_OUTPUT_WIDTH = FIR.output_bit_width(FIR_INPUT_WIDTH)
-    FIR_TAP_WIDTH = 16
-    FIR_M = 20
-
-    quantized_taps = (
-        FIR.quantized_taps(10, taps=FIR.normalized_taps())
-        / 2 ** FIR.tap_normalization_shift()
-    )
-    FIR.plot_response("plot_response_quant.png", taps=quantized_taps)
-
-    FIR.write_poly_taps_files(
-        ["../hdl/filters/fir/poly/verilog/120taps/taps/"], FIR_TAP_WIDTH, FIR_M
-    )
-
-    FIR.write_input_sample_file(
-        10000,
-        FIR_M,
-        FIR_INPUT_WIDTH,
-        FIR_OUTPUT_WIDTH,
-        ["../hdl/filters/fir/poly/verilog/120taps/tb/"],
-    )
