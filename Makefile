@@ -1,5 +1,5 @@
-FFT_DIR		= libdigital/hdl/fft/r22sdf/verilog/single
-FIFO_DIR	= libdigital/hdl/memory/fifo/async
+FFT_DIR		= libdigital/hdl/fft/r22sdf
+FIFO_DIR	= libdigital/hdl/memory/fifo
 SHIFT_REG_DIR	= libdigital/hdl/memory/shift_reg
 RAM_DIR		= libdigital/hdl/memory/ram
 

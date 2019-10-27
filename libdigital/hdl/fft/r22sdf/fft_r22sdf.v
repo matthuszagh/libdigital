@@ -45,7 +45,7 @@ module fft_r22sdf #(
    // twiddle factors
    wire signed [TWIDDLE_WIDTH-1:0]      w_s0_re;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s0_re.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s0_re.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N                )
    ) rom_s0_re (
@@ -61,7 +61,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s0_im;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s0_im.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s0_im.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N                )
    ) rom_s0_im (
@@ -77,7 +77,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s1_re;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s1_re.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s1_re.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/4              )
    ) rom_s1_re (
@@ -93,7 +93,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s1_im;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s1_im.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s1_im.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/4              )
    ) rom_s1_im (
@@ -109,7 +109,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s2_re;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s2_re.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s2_re.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/16             )
    ) rom_s2_re (
@@ -125,7 +125,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s2_im;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s2_im.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s2_im.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/16             )
    ) rom_s2_im (
@@ -141,7 +141,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s3_re;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s3_re.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s3_re.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/64             )
    ) rom_s3_re (
@@ -157,7 +157,7 @@ module fft_r22sdf #(
 
    wire signed [TWIDDLE_WIDTH-1:0]      w_s3_im;
    ram #(
-      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/verilog/single/roms/s3_im.hex" ),
+      .INITFILE ("/home/matt/src/libdigital/libdigital/hdl/fft/r22sdf/roms/s3_im.hex" ),
       .WIDTH    (TWIDDLE_WIDTH    ),
       .SIZE     (N/64             )
    ) rom_s3_im (
