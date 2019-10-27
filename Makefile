@@ -27,4 +27,8 @@ test_ram:
 
 # formal verification
 .PHONY: formal
-formal:
+formal: formal_fifo
+
+.PHONY: formal_fifo
+formal_fifo:
+	$(MAKE) -C $(FIFO_DIR) formal
