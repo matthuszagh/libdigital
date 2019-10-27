@@ -1,8 +1,11 @@
-FFT_DIR		= libdigital/hdl/fft/r22sdf
-FIFO_DIR	= libdigital/hdl/memory/fifo
-SHIFT_REG_DIR	= libdigital/hdl/memory/shift_reg
-RAM_DIR		= libdigital/hdl/memory/ram
+export
+HDL_ROOT	= $(abspath libdigital/hdl)
+FFT_DIR		= $(HDL_ROOT)/fft/r22sdf
+FIFO_DIR	= $(HDL_ROOT)/memory/fifo
+SHIFT_REG_DIR	= $(HDL_ROOT)/memory/shift_reg
+RAM_DIR		= $(HDL_ROOT)/memory/ram
 
+# unit tests
 .PHONY: test
 test: test_fft test_fifo test_shift_reg test_ram
 
@@ -21,3 +24,7 @@ test_shift_reg:
 .PHONY: test_ram
 test_ram:
 	$(MAKE) -C $(RAM_DIR) test
+
+# formal verification
+.PHONY: formal
+formal:
