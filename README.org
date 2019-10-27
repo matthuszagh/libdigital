@@ -5,7 +5,8 @@ implementations are currently done in Verilog, but in the future I
 intend to port them to nMigen.
 
 * TODO
-** Run all unit tests / formal verification from a toplevel Makefile
+** Use inferrence for FIR multiply
+** reorganize fft dir
 ** Incorporate resource usage reports into unit tests
 This relates to the next item, since edalize will probably support
 this functionality at a nearterm date.
