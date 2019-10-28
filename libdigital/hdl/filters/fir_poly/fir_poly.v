@@ -949,8 +949,3 @@ module fir_poly_tb;
 endmodule
 
 `endif
-// Local Variables:
-// flycheck-verilator-include-path:("/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unimacro/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/"
-//                                  "/home/matt/.nix-profile/opt/Vivado/2017.2/data/verilog/src/unisims/")
-// End:
