@@ -4,7 +4,7 @@ A collection of useful functions for extending cocotb.
 
 import cocotb
 from cocotb import clock
-from cocotb.triggers import Timer
+from cocotb.triggers import Timer, RisingEdge
 
 
 class Clock:
@@ -50,6 +50,40 @@ class Clock:
             await Timer(self.period / 2)
             self.clk <= 0
             await Timer(self.period / 2)
+
+
+class ClockEnable:
+    """
+    Generates a clock enable signal based on an underlying clock
+    signal.
+    """
+
+    def __init__(self, clk, clk_en, rst_n, freq_ratio):
+        """
+        @clk is the underlying base Clock object.
+
+        @clk_en is the device under test clock enable port.
+
+        @freq_ratio is the ratio of the frequency of the base clock to
+        the frequency of the clock enable signal.
+        """
+        self.clk = clk
+        self.clk_en = clk_en
+        self.rst_n = rst_n
+        self.freq_ratio = freq_ratio
+
+    @cocotb.coroutine
+    async def start(self):
+        ctr = 0
+        await RisingEdge(self.rst_n)
+        while True:
+            if ctr == self.freq_ratio - 1:
+                ctr = 0
+                self.clk_en <= 1
+            else:
+                ctr = ctr + 1
+                self.clk_en <= 0
+            await RisingEdge(self.clk)
 
 
 def check_periods_integral(periods):
