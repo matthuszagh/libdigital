@@ -11,4 +11,11 @@ fir = FIR(
     stop_db=-40,
 )
 
-fir.write_poly_taps_files(["../taps"], 16, 20, True, False)
+tap_bits = 16
+input_bits = 12
+downsample_factor = 20
+fir.write_poly_taps_files(
+    ["../taps"], tap_bits, downsample_factor, True, False
+)
+print("normalization shift: {}".format(fir.tap_normalization_shift()))
+print("output bits: {}".format(fir.output_bit_width(input_bits)))

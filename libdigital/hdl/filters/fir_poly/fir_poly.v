@@ -12,7 +12,11 @@ module fir_poly #(
    parameter BANK_LEN       = 6,   /* N_TAPS/M */
    parameter INPUT_WIDTH    = 12,
    parameter TAP_WIDTH      = 16,
+   // should be set equal to the
+   // INPUT_WIDTH + TAP_WIDTH + ceil(log2(N_TAPS))
    parameter INTERNAL_WIDTH = 35,
+   // these values should be set according to the output of
+   // gen_taps.py
    parameter NORM_SHIFT     = 3,
    parameter OUTPUT_WIDTH   = 14
 ) (
@@ -44,6 +48,7 @@ module fir_poly #(
       end
    end
 
+   // decimate the input signal by the downsampling factor.
    reg signed [INPUT_WIDTH-1:0]     bank_din [0:M/2-1];
    always @(posedge clk) begin
       if (!rst_n) begin
@@ -770,6 +775,7 @@ module fir_poly #(
         bank18_19_dsp_p <= bank18_19_dsp_a * bank18_19_dsp_b;
    end
 
+   // TODO pipeline if this is too slow.
    wire signed [INTERNAL_WIDTH-1:0] out_tmp = bank_dout[0]
         + bank_dout[1]
         + bank_dout[2]
@@ -791,23 +797,30 @@ module fir_poly #(
         + bank_dout[18]
         + bank_dout[19];
 
-   localparam DROP_LSB_BITS = TAP_WIDTH+NORM_SHIFT-1;
-   localparam DROP_MSB_BITS = INTERNAL_WIDTH-DROP_LSB_BITS-OUTPUT_WIDTH;
-   // convergent rounding
-   wire signed [INTERNAL_WIDTH-1:0] out_rounded = out_tmp
-        + {{DROP_LSB_BITS{1'b0}},
-           out_tmp[INTERNAL_WIDTH-DROP_LSB_BITS],
-           {INTERNAL_WIDTH-DROP_LSB_BITS-1{!out_tmp[INTERNAL_WIDTH-DROP_LSB_BITS]}}};
+   // -1 comes from the fact that taps are two's complement and so
+   // we're dividing by 2^(n-1)
+   localparam DROP_LSB_BITS = TAP_WIDTH - 1 + NORM_SHIFT;
+   // since we compute the maximum value that an output can take, we
+   // can drop bits at the top.
+   localparam DROP_MSB_BITS = INTERNAL_WIDTH - OUTPUT_WIDTH - DROP_LSB_BITS;
+   localparam ROUND_BIT_POS = DROP_LSB_BITS - 1;
 
-   wire signed [INTERNAL_WIDTH-DROP_MSB_BITS-1:0] out_drop_msb = out_rounded[INTERNAL_WIDTH-DROP_MSB_BITS-1:0];
+   function [INTERNAL_WIDTH-1:0] round_nearest(input [INTERNAL_WIDTH-1:0] expr);
+      if (expr[INTERNAL_WIDTH-1] == 1'b0)
+        round_nearest = (expr[ROUND_BIT_POS] == 1'b1 ? expr + 1'b1 : expr);
+      else
+        round_nearest = (expr[ROUND_BIT_POS] == 1'b0 ? expr + 1'b1 : expr);
+   endfunction
 
-   reg                                            dvalid_delay;
+   function [OUTPUT_WIDTH-1:0] trunc_to_out(input [INTERNAL_WIDTH-1:0] expr);
+      trunc_to_out = expr[INTERNAL_WIDTH-DROP_MSB_BITS-1:DROP_LSB_BITS];
+   endfunction
 
    // compute the sum of all bank outputs
    always @(posedge clk) begin
       if (!rst_n) begin
          dvalid <= 1'b0;
-         dvalid_delay <= 1'b0;
+         // dvalid_delay <= 1'b0;
       end else begin
          if (clk_2mhz_pos_en) begin
             dvalid <= 1'b1;
@@ -816,9 +829,7 @@ module fir_poly #(
             // else
             //   dvalid_delay <= 1'b1;
 
-            // dout   <= out_drop_msb[INTERNAL_WIDTH-DROP_MSB_BITS-1:DROP_LSB_BITS];
-            // TODO I'm not rounding well, which could give this a bit of a bias.
-            dout     <= {out_tmp[INTERNAL_WIDTH-1], out_tmp[DROP_LSB_BITS+OUTPUT_WIDTH-2:DROP_LSB_BITS]};
+            dout <= trunc_to_out(round_nearest(out_tmp));
          end
       end
    end

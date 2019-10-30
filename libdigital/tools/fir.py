@@ -38,7 +38,6 @@ class FIR:
         norm_val = val / max_val
         return round(norm_val * 2 ** (nbits - 1))
 
-    # TODO deprecate in favor of bit functions
     def quantized_taps(self, nbits, taps=None):
         """
         Quantize all taps for two's complement representation with `nbits'
@@ -49,10 +48,8 @@ class FIR:
             taps = self.taps
 
         new_taps = np.zeros(len(taps))
-        for i in range(len(taps)):
-            new_taps[i] = self.quantize_2s_comp(nbits, taps[i]) / 2 ** (
-                nbits - 1
-            )
+        for i, tap in enumerate(taps):
+            new_taps[i] = quantized_real(tap, nbits)
         return new_taps
 
     # TODO deprecate in favor of bit functions

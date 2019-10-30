@@ -79,6 +79,9 @@ async def check_sequence(dut):
     downsample_factor = 20
     num_outputs = int(num_samples / downsample_factor)
     input_width = 12
+    quantize_taps = True
+    tap_width = 16
+
     input_seq = np.zeros(num_samples)
     for i, _ in enumerate(input_seq):
         input_seq[i] = np.random.randint(
@@ -87,23 +90,29 @@ async def check_sequence(dut):
     input_seq = input_seq.astype(int)
     cocotb.fork(tb.write_continuous(input_seq))
 
-    out_pre_dec = np.convolve(input_seq, fir.taps)
+    if quantize_taps:
+        taps = fir.quantized_taps(tap_width)
+    else:
+        taps = fir.taps
+    out_pre_dec = np.convolve(input_seq, taps)
     outputs = [out_pre_dec[i] for i in range(len(out_pre_dec)) if i % 20 == 0]
-    # outputs = signal.resample_poly(
-    #     input_seq, 1, downsample_factor, 0, fir.taps
-    # )
+    # outputs = signal.resample_poly(input_seq, 1, downsample_factor, 0, taps)
 
     tol = 2 ** 14 / 1e1
     i = num_outputs
     clk_en_ctr = 0
+    diffs = []
     while i > 0:
         await FallingEdge(tb.dut.clk_2mhz_pos_en)
         await ReadOnly()
         if tb.dut.dvalid.value.integer:
             out_val = tb.dut.dout.value.signed_integer
+            diffs.append(out_val - int(outputs[num_outputs - i].item()))
             print(
-                "expected: {:5}, actual: {:5}".format(
-                    int(outputs[num_outputs - i].item()), out_val
+                "expected: {:5}, actual: {:5}, difference: {:5}".format(
+                    int(outputs[num_outputs - i].item()),
+                    out_val,
+                    out_val - int(outputs[num_outputs - i].item()),
                 )
             )
             if abs(out_val - outputs[num_outputs - i].item()) > tol:
@@ -116,3 +125,6 @@ async def check_sequence(dut):
                 )
 
             i -= 1
+
+    print("avg diff: {}".format(np.average(diffs)))
+    print("avg abs diff: {}".format(np.average(np.abs(diffs))))
