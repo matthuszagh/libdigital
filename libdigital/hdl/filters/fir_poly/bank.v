@@ -1,3 +1,5 @@
+`ifndef _BANK_V_
+`define _BANK_V_
 `default_nettype none
 
 `include "dsp.v"
@@ -77,3 +79,4 @@ module bank #(
    assign dout = p_reg;
 
 endmodule
+`endif

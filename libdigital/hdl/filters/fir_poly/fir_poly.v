@@ -5,6 +5,7 @@
 
 `include "bank.v"
 
+`timescale 1ns/1ps
 module fir_poly #(
    parameter N_TAPS         = 120, /* total number of taps */
    parameter M              = 20,  /* decimation factor */
@@ -12,7 +13,7 @@ module fir_poly #(
    parameter INPUT_WIDTH    = 12,
    parameter TAP_WIDTH      = 16,
    parameter INTERNAL_WIDTH = 35,
-   parameter NORM_SHIFT     = 4,
+   parameter NORM_SHIFT     = 3,
    parameter OUTPUT_WIDTH   = 14
 ) (
    input wire                           clk,
@@ -98,26 +99,26 @@ module fir_poly #(
    reg signed [TAP_WIDTH-1:0] taps19 [0:BANK_LEN-1];
 
    initial begin
-      $readmemh("taps/taps0.hex", taps0);
-      $readmemh("taps/taps1.hex", taps1);
-      $readmemh("taps/taps2.hex", taps2);
-      $readmemh("taps/taps3.hex", taps3);
-      $readmemh("taps/taps4.hex", taps4);
-      $readmemh("taps/taps5.hex", taps5);
-      $readmemh("taps/taps6.hex", taps6);
-      $readmemh("taps/taps7.hex", taps7);
-      $readmemh("taps/taps8.hex", taps8);
-      $readmemh("taps/taps9.hex", taps9);
-      $readmemh("taps/taps10.hex", taps10);
-      $readmemh("taps/taps11.hex", taps11);
-      $readmemh("taps/taps12.hex", taps12);
-      $readmemh("taps/taps13.hex", taps13);
-      $readmemh("taps/taps14.hex", taps14);
-      $readmemh("taps/taps15.hex", taps15);
-      $readmemh("taps/taps16.hex", taps16);
-      $readmemh("taps/taps17.hex", taps17);
-      $readmemh("taps/taps18.hex", taps18);
-      $readmemh("taps/taps19.hex", taps19);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps0.hex", taps0);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps1.hex", taps1);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps2.hex", taps2);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps3.hex", taps3);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps4.hex", taps4);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps5.hex", taps5);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps6.hex", taps6);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps7.hex", taps7);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps8.hex", taps8);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps9.hex", taps9);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps10.hex", taps10);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps11.hex", taps11);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps12.hex", taps12);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps13.hex", taps13);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps14.hex", taps14);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps15.hex", taps15);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps16.hex", taps16);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps17.hex", taps17);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps18.hex", taps18);
+      $readmemh("/home/matt/src/libdigital/libdigital/hdl/filters/fir_poly/taps/taps19.hex", taps19);
    end
 
    wire signed [TAP_WIDTH-1:0] tap0 = taps0[tap_addr[BANK_LEN_LOG2-1:0]];
@@ -804,7 +805,7 @@ module fir_poly #(
         + bank_dout[18]
         + bank_dout[19];
 
-   localparam DROP_LSB_BITS = TAP_WIDTH+NORM_SHIFT;
+   localparam DROP_LSB_BITS = TAP_WIDTH+NORM_SHIFT-1;
    localparam DROP_MSB_BITS = INTERNAL_WIDTH-DROP_LSB_BITS-OUTPUT_WIDTH;
    // convergent rounding
    wire signed [INTERNAL_WIDTH-1:0] out_rounded = out_tmp
@@ -823,24 +824,36 @@ module fir_poly #(
          dvalid_delay <= 1'b0;
       end else begin
          if (clk_2mhz_pos_en) begin
-            if (dvalid_delay)
-              dvalid <= 1'b1;
-            else
-              dvalid_delay <= 1'b1;
+            dvalid <= 1'b1;
+            // if (dvalid_delay)
+            //   dvalid <= 1'b1;
+            // else
+            //   dvalid_delay <= 1'b1;
 
             // dout   <= out_drop_msb[INTERNAL_WIDTH-DROP_MSB_BITS-1:DROP_LSB_BITS];
             // TODO I'm not rounding well, which could give this a bit of a bias.
-            dout     <= {out_tmp[INTERNAL_WIDTH-1], out_tmp[DROP_LSB_BITS+OUTPUT_WIDTH-3:DROP_LSB_BITS-1]};
+            dout     <= {out_tmp[INTERNAL_WIDTH-1], out_tmp[DROP_LSB_BITS+OUTPUT_WIDTH-2:DROP_LSB_BITS]};
          end
       end
    end
 
+`ifdef COCOTB_SIM
+   // integer i;
+   initial begin
+      $dumpfile ("cocotb/build/fir_poly.vcd");
+      $dumpvars (0, fir_poly);
+      // for (i=0; i<100; i=i+1)
+      //   $dumpvars (0, ram.mem[i]);
+      #1;
+   end
+`endif
+
 endmodule
 
-`ifdef SIMULATE
+`ifdef ICARUS
 
-`include "DSP48E1.v"
-`include "glbl.v"
+// `include "/home/matt/src/vivado/2019_libs/unisims/DSP48E1.v"
+// `include "/home/matt/src/vivado/2019_libs/glbl.v"
 
 `timescale 1ns/1ps
 module fir_poly_tb;
@@ -912,13 +925,13 @@ module fir_poly_tb;
 
    integer i, f;
    initial begin
-      $dumpfile("tb/fir_poly.vcd");
+      $dumpfile("icarus/build/fir_poly_tb.vcd");
       $dumpvars(0, fir_poly_tb);
       $dumpvars(0, dut.bank0.shift_reg[0]);
 
-      f = $fopen("tb/sample_out_real_verilog.txt", "w");
+      f = $fopen("../old/tb/sample_out_real_verilog.txt", "w");
 
-      $readmemh("tb/sample_in_real.hex", samples);
+      $readmemh("../old/tb/sample_in_real.hex", samples);
 
       #10000000 $finish;
    end
