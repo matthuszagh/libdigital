@@ -196,17 +196,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank0_1_dsp_a = tap_addr < 5'd8 ? bank0_dsp_a : bank1_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank0_1_dsp_b = tap_addr < 5'd8 ? bank0_dsp_b : bank1_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank0_1_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank0_1_dsp_p;
    assign bank0_dsp_p = bank0_1_dsp_p;
    assign bank1_dsp_p = bank0_1_dsp_p;
 
-   dsp bank0_1_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank0_1_dsp_a),
-      .b   (bank0_1_dsp_b),
-      .p   (bank0_1_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank0_1_dsp_p <= (bank0_1_dsp_a * bank0_1_dsp_b) + bank0_1_dsp_p;
+      else
+        bank0_1_dsp_p <= bank0_1_dsp_a * bank0_1_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank2_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank2_dsp_b;
@@ -260,17 +259,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank2_3_dsp_a = tap_addr < 5'd8 ? bank2_dsp_a : bank3_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank2_3_dsp_b = tap_addr < 5'd8 ? bank2_dsp_b : bank3_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank2_3_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank2_3_dsp_p;
    assign bank2_dsp_p = bank2_3_dsp_p;
    assign bank3_dsp_p = bank2_3_dsp_p;
 
-   dsp bank2_3_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank2_3_dsp_a),
-      .b   (bank2_3_dsp_b),
-      .p   (bank2_3_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank2_3_dsp_p <= (bank2_3_dsp_a * bank2_3_dsp_b) + bank2_3_dsp_p;
+      else
+        bank2_3_dsp_p <= bank2_3_dsp_a * bank2_3_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank4_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank4_dsp_b;
@@ -324,17 +322,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank4_5_dsp_a = tap_addr < 5'd8 ? bank4_dsp_a : bank5_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank4_5_dsp_b = tap_addr < 5'd8 ? bank4_dsp_b : bank5_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank4_5_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank4_5_dsp_p;
    assign bank4_dsp_p = bank4_5_dsp_p;
    assign bank5_dsp_p = bank4_5_dsp_p;
 
-   dsp bank4_5_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank4_5_dsp_a),
-      .b   (bank4_5_dsp_b),
-      .p   (bank4_5_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank4_5_dsp_p <= (bank4_5_dsp_a * bank4_5_dsp_b) + bank4_5_dsp_p;
+      else
+        bank4_5_dsp_p <= bank4_5_dsp_a * bank4_5_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank6_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank6_dsp_b;
@@ -388,17 +385,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank6_7_dsp_a = tap_addr < 5'd8 ? bank6_dsp_a : bank7_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank6_7_dsp_b = tap_addr < 5'd8 ? bank6_dsp_b : bank7_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank6_7_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank6_7_dsp_p;
    assign bank6_dsp_p = bank6_7_dsp_p;
    assign bank7_dsp_p = bank6_7_dsp_p;
 
-   dsp bank6_7_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank6_7_dsp_a),
-      .b   (bank6_7_dsp_b),
-      .p   (bank6_7_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank6_7_dsp_p <= (bank6_7_dsp_a * bank6_7_dsp_b) + bank6_7_dsp_p;
+      else
+        bank6_7_dsp_p <= bank6_7_dsp_a * bank6_7_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank8_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank8_dsp_b;
@@ -452,17 +448,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank8_9_dsp_a = tap_addr < 5'd8 ? bank8_dsp_a : bank9_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank8_9_dsp_b = tap_addr < 5'd8 ? bank8_dsp_b : bank9_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank8_9_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank8_9_dsp_p;
    assign bank8_dsp_p = bank8_9_dsp_p;
    assign bank9_dsp_p = bank8_9_dsp_p;
 
-   dsp bank8_9_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank8_9_dsp_a),
-      .b   (bank8_9_dsp_b),
-      .p   (bank8_9_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank8_9_dsp_p <= (bank8_9_dsp_a * bank8_9_dsp_b) + bank8_9_dsp_p;
+      else
+        bank8_9_dsp_p <= bank8_9_dsp_a * bank8_9_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank10_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank10_dsp_b;
@@ -516,17 +511,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank10_11_dsp_a = tap_addr < 5'd8 ? bank10_dsp_a : bank11_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank10_11_dsp_b = tap_addr < 5'd8 ? bank10_dsp_b : bank11_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank10_11_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank10_11_dsp_p;
    assign bank10_dsp_p = bank10_11_dsp_p;
    assign bank11_dsp_p = bank10_11_dsp_p;
 
-   dsp bank10_11_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank10_11_dsp_a),
-      .b   (bank10_11_dsp_b),
-      .p   (bank10_11_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank10_11_dsp_p <= (bank10_11_dsp_a * bank10_11_dsp_b) + bank10_11_dsp_p;
+      else
+        bank10_11_dsp_p <= bank10_11_dsp_a * bank10_11_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank12_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank12_dsp_b;
@@ -580,17 +574,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank12_13_dsp_a = tap_addr < 5'd8 ? bank12_dsp_a : bank13_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank12_13_dsp_b = tap_addr < 5'd8 ? bank12_dsp_b : bank13_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank12_13_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank12_13_dsp_p;
    assign bank12_dsp_p = bank12_13_dsp_p;
    assign bank13_dsp_p = bank12_13_dsp_p;
 
-   dsp bank12_13_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank12_13_dsp_a),
-      .b   (bank12_13_dsp_b),
-      .p   (bank12_13_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank12_13_dsp_p <= (bank12_13_dsp_a * bank12_13_dsp_b) + bank12_13_dsp_p;
+      else
+        bank12_13_dsp_p <= bank12_13_dsp_a * bank12_13_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank14_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank14_dsp_b;
@@ -644,17 +637,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank14_15_dsp_a = tap_addr < 5'd8 ? bank14_dsp_a : bank15_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank14_15_dsp_b = tap_addr < 5'd8 ? bank14_dsp_b : bank15_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank14_15_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank14_15_dsp_p;
    assign bank14_dsp_p = bank14_15_dsp_p;
    assign bank15_dsp_p = bank14_15_dsp_p;
 
-   dsp bank14_15_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank14_15_dsp_a),
-      .b   (bank14_15_dsp_b),
-      .p   (bank14_15_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank14_15_dsp_p <= (bank14_15_dsp_a * bank14_15_dsp_b) + bank14_15_dsp_p;
+      else
+        bank14_15_dsp_p <= bank14_15_dsp_a * bank14_15_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank16_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank16_dsp_b;
@@ -708,17 +700,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank16_17_dsp_a = tap_addr < 5'd8 ? bank16_dsp_a : bank17_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank16_17_dsp_b = tap_addr < 5'd8 ? bank16_dsp_b : bank17_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank16_17_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank16_17_dsp_p;
    assign bank16_dsp_p = bank16_17_dsp_p;
    assign bank17_dsp_p = bank16_17_dsp_p;
 
-   dsp bank16_17_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank16_17_dsp_a),
-      .b   (bank16_17_dsp_b),
-      .p   (bank16_17_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank16_17_dsp_p <= (bank16_17_dsp_a * bank16_17_dsp_b) + bank16_17_dsp_p;
+      else
+        bank16_17_dsp_p <= bank16_17_dsp_a * bank16_17_dsp_b;
+   end
 
    wire signed [DSP_A_WIDTH-1:0]    bank18_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank18_dsp_b;
@@ -772,17 +763,16 @@ module fir_poly #(
 
    wire signed [DSP_A_WIDTH-1:0]    bank18_19_dsp_a = tap_addr < 5'd8 ? bank18_dsp_a : bank19_dsp_a;
    wire signed [DSP_B_WIDTH-1:0]    bank18_19_dsp_b = tap_addr < 5'd8 ? bank18_dsp_b : bank19_dsp_b;
-   wire signed [DSP_P_WIDTH-1:0]    bank18_19_dsp_p;
+   reg signed [DSP_P_WIDTH-1:0]     bank18_19_dsp_p;
    assign bank18_dsp_p = bank18_19_dsp_p;
    assign bank19_dsp_p = bank18_19_dsp_p;
 
-   dsp bank18_19_dsp (
-      .clk (clk),
-      .acc (dsp_acc),
-      .a   (bank18_19_dsp_a),
-      .b   (bank18_19_dsp_b),
-      .p   (bank18_19_dsp_p)
-   );
+   always @(posedge clk) begin
+      if (dsp_acc)
+        bank18_19_dsp_p <= (bank18_19_dsp_a * bank18_19_dsp_b) + bank18_19_dsp_p;
+      else
+        bank18_19_dsp_p <= bank18_19_dsp_a * bank18_19_dsp_b;
+   end
 
    wire signed [INTERNAL_WIDTH-1:0] out_tmp = bank_dout[0]
         + bank_dout[1]

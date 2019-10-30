@@ -2,8 +2,6 @@
 `define _BANK_V_
 `default_nettype none
 
-`include "dsp.v"
-
 module bank #(
    parameter N_TAPS         = 120, /* total number of taps */
    parameter M              = 20,  /* decimation factor */
