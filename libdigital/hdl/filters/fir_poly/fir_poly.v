@@ -48,16 +48,20 @@ module fir_poly #(
       end
    end
 
-   // decimate the input signal by the downsampling factor.
-   reg signed [INPUT_WIDTH-1:0]     bank_din [0:M/2-1];
+   // Decimate the input signal by the downsampling factor. We can get
+   // away with M/2 since half the inputs will arrive at the right
+   // time (those where the accumulation starts on tap_addr == 0). The
+   // other half need to be registered. This relates to the way the
+   // multiply is time-multiplexed.
+   reg signed [INPUT_WIDTH-1:0]     bank_decimated_in [0:M/2-1];
    always @(posedge clk) begin
       if (!rst_n) begin
          for (i=0; i<M/2; i=i+1)
-           bank_din[i] <= {INPUT_WIDTH{1'b0}};
+           bank_decimated_in[i] <= {INPUT_WIDTH{1'b0}};
       end else if (tap_addr == 5'd19) begin
-         bank_din[0] <= din;
+         bank_decimated_in[0] <= din;
          for (i=2; i<M; i=i+2)
-           bank_din[i/2] <= shift_reg[i-1];
+           bank_decimated_in[i/2] <= shift_reg[i-1];
       end
    end
 
@@ -159,7 +163,6 @@ module fir_poly #(
    ) bank0 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (din),
       .dout            (bank_dout[0]),
       .tap_addr        (tap_addr),
@@ -184,8 +187,7 @@ module fir_poly #(
    ) bank1 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[0]),
+      .din             (bank_decimated_in[0]),
       .dout            (bank_dout[1]),
       .tap_addr        (tap_addr2),
       .tap             (tap1),
@@ -222,7 +224,6 @@ module fir_poly #(
    ) bank2 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[1]),
       .dout            (bank_dout[2]),
       .tap_addr        (tap_addr),
@@ -247,8 +248,7 @@ module fir_poly #(
    ) bank3 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[1]),
+      .din             (bank_decimated_in[1]),
       .dout            (bank_dout[3]),
       .tap_addr        (tap_addr2),
       .tap             (tap3),
@@ -285,7 +285,6 @@ module fir_poly #(
    ) bank4 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[3]),
       .dout            (bank_dout[4]),
       .tap_addr        (tap_addr),
@@ -310,8 +309,7 @@ module fir_poly #(
    ) bank5 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[2]),
+      .din             (bank_decimated_in[2]),
       .dout            (bank_dout[5]),
       .tap_addr        (tap_addr2),
       .tap             (tap5),
@@ -348,7 +346,6 @@ module fir_poly #(
    ) bank6 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[5]),
       .dout            (bank_dout[6]),
       .tap_addr        (tap_addr),
@@ -373,8 +370,7 @@ module fir_poly #(
    ) bank7 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[3]),
+      .din             (bank_decimated_in[3]),
       .dout            (bank_dout[7]),
       .tap_addr        (tap_addr2),
       .tap             (tap7),
@@ -411,7 +407,6 @@ module fir_poly #(
    ) bank8 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[7]),
       .dout            (bank_dout[8]),
       .tap_addr        (tap_addr),
@@ -436,8 +431,7 @@ module fir_poly #(
    ) bank9 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[4]),
+      .din             (bank_decimated_in[4]),
       .dout            (bank_dout[9]),
       .tap_addr        (tap_addr2),
       .tap             (tap9),
@@ -474,7 +468,6 @@ module fir_poly #(
    ) bank10 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[9]),
       .dout            (bank_dout[10]),
       .tap_addr        (tap_addr),
@@ -499,8 +492,7 @@ module fir_poly #(
    ) bank11 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[5]),
+      .din             (bank_decimated_in[5]),
       .dout            (bank_dout[11]),
       .tap_addr        (tap_addr2),
       .tap             (tap11),
@@ -537,7 +529,6 @@ module fir_poly #(
    ) bank12 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[11]),
       .dout            (bank_dout[12]),
       .tap_addr        (tap_addr),
@@ -562,8 +553,7 @@ module fir_poly #(
    ) bank13 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[6]),
+      .din             (bank_decimated_in[6]),
       .dout            (bank_dout[13]),
       .tap_addr        (tap_addr2),
       .tap             (tap13),
@@ -600,7 +590,6 @@ module fir_poly #(
    ) bank14 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[13]),
       .dout            (bank_dout[14]),
       .tap_addr        (tap_addr),
@@ -625,8 +614,7 @@ module fir_poly #(
    ) bank15 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[7]),
+      .din             (bank_decimated_in[7]),
       .dout            (bank_dout[15]),
       .tap_addr        (tap_addr2),
       .tap             (tap15),
@@ -663,7 +651,6 @@ module fir_poly #(
    ) bank16 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[15]),
       .dout            (bank_dout[16]),
       .tap_addr        (tap_addr),
@@ -688,8 +675,7 @@ module fir_poly #(
    ) bank17 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[8]),
+      .din             (bank_decimated_in[8]),
       .dout            (bank_dout[17]),
       .tap_addr        (tap_addr2),
       .tap             (tap17),
@@ -726,7 +712,6 @@ module fir_poly #(
    ) bank18 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
       .din             (shift_reg[17]),
       .dout            (bank_dout[18]),
       .tap_addr        (tap_addr),
@@ -751,8 +736,7 @@ module fir_poly #(
    ) bank19 (
       .clk             (clk),
       .rst_n           (rst_n),
-      .clk_2mhz_pos_en (clk_2mhz_pos_en),
-      .din             (bank_din[9]),
+      .din             (bank_decimated_in[9]),
       .dout            (bank_dout[19]),
       .tap_addr        (tap_addr2),
       .tap             (tap19),

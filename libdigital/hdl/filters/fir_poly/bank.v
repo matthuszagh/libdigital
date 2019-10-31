@@ -12,7 +12,6 @@ module bank #(
 ) (
    input wire                            clk,
    input wire                            rst_n,
-   input wire                            clk_2mhz_pos_en,
    input wire signed [INPUT_WIDTH-1:0]   din,
    output wire signed [OUTPUT_WIDTH-1:0] dout,
    input wire [M_LOG2-1:0]               tap_addr,
