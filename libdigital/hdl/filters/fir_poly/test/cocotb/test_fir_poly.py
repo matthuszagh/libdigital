@@ -94,6 +94,7 @@ async def check_sequence(dut):
         taps = fir.quantized_taps(tap_width)
     else:
         taps = fir.taps
+
     out_pre_dec = np.convolve(input_seq, taps)
     outputs = [out_pre_dec[i] for i in range(len(out_pre_dec)) if i % 20 == 0]
     # outputs = signal.resample_poly(input_seq, 1, downsample_factor, 0, taps)
