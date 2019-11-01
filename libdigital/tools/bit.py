@@ -12,7 +12,10 @@ def sub_integral_to_sint(real_val, prec):
     though it is in the valid two's complement range in order to
     simplify the computation somewhat.
     """
-    return int(round(real_val * (2 ** (prec - 1) - 1)))
+    int_val = int(round(real_val * (2 ** (prec - 1))))
+    if int_val == 2 ** (prec - 1):
+        int_val -= 1
+    return int_val
 
 
 def quantized_real(orig_val, prec):
@@ -25,7 +28,7 @@ def quantized_real(orig_val, prec):
     `sub_integral_to_sint'.
     """
     int_val = sub_integral_to_sint(orig_val, prec)
-    return int_val / (2 ** (prec - 1) - 1)
+    return int_val / (2 ** (prec - 1))
 
 
 def int_to_hex(i, prec):

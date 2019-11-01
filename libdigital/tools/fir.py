@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-from libdigital.tools.bit import *
+from libdigital.tools import bit
 
 
 class FIR:
@@ -49,7 +49,7 @@ class FIR:
 
         new_taps = np.zeros(len(taps))
         for i, tap in enumerate(taps):
-            new_taps[i] = quantized_real(tap, nbits)
+            new_taps[i] = bit.quantized_real(tap, nbits)
         return new_taps
 
     # TODO deprecate in favor of bit functions
@@ -149,7 +149,7 @@ class FIR:
 
         factor = 2 ** self.tap_normalization_shift(taps=taps)
         new_taps = np.zeros(len(taps))
-        for i in range(len(taps)):
+        for i, _ in enumerate(taps):
             new_taps[i] = factor * taps[i]
         return new_taps
 
@@ -186,8 +186,8 @@ class FIR:
 
         fir_hex = []
         for i, tap in enumerate(taps):
-            quant_tap = sub_integral_to_sint(tap, nbits)
-            fir_hex.append(int_to_hex(quant_tap, nbits))
+            quant_tap = bit.sub_integral_to_sint(tap, nbits)
+            fir_hex.append(bit.int_to_hex(quant_tap, nbits))
 
         if combine_adjacent_taps_files == False:
             for d in dirs:

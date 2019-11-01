@@ -25,17 +25,17 @@ module bank #(
    localparam M_LOG2        = $clog2(M);
    localparam BANK_LEN_LOG2 = $clog2(BANK_LEN);
 
-   reg signed [INPUT_WIDTH-1:0]         shift_reg [0:BANK_LEN-2];
+   reg signed [INPUT_WIDTH-1:0]         shift_reg [0:BANK_LEN-1];
 
    integer i;
    always @(posedge clk) begin
       if (!rst_n) begin
-         for (i=0; i<BANK_LEN-1; i=i+1)
+         for (i=0; i<BANK_LEN; i=i+1)
            shift_reg[i] <= 0;
       end else begin
          if (tap_addr == {M_LOG2{1'b0}}) begin
             shift_reg[0] <= din;
-            for (i=1; i<BANK_LEN-1; i=i+1)
+            for (i=1; i<BANK_LEN; i=i+1)
               shift_reg[i] <= shift_reg[i-1];
          end
       end
@@ -50,8 +50,10 @@ module bank #(
       endcase
    end
 
-   assign dsp_a = tap_addr < 5'd5 ? tap : {TAP_WIDTH{1'b0}};
-   assign dsp_b = tap_addr < 5'd5 ? dsp_din : {INPUT_WIDTH{1'b0}};
+   // TODO use BANK_LEN parameter for 5'd6 but while ensuring module
+   // generality and only using correct number of bits.
+   assign dsp_a = tap_addr < 5'd6 ? tap : {TAP_WIDTH{1'b0}};
+   assign dsp_b = tap_addr < 5'd6 ? dsp_din : {INPUT_WIDTH{1'b0}};
 
    reg signed [OUTPUT_WIDTH-1:0] p_reg;
 
