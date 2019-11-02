@@ -169,37 +169,23 @@ async def bank_output_vals(dut):
     while i > 0:
         outputs_count_up = num_outputs - i
         cur_input_index = downsample_factor * outputs_count_up
+        min_idx = max(cur_input_index - 119, 0)
+        max_idx = min(min_idx + 119, cur_input_index)
         last_120_inputs_indices = np.linspace(
-            max(cur_input_index - 120, 0),
-            cur_input_index,
-            min(cur_input_index + 1, 120),
-            dtype=int,
+            min_idx, max_idx, max_idx - min_idx + 1, dtype=int
         )
         last_120_inputs_indices = np.flip(last_120_inputs_indices)
         bank_outs.fill(0)
 
         for j, input_index in enumerate(last_120_inputs_indices):
-            # print(j)
-            # print(input_index)
-            # print(last_120_inputs_indices)
-            # print(input_seq[input_index])
-            # print(
-            #     bit.sub_integral_to_sint(
-            #         fir.taps[j] * (2 ** norm_shift), tap_width
-            #     )
-            # )
-            # print(bank_outs)
-            bank_outs[j % 20] += input_seq[
+            bank_outs[(20 - (input_index % 20)) % 20] += input_seq[
                 input_index
             ] * bit.sub_integral_to_sint(
                 fir.taps[j] * (2 ** norm_shift), tap_width
             )
-            # print(bank_outs)
-            # print("\n")
 
         await RisingEdge(tb.dut.clk_2mhz_pos_en)
         await ReadOnly()
-        # if tb.dut.dvalid.value.integer:
         bank_output_vars = [
             tb.dut.bank0.dout,
             tb.dut.bank1.dout,
