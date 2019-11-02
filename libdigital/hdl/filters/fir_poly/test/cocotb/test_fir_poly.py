@@ -111,11 +111,6 @@ async def check_sequence(dut):
             out_val = tb.dut.dout.value.signed_integer
             out_exp = int(round(outputs[num_outputs - i].item()))
             diffs.append(out_val - out_exp)
-            # print(
-            #     "expected: {:5}, actual: {:5}, difference: {:5}".format(
-            #         out_exp, out_val, out_val - out_exp
-            #     )
-            # )
             if abs(out_val - out_exp) > tol:
                 raise TestFailure(
                     (
