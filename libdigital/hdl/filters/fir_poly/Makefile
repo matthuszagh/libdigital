@@ -21,8 +21,12 @@ test_cocotb:
 test_icarus:
 	$(MAKE) -C $(TEST_DIR) icarus
 
-.PHONY: resources
-resources:
+.PHONY: synth
+synth:
+	$(MAKE) -C $(SCRIPT_DIR) synth
+
+.PHONY: synth_vivado
+synth_vivado:
 	$(MAKE) -C $(SCRIPT_DIR) synth_vivado
 
 .PHONY: taps

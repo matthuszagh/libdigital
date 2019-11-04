@@ -3,8 +3,6 @@ export
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/shift_reg
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
-VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram/old/single_port
-VERILOG_DIRS	+= $(HDL_ROOT)/dsp/multiply_add
 
 VERILOG_INCS	= $(addprefix -I,$(VERILOG_DIRS))
 VERILOG_SRCS	:= $(shell find $(VERILOG_DIRS) -maxdepth 1 -name '*.v')

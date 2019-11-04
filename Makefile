@@ -8,7 +8,7 @@ FIR_POLY_DIR	= $(HDL_ROOT)/filters/fir_poly
 
 # unit tests
 .PHONY: test
-test: test_fft test_fifo test_shift_reg test_ram test_fir_poly
+test: test_fft test_fifo test_fir_poly
 
 .PHONY: test_fft
 test_fft:
@@ -18,10 +18,12 @@ test_fft:
 test_fifo:
 	$(MAKE) -C $(FIFO_DIR) test
 
+# TODO
 .PHONY: test_shift_reg
 test_shift_reg:
 	$(MAKE) -C $(SHIFT_REG_DIR) test
 
+# TODO
 .PHONY: test_ram
 test_ram:
 	$(MAKE) -C $(RAM_DIR) test
@@ -37,3 +39,27 @@ formal: formal_fifo
 .PHONY: formal_fifo
 formal_fifo:
 	$(MAKE) -C $(FIFO_DIR) formal
+
+# synthesis
+.PHONY: synth
+synth: synth_fft synth_fifo synth_shift_reg synth_ram synth_fir_poly
+
+.PHONY: synth_fft
+synth_fft:
+	$(MAKE) -C $(FFT_DIR) synth
+
+.PHONY: synth_fifo
+synth_fifo:
+	$(MAKE) -C $(FIFO_DIR) synth
+
+.PHONY: synth_shift_reg
+synth_shift_reg:
+	$(MAKE) -C $(SHIFT_REG_DIR) synth
+
+.PHONY: synth_ram
+synth_ram:
+	$(MAKE) -C $(RAM_DIR) synth
+
+.PHONY: synth_fir_poly
+synth_fir_poly:
+	$(MAKE) -C $(FIR_POLY_DIR) synth
