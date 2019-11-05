@@ -80,7 +80,7 @@ async def check_sequence(dut):
     downsample_factor = 20
     num_outputs = int(num_samples / downsample_factor)
     input_width = 12
-    quantize_taps = True
+    quantize_taps = False
     tap_width = 16
 
     input_seq = np.zeros(num_samples)
@@ -97,10 +97,16 @@ async def check_sequence(dut):
         taps = fir.taps
 
     out_pre_dec = np.convolve(input_seq, taps)
-    outputs = [out_pre_dec[i] for i in range(len(out_pre_dec)) if i % 20 == 0]
+    # use convergent rounding
+    outputs = [
+        out_pre_dec[i]
+        # int(np.around(out_pre_dec[i]))
+        for i in range(len(out_pre_dec))
+        if i % 20 == 0
+    ]
     # outputs = signal.resample_poly(input_seq, 1, downsample_factor, 0, taps)
 
-    tol = 2
+    tol = 1
     i = num_outputs
     clk_en_ctr = 0
     diffs = []
@@ -109,7 +115,7 @@ async def check_sequence(dut):
         await ReadOnly()
         if tb.dut.dvalid.value.integer:
             out_val = tb.dut.dout.value.signed_integer
-            out_exp = int(round(outputs[num_outputs - i].item()))
+            out_exp = outputs[num_outputs - i]
             diffs.append(out_val - out_exp)
             if abs(out_val - out_exp) > tol:
                 raise TestFailure(
@@ -121,6 +127,28 @@ async def check_sequence(dut):
                 )
 
             i -= 1
+
+    avg_tol = 0.3
+    abs_avg_diff = np.average(np.abs(diffs))
+    avg_diff = abs(np.average(diffs))
+
+    if avg_diff > avg_tol:
+        raise TestFailure(
+            (
+                "Average deviation of %f further from zero than"
+                " expected. There might be a bias. Tolerance: %f."
+            )
+            % (avg_diff, avg_tol)
+        )
+
+    if abs_avg_diff > 2 * avg_tol:
+        raise TestFailure(
+            (
+                "Average absolute deviation of %f further from zero than"
+                " expected. There might be a problem. Tolerance: %f."
+            )
+            % (abs_avg_diff, 2 * avg_tol)
+        )
 
 
 @cocotb.test()

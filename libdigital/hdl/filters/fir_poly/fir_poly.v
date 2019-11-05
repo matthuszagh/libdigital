@@ -789,17 +789,20 @@ module fir_poly #(
    // since we compute the maximum value that an output can take, we
    // can drop bits at the top.
    localparam DROP_MSB_BITS = INTERNAL_WIDTH - OUTPUT_WIDTH - DROP_LSB_BITS;
-   localparam ROUND_BIT_POS = DROP_LSB_BITS - 1;
+   localparam INTERNAL_MIN_MSB = INTERNAL_WIDTH-DROP_MSB_BITS;
 
-   function [INTERNAL_WIDTH-1:0] round_nearest(input [INTERNAL_WIDTH-1:0] expr);
-      if (expr[INTERNAL_WIDTH-1] == 1'b0)
-        round_nearest = (expr[ROUND_BIT_POS] == 1'b1 ? expr + 1'b1 : expr);
-      else
-        round_nearest = (expr[ROUND_BIT_POS] == 1'b0 ? expr + 1'b1 : expr);
+   function [INTERNAL_MIN_MSB-1:0] drop_msb_bits(input [INTERNAL_WIDTH-1:0] expr);
+      drop_msb_bits = expr[INTERNAL_MIN_MSB-1:0];
    endfunction
 
-   function [OUTPUT_WIDTH-1:0] trunc_to_out(input [INTERNAL_WIDTH-1:0] expr);
-      trunc_to_out = expr[INTERNAL_WIDTH-DROP_MSB_BITS-1:DROP_LSB_BITS];
+   function [INTERNAL_MIN_MSB-1:0] round_convergent(input [INTERNAL_MIN_MSB-1:0] expr);
+      round_convergent = expr + {{OUTPUT_WIDTH{1'b0}},
+                                 expr[INTERNAL_MIN_MSB-OUTPUT_WIDTH],
+                                 {INTERNAL_MIN_MSB-OUTPUT_WIDTH-1{!expr[INTERNAL_MIN_MSB-OUTPUT_WIDTH]}}};
+   endfunction
+
+   function [OUTPUT_WIDTH-1:0] trunc_to_out(input [INTERNAL_MIN_MSB-1:0] expr);
+      trunc_to_out = expr[INTERNAL_MIN_MSB-1:INTERNAL_MIN_MSB-OUTPUT_WIDTH];
    endfunction
 
    // compute the sum of all bank outputs
@@ -815,7 +818,10 @@ module fir_poly #(
             // else
             //   dvalid_delay <= 1'b1;
 
-            dout <= trunc_to_out(round_nearest(out_tmp));
+            dout <= trunc_to_out(round_convergent(drop_msb_bits(out_tmp)));
+            // Simple truncation. Can be used to test effect of
+            // convergent rounding.
+            // dout <= out_tmp[INTERNAL_MIN_MSB-1:INTERNAL_MIN_MSB-OUTPUT_WIDTH];
          end
       end
    end

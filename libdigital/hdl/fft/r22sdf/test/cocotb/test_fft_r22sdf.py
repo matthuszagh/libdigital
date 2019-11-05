@@ -10,7 +10,7 @@ from libdigital.tools.cocotb_helpers import Clock, MultiClock
 
 import cocotb
 from cocotb.result import TestFailure
-from cocotb.triggers import *
+from cocotb.triggers import RisingEdge, ReadOnly, Combine
 from cocotb.binary import *
 
 
@@ -92,7 +92,8 @@ async def check_sequence(dut):
             if abs(rval - reals[bit_rev_ctr].item()) > tol:
                 raise TestFailure(
                     (
-                        "Actual real output differs from expected. Actual: %d, expected: %d. Tolerance set at %d."
+                        "Actual real output differs from expected."
+                        " Actual: %d, expected: %d. Tolerance set at %d."
                     )
                     % (rval, reals[bit_rev_ctr].item(), tol)
                 )
@@ -100,7 +101,8 @@ async def check_sequence(dut):
             if abs(ival - imags[bit_rev_ctr].item()) > tol:
                 raise TestFailure(
                     (
-                        "Actual imaginary output differs from expected. Actual: %d, expected: %d. Tolerance set at %d."
+                        "Actual imaginary output differs from expected."
+                        " Actual: %d, expected: %d. Tolerance set at %d."
                     )
                     % (ival, imags[bit_rev_ctr].item(), tol)
                 )
