@@ -809,14 +809,9 @@ module fir_poly #(
    always @(posedge clk) begin
       if (!rst_n) begin
          dvalid <= 1'b0;
-         // dvalid_delay <= 1'b0;
       end else begin
          if (clk_2mhz_pos_en) begin
             dvalid <= 1'b1;
-            // if (dvalid_delay)
-            //   dvalid <= 1'b1;
-            // else
-            //   dvalid_delay <= 1'b1;
 
             dout <= trunc_to_out(round_convergent(drop_msb_bits(out_tmp)));
             // Simple truncation. Can be used to test effect of
@@ -840,9 +835,6 @@ module fir_poly #(
 endmodule
 
 `ifdef ICARUS
-
-// `include "/home/matt/src/vivado/2019_libs/unisims/DSP48E1.v"
-// `include "/home/matt/src/vivado/2019_libs/glbl.v"
 
 `timescale 1ns/1ps
 module fir_poly_tb;
