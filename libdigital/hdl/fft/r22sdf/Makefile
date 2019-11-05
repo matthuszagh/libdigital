@@ -1,4 +1,5 @@
 export
+HDL_ROOT	?= /home/matt/src/libdigital/libdigital/hdl
 # Source files
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/shift_reg

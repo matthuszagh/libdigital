@@ -132,6 +132,23 @@ module fft_r22sdf_wm #(
 
    assign p_dsp = (a_dsp * b_dsp) + c_dsp;
 
+   parameter INTERNAL_WIDTH = DATA_WIDTH+TWIDDLE_WIDTH;
+   parameter INTERNAL_MIN_MSB = INTERNAL_WIDTH - 1;
+
+   function [INTERNAL_MIN_MSB-1:0] drop_msb_bits(input [INTERNAL_WIDTH:0] expr);
+      drop_msb_bits = expr[INTERNAL_MIN_MSB-1:0];
+   endfunction
+
+   function [INTERNAL_MIN_MSB-1:0] round_convergent(input [INTERNAL_MIN_MSB-1:0] expr);
+      round_convergent = expr + {{DATA_WIDTH{1'b0}},
+                                 expr[INTERNAL_MIN_MSB-DATA_WIDTH],
+                                 {INTERNAL_MIN_MSB-DATA_WIDTH-1{!expr[INTERNAL_MIN_MSB-DATA_WIDTH]}}};
+   endfunction
+
+   function [DATA_WIDTH-1:0] trunc_to_out(input [INTERNAL_MIN_MSB-1:0] expr);
+      trunc_to_out = expr[INTERNAL_MIN_MSB-1:INTERNAL_MIN_MSB-DATA_WIDTH];
+   endfunction
+
    reg [NLOG2-1:0] ctr_reg;
    reg [NLOG2-1:0] ctr_reg2;
    always @(posedge clk_i) begin
@@ -142,18 +159,16 @@ module fft_r22sdf_wm #(
          ctr_reg2 <= ctr_reg;
          ctr_o    <= ctr_reg2;
 
-         // TODO does this cause rounding error? see the zipcpu blog
-         // post about rounding.
-
          // TODO verify that dropping msb is ok
-
-         // TODO since this is signed, maybe I should take the MSB and
-         // then other bits?
 
          // safe to ignore the msb since the greatest possible
          // absolute twiddle value is 2^(TWIDDLE_WIDTH-1)
-         z_re_o   <= kar_r[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
-         z_im_o   <= kar_i[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
+         z_re_o   <= trunc_to_out(round_convergent(drop_msb_bits(kar_r)));
+         z_im_o   <= trunc_to_out(round_convergent(drop_msb_bits(kar_i)));
+
+         // simple truncation for comparison
+         // z_re_o   <= kar_r[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
+         // z_im_o   <= kar_i[DATA_WIDTH+TWIDDLE_WIDTH-2:TWIDDLE_WIDTH-1];
       end
    end
 

@@ -68,12 +68,14 @@ async def check_sequence(dut):
 
     input_seq = input_seq.astype(int)
     outputs = np.fft.fft(input_seq)
-    reals = outputs.real.astype(int)
-    imags = outputs.imag.astype(int)
+    reals = outputs.real
+    imags = outputs.imag
 
     # TODO this tolerance is way too high. This is just an initial
     # sanity check.
-    tol = 2 ** 25 / 1e4
+    tol = 3000
+    rdiffs = []
+    idiffs = []
 
     glbl_ctr = 0
     i = num_samples
@@ -86,26 +88,52 @@ async def check_sequence(dut):
         fft.dut.data_im_i <= 0
         await ReadOnly()
         if fft.dut.sync_o.value.integer:
-            rval = fft.dut.data_re_o.value.signed_integer
-            ival = fft.dut.data_im_o.value.signed_integer
             bit_rev_ctr = fft.dut.data_ctr_o.value.integer
-            if abs(rval - reals[bit_rev_ctr].item()) > tol:
+            rval = fft.dut.data_re_o.value.signed_integer
+            rexp = reals[bit_rev_ctr].item()
+            rdiffs.append(rval - rexp)
+            ival = fft.dut.data_im_o.value.signed_integer
+            iexp = imags[bit_rev_ctr].item()
+            idiffs.append(ival - iexp)
+            if abs(rval - rexp) > tol:
                 raise TestFailure(
                     (
                         "Actual real output differs from expected."
-                        " Actual: %d, expected: %d. Tolerance set at %d."
+                        " Actual: %d, expected: %d, difference: %d."
+                        " Tolerance set at %d."
                     )
-                    % (rval, reals[bit_rev_ctr].item(), tol)
+                    % (rval, rexp, rval - rexp, tol)
                 )
 
-            if abs(ival - imags[bit_rev_ctr].item()) > tol:
+            if abs(ival - iexp) > tol:
                 raise TestFailure(
                     (
                         "Actual imaginary output differs from expected."
-                        " Actual: %d, expected: %d. Tolerance set at %d."
+                        " Actual: %d, expected: %d, difference: %d."
+                        " Tolerance set at %d."
                     )
-                    % (ival, imags[bit_rev_ctr].item(), tol)
+                    % (ival, iexp, ival - iexp, tol)
                 )
 
             i -= 1
         await RisingEdge(fft.dut.clk_i)
+
+    avg_tol = 40
+    if abs(np.average(rdiffs)) > avg_tol:
+        raise TestFailure(
+            (
+                "Average real outputs differ from expected more than"
+                " tolerated. There might be a bias. Difference %f."
+                " Tolerated: %f"
+            )
+            % (np.average(rdiffs), avg_tol)
+        )
+    if abs(np.average(idiffs)) > avg_tol:
+        raise TestFailure(
+            (
+                "Average imaginary outputs differ from expected more than"
+                " tolerated. There might be a bias. Difference %f."
+                " Tolerated: %f"
+            )
+            % (np.average(idiffs), avg_tol)
+        )
