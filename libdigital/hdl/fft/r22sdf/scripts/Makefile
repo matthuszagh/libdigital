@@ -7,7 +7,7 @@ VERILOG_INCS	:= $(filter-out -I$(TOP_MODULE_DIR),$(VERILOG_INCS))
 VERILOG_SRCS    := $(filter-out $(TOP_MODULE_SRC),$(VERILOG_SRCS))
 
 VIVADO_DIR	= vivado
-VIVADO_INCS	:= $(filter-out -I,)
+VIVADO_INCS	= $(subst -I,,$(VERILOG_INCS))
 
 .PHONY: synth
 synth: synth_xilinx

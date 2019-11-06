@@ -382,6 +382,7 @@ module fft_r22sdf #(
             .z_im_o   (w3_im)
          );
 
+         /* verilator lint_off PINMISSING */
          fft_r22sdf_bf #(
             .DATA_WIDTH (OUTPUT_WIDTH),
             .FFT_N      (N),
@@ -397,6 +398,7 @@ module fft_r22sdf #(
             .z_re_o (bf4_re),
             .z_im_o (bf4_im)
          );
+         /* verilator lint_on PINMISSING */
       end // if (N > 4)
    endgenerate
 
@@ -433,6 +435,10 @@ module fft_r22sdf #(
       endcase
    endgenerate
 
+   /* verilator lint_off WIDTH */
+   localparam [N_LOG2-1:0] SYNC_STAGE = N_STAGES-2;
+   /* verilator lint_on WIDTH */
+
    always @(posedge clk_i) begin
       if (!rst_n) begin
          sync_o            <= 1'b0;
@@ -449,7 +455,7 @@ module fft_r22sdf #(
             data_ctr_bit_nrml <= {N_LOG2{1'b0}};
          end
 
-         if (stage4_ctr == N_STAGES-2 || sync_o == 1'b1) begin
+         if (stage4_ctr == SYNC_STAGE || sync_o == 1'b1) begin
             sync_o <= 1'b1;
          end else begin
             sync_o <= 1'b0;

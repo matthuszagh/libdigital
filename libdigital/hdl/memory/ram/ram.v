@@ -33,6 +33,7 @@ module ram #(
 
    integer                i;
    generate
+      /* verilator lint_off WIDTH */
       if (INITFILE == "") begin
          initial begin
             for (i=0; i<SIZE; i=i+1)
@@ -43,6 +44,7 @@ module ram #(
             $readmemh(INITFILE, mem);
          end
       end
+      /* verilator lint_on WIDTH */
    endgenerate
 
    wire                   conflict = (rden && wren) ? (rdaddr == wraddr) : 1'b0;
