@@ -112,7 +112,7 @@ module ft245 #(
 
    reg [CTR_WIDTH-1:0]          ctr;
 
-   always @(negedge ft_clk) begin
+   always @(posedge ft_clk) begin
       if (!rst_n) begin
          ctr <= {CTR_WIDTH{1'b0}};
       end else if (oe_n) begin
@@ -163,7 +163,7 @@ module ft245 #(
          end
 
          assign wr_fifo_rd_en = ~duplicate;
-         always @(negedge ft_clk) begin
+         always @(posedge ft_clk) begin
             if (!rst_n) begin
                rd_n <= 1'b1;
                wr_n <= 1'b1;
@@ -185,7 +185,7 @@ module ft245 #(
          end
       end else begin
          assign wr_fifo_rd_en = 1'b1;
-         always @(negedge ft_clk) begin
+         always @(posedge ft_clk) begin
             if (!rst_n) begin
                rd_n <= 1'b1;
                wr_n <= 1'b1;
