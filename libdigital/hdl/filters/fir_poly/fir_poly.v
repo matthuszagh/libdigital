@@ -1,8 +1,5 @@
 `default_nettype none
 
-// TODO consider using a bandpass filter instead of lowpass filter for
-// the FPGA.
-
 `include "bank.v"
 
 `timescale 1ns/1ps

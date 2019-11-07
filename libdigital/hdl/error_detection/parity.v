@@ -1,5 +1,7 @@
 `default_nettype none
 
+// Generates an even parity bit.
+
 module parity #(
    parameter DATA_WIDTH = 8
 ) (

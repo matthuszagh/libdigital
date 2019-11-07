@@ -2,9 +2,22 @@
 A collection of useful functions for extending cocotb.
 """
 
+import numpy as np
+
 import cocotb
 from cocotb import clock
 from cocotb.triggers import Timer, RisingEdge
+
+
+def random_samples(bit_width, num_samples):
+    """
+    Generate a random sequence of values where each data point in the
+    sequence has its range determined by @bit_width.
+    """
+    seq = np.zeros(num_samples, dtype=int)
+    for i, _ in enumerate(seq):
+        seq[i] = np.random.randint(-2 ** (bit_width - 1), 2 ** (bit_width - 1))
+    return seq
 
 
 class Clock:
@@ -32,7 +45,7 @@ class Clock:
         self.phase = 1e3 * phase
 
     def scale(self, factor):
-        """Scale the clock period and phase shift by factor."""
+        """Scale the clock period and phase shift by @factor."""
         self.period *= factor
         self.phase *= factor
 
