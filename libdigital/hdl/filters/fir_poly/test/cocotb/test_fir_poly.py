@@ -26,6 +26,16 @@ class FIRTB:
         self.dut = dut
         self.inputs = random_samples(input_width, num_samples)
         self.downsample_factor = 20
+        self.fir = FIR(
+            numtaps=120,
+            bands=[0, 0.95e6, 1e6, 20e6],
+            band_gain=[1, 0],
+            fs=40e6,
+            pass_db=0.5,
+            stop_db=-40,
+        )
+        self.taps = self.fir.taps
+        self.outputs = self.gen_outputs()
 
     @cocotb.coroutine
     async def setup(self):
@@ -62,47 +72,36 @@ class FIRTB:
             sample_ctr += 1
             await RisingEdge(self.dut.clk)
 
+    def gen_outputs(self):
+        """
+        Generate expected outputs.
+        """
+        out_pre_dec = np.convolve(self.inputs, self.taps)
+        # use convergent rounding
+        outputs = [
+            out_pre_dec[i]
+            # int(np.around(out_pre_dec[i]))
+            for i in range(len(out_pre_dec))
+            if i % self.downsample_factor == 0
+        ]
+        return outputs
+
 
 @cocotb.test()
 async def check_sequence(dut):
     """
     Compare the output from a randomly-generated sequence with scipy.
     """
-    fir = FIR(
-        numtaps=120,
-        bands=[0, 0.95e6, 1e6, 20e6],
-        band_gain=[1, 0],
-        fs=40e6,
-        pass_db=0.5,
-        stop_db=-40,
-    )
     num_samples = 10000
     input_width = 12
     tap_width = 16
     tb = FIRTB(dut, num_samples, input_width, tap_width)
     await tb.setup()
-    downsample_factor = 20
-    num_outputs = int(num_samples / downsample_factor)
-    quantize_taps = False
 
     cocotb.fork(tb.write_continuous())
 
-    if quantize_taps:
-        taps = fir.quantized_taps(tap_width)
-    else:
-        taps = fir.taps
-
-    out_pre_dec = np.convolve(tb.inputs, taps)
-    # use convergent rounding
-    outputs = [
-        out_pre_dec[i]
-        # int(np.around(out_pre_dec[i]))
-        for i in range(len(out_pre_dec))
-        if i % 20 == 0
-    ]
-
     tol = 1
-    i = num_outputs
+    i = len(tb.outputs)
     clk_en_ctr = 0
     diffs = []
     while i > 0:
@@ -110,7 +109,7 @@ async def check_sequence(dut):
         await ReadOnly()
         if tb.dut.dvalid.value.integer:
             out_val = tb.dut.dout.value.signed_integer
-            out_exp = outputs[num_outputs - i]
+            out_exp = tb.outputs[len(tb.outputs) - i]
             diffs.append(out_val - out_exp)
             if abs(out_val - out_exp) > tol:
                 raise TestFailure(
@@ -151,49 +150,35 @@ async def bank_output_vals(dut):
     """
     Ensure the bank output values are correct at all points time.
     """
-    fir = FIR(
-        numtaps=120,
-        bands=[0, 0.95e6, 1e6, 20e6],
-        band_gain=[1, 0],
-        fs=40e6,
-        pass_db=0.5,
-        stop_db=-40,
-    )
     num_samples = 10000
     input_width = 12
     tap_width = 16
     tb = FIRTB(dut, num_samples, input_width, tap_width)
     await tb.setup()
-    downsample_factor = 20
-    num_outputs = int(num_samples / downsample_factor)
-    quantize_taps = False
     norm_shift = 3
 
     cocotb.fork(tb.write_continuous())
 
-    if quantize_taps:
-        taps = fir.quantized_taps(tap_width)
-    else:
-        taps = fir.taps
-
+    # we can't use len(tb.outputs) here since we want 500 and that
+    # gives 506 due to the resultant length of a convolution
+    num_outputs = int(num_samples / tb.downsample_factor)
     i = num_outputs
-    bank_outs = np.zeros(downsample_factor, dtype=int)
+    bank_outs = np.zeros(tb.downsample_factor, dtype=int)
     while i > 0:
         outputs_count_up = num_outputs - i
-        cur_input_index = downsample_factor * outputs_count_up
+        cur_input_index = tb.downsample_factor * outputs_count_up
         min_idx = max(cur_input_index - 119, 0)
         max_idx = min(min_idx + 119, cur_input_index)
         last_120_inputs_indices = np.linspace(
-            min_idx, max_idx, max_idx - min_idx + 1, dtype=int
+            max_idx, min_idx, max_idx - min_idx + 1, dtype=int
         )
-        last_120_inputs_indices = np.flip(last_120_inputs_indices)
         bank_outs.fill(0)
 
         for j, input_index in enumerate(last_120_inputs_indices):
             bank_outs[(20 - (input_index % 20)) % 20] += tb.inputs[
                 input_index
             ] * bit.sub_integral_to_sint(
-                fir.taps[j] * (2 ** norm_shift), tap_width
+                tb.fir.taps[j] * (2 ** norm_shift), tap_width
             )
 
         await RisingEdge(tb.dut.clk_2mhz_pos_en)
@@ -221,7 +206,7 @@ async def bank_output_vals(dut):
             tb.dut.bank19.dout,
         ]
 
-        for bank in range(downsample_factor):
+        for bank in range(tb.downsample_factor):
             bank_out = bank_output_vars[bank].value.signed_integer
             exp_out = bank_outs[bank]
             if bank_out != exp_out:
