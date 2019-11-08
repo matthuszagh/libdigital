@@ -17,7 +17,7 @@ def random_samples(bit_width, num_samples):
     seq = np.zeros(num_samples, dtype=int)
     for i, _ in enumerate(seq):
         seq[i] = np.random.randint(-2 ** (bit_width - 1), 2 ** (bit_width - 1))
-    return seq
+    return seq.astype(int)
 
 
 class Clock:
