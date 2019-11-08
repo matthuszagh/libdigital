@@ -6,7 +6,7 @@ Unit tests for fir_poly.
 import numpy as np
 from scipy import signal
 
-from libdigital.tools.cocotb_helpers import Clock, ClockEnable
+from libdigital.tools.cocotb_helpers import Clock, ClockEnable, random_samples
 from libdigital.tools.fir import FIR
 from libdigital.tools import bit
 
@@ -20,10 +20,12 @@ class FIRTB:
     FIR testbench class.
     """
 
-    def __init__(self, dut):
+    def __init__(self, dut, num_samples, input_width, tap_width):
         self.clk = Clock(dut.clk, 40)
         self.clk_en = ClockEnable(dut.clk, dut.clk_2mhz_pos_en, dut.rst_n, 20)
         self.dut = dut
+        self.inputs = random_samples(input_width, num_samples)
+        self.downsample_factor = 20
 
     @cocotb.coroutine
     async def setup(self):
@@ -45,16 +47,16 @@ class FIRTB:
         self.dut.rst_n <= 1
 
     @cocotb.coroutine
-    async def write_continuous(self, inputs):
+    async def write_continuous(self):
         """
         Continously write inputs. When inputs have been exhausted, write
         zeros.
         """
         sample_ctr = 0
-        num_samples = len(inputs)
+        num_samples = len(self.inputs)
         while True:
             if sample_ctr < num_samples:
-                self.dut.din <= inputs[sample_ctr].item()
+                self.dut.din <= self.inputs[sample_ctr].item()
             else:
                 self.dut.din <= 0
             sample_ctr += 1
@@ -74,29 +76,23 @@ async def check_sequence(dut):
         pass_db=0.5,
         stop_db=-40,
     )
-    tb = FIRTB(dut)
-    await tb.setup()
     num_samples = 10000
+    input_width = 12
+    tap_width = 16
+    tb = FIRTB(dut, num_samples, input_width, tap_width)
+    await tb.setup()
     downsample_factor = 20
     num_outputs = int(num_samples / downsample_factor)
-    input_width = 12
     quantize_taps = False
-    tap_width = 16
 
-    input_seq = np.zeros(num_samples)
-    for i, _ in enumerate(input_seq):
-        input_seq[i] = np.random.randint(
-            -2 ** (input_width - 1), 2 ** (input_width - 1)
-        )
-    input_seq = input_seq.astype(int)
-    cocotb.fork(tb.write_continuous(input_seq))
+    cocotb.fork(tb.write_continuous())
 
     if quantize_taps:
         taps = fir.quantized_taps(tap_width)
     else:
         taps = fir.taps
 
-    out_pre_dec = np.convolve(input_seq, taps)
+    out_pre_dec = np.convolve(tb.inputs, taps)
     # use convergent rounding
     outputs = [
         out_pre_dec[i]
@@ -104,7 +100,6 @@ async def check_sequence(dut):
         for i in range(len(out_pre_dec))
         if i % 20 == 0
     ]
-    # outputs = signal.resample_poly(input_seq, 1, downsample_factor, 0, taps)
 
     tol = 1
     i = num_outputs
@@ -164,23 +159,17 @@ async def bank_output_vals(dut):
         pass_db=0.5,
         stop_db=-40,
     )
-    tb = FIRTB(dut)
-    await tb.setup()
     num_samples = 10000
+    input_width = 12
+    tap_width = 16
+    tb = FIRTB(dut, num_samples, input_width, tap_width)
+    await tb.setup()
     downsample_factor = 20
     num_outputs = int(num_samples / downsample_factor)
-    input_width = 12
     quantize_taps = False
-    tap_width = 16
     norm_shift = 3
 
-    input_seq = np.zeros(num_samples)
-    for i, _ in enumerate(input_seq):
-        input_seq[i] = np.random.randint(
-            -2 ** (input_width - 1), 2 ** (input_width - 1)
-        )
-    input_seq = input_seq.astype(int)
-    cocotb.fork(tb.write_continuous(input_seq))
+    cocotb.fork(tb.write_continuous())
 
     if quantize_taps:
         taps = fir.quantized_taps(tap_width)
@@ -201,7 +190,7 @@ async def bank_output_vals(dut):
         bank_outs.fill(0)
 
         for j, input_index in enumerate(last_120_inputs_indices):
-            bank_outs[(20 - (input_index % 20)) % 20] += input_seq[
+            bank_outs[(20 - (input_index % 20)) % 20] += tb.inputs[
                 input_index
             ] * bit.sub_integral_to_sint(
                 fir.taps[j] * (2 ** norm_shift), tap_width
