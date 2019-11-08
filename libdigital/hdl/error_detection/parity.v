@@ -1,3 +1,5 @@
+`ifndef _PARITY_V_
+`define _PARITY_V_
 `default_nettype none
 
 // Generates an even parity bit.
@@ -54,4 +56,5 @@ module parity_tb;
    );
 
 endmodule
+`endif
 `endif

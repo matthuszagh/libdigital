@@ -1,3 +1,5 @@
+`ifndef _LTC2292_V_
+`define _LTC2292_V_
 `default_nettype none
 
 // Simple interface for the LTC2292 ADC.
@@ -31,3 +33,4 @@ module ltc2292 #(
    end
 
 endmodule
+`endif

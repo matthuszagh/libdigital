@@ -1,3 +1,5 @@
+`ifndef _ADF4158_V_
+`define _ADF4158_V_
 `default_nettype none
 
 // `adf4158' can be used to configure and control an ADF4158 frequency
@@ -394,4 +396,5 @@ module adf4158_tb;
 
 endmodule
 
+`endif
 `endif
