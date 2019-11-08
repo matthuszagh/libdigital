@@ -804,8 +804,6 @@ module fir_poly #(
       trunc_to_out = expr[INTERNAL_MIN_MSB-1:INTERNAL_MIN_MSB-OUTPUT_WIDTH];
    endfunction
 
-   // TODO delay breaks tests, but should be correct for module. Fix
-   // tests.
    reg                              dvalid_delay;
    // compute the sum of all bank outputs
    always @(posedge clk) begin
@@ -814,10 +812,9 @@ module fir_poly #(
          dvalid_delay <= 1'b0;
       end else begin
          if (clk_2mhz_pos_en) begin
-            dvalid <= 1'b1;
-            // dvalid_delay <= 1'b1;
-            // if (dvalid_delay)
-            //   dvalid <= 1'b1;
+            dvalid_delay <= 1'b1;
+            if (dvalid_delay)
+              dvalid <= 1'b1;
 
             dout <= trunc_to_out(round_convergent(drop_msb_bits(out_tmp)));
             // Simple truncation. Can be used to test effect of

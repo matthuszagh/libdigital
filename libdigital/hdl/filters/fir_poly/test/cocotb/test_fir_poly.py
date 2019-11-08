@@ -84,7 +84,9 @@ class FIRTB:
             for i in range(len(out_pre_dec))
             if i % self.downsample_factor == 0
         ]
-        return outputs
+        # Drop the first value. This ensures that the first output
+        # gets the full 2MHz cycle of inputs.
+        return outputs[1:]
 
 
 @cocotb.test()
