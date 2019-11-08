@@ -81,8 +81,8 @@ module fft_r22sdf_wm #(
               // updating the regs on `mul_state==2'd1' ensures that
               // `kar_i' is not set before `kar_f'.
               x_re_reg  <= x_re_i;
-              x_im_reg  <= x_im_i;
               x_re_reg2 <= x_re_reg;
+              x_im_reg  <= x_im_i;
               x_im_reg2 <= x_im_reg;
               w_re_reg  <= w_re_i;
               w_im_reg  <= w_im_i;
