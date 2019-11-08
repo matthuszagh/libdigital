@@ -54,6 +54,13 @@ module fft_r22sdf_wm #(
    reg signed [TWIDDLE_WIDTH-1:0] w_re_reg;
    reg signed [TWIDDLE_WIDTH-1:0] w_im_reg;
 
+   reg signed [DATA_WIDTH-1:0] a0_reg;
+   reg signed [TWIDDLE_WIDTH:0] b0_reg;
+   reg signed [DATA_WIDTH-1:0] a1_reg;
+   reg signed [TWIDDLE_WIDTH:0] b1_reg;
+   reg signed [DATA_WIDTH-1:0] a2_reg;
+   reg signed [TWIDDLE_WIDTH:0] b2_reg;
+
    // `mul_state_start' ensures that `mul_state' is not dependent on
    // when `rst_n' is released.
    reg                            mul_state_start;
@@ -73,6 +80,9 @@ module fft_r22sdf_wm #(
            begin
               kar_r     <= p_dsp;
               mul_state <= 2'd1;
+
+              a0_reg <= x_im_reg2;
+              b0_reg <= w_re_reg - w_im_reg;
            end
          2'd1:
            begin
@@ -86,11 +96,17 @@ module fft_r22sdf_wm #(
               x_im_reg2 <= x_im_reg;
               w_re_reg  <= w_re_i;
               w_im_reg  <= w_im_i;
+
+              a1_reg <= x_re_reg2;
+              b1_reg <= w_re_reg + w_im_reg;
            end
          2'd2:
            begin
               kar_f     <= p_dsp;
               mul_state <= 2'd0;
+
+              a2_reg <= x_re_reg2 - x_im_reg2;
+              b2_reg <= sign_extend_b(w_re_reg);
            end
          endcase
       end
@@ -105,20 +121,20 @@ module fft_r22sdf_wm #(
       case (mul_state)
       2'd0:
         begin
-           a_dsp = x_im_reg2;
-           b_dsp = w_re_reg - w_im_reg;
+           a_dsp = a0_reg;
+           b_dsp = b0_reg;
            c_dsp = kar_f;
         end
       2'd1:
         begin
-           a_dsp = x_re_reg2;
-           b_dsp = w_re_reg + w_im_reg;
+           a_dsp = a1_reg;
+           b_dsp = b1_reg;
            c_dsp = -kar_f;
         end
       2'd2:
         begin
-           a_dsp = x_re_reg2 - x_im_reg2;
-           b_dsp = sign_extend_b(w_re_reg);
+           a_dsp = a2_reg;
+           b_dsp = b2_reg;
            c_dsp = {DATA_WIDTH+TWIDDLE_WIDTH+1{1'b0}};
         end
       default:
@@ -151,13 +167,15 @@ module fft_r22sdf_wm #(
 
    reg [NLOG2-1:0] ctr_reg;
    reg [NLOG2-1:0] ctr_reg2;
+   reg [NLOG2-1:0] ctr_reg3;
    always @(posedge clk_i) begin
       if (!rst_n) begin
          ctr_o    <= {NLOG2{1'b0}};
       end else begin
          ctr_reg  <= ctr_i;
          ctr_reg2 <= ctr_reg;
-         ctr_o    <= ctr_reg2;
+         ctr_reg3 <= ctr_reg2;
+         ctr_o    <= ctr_reg3;
 
          // TODO verify that dropping msb is ok
 

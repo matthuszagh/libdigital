@@ -118,7 +118,7 @@ async def check_sequence(dut):
             i -= 1
         await RisingEdge(fft.dut.clk_i)
 
-    avg_tol = 40
+    avg_tol = 70
     if abs(np.average(rdiffs)) > avg_tol:
         raise TestFailure(
             (
