@@ -10,7 +10,7 @@ from libdigital.tools.cocotb_helpers import Clock, MultiClock, random_samples
 
 import cocotb
 from cocotb.result import TestFailure
-from cocotb.triggers import RisingEdge, ReadOnly, Combine
+from cocotb.triggers import RisingEdge, ReadOnly, Combine, Timer
 from cocotb.binary import *
 
 
@@ -24,8 +24,9 @@ class FFTTB:
         clk_3x = Clock(dut.clk_3x_i, 120)
         self.multiclock = MultiClock([clk, clk_3x])
         self.dut = dut
-        self.inputs = random_samples(input_width, num_samples)
-        self.outputs = np.fft.fft(self.inputs)
+        self.re_inputs = random_samples(input_width, num_samples)
+        self.im_inputs = random_samples(input_width, num_samples)
+        self.outputs = np.fft.fft(self.re_inputs + 1j * self.im_inputs)
 
     @cocotb.coroutine
     async def setup(self):
@@ -86,6 +87,38 @@ class FFTTB:
 
         return (rdiff, idiff)
 
+    @cocotb.coroutine
+    async def write_inputs(self):
+        """
+        Send all calculated inputs to dut.
+        """
+        ctr = 0
+        num_samples = len(self.re_inputs)
+        while True:
+            if ctr < num_samples:
+                self.dut.data_re_i <= self.re_inputs[ctr].item()
+                self.dut.data_im_i <= self.im_inputs[ctr].item()
+            else:
+                self.dut.data_re_i <= 0
+                self.dut.data_im_i <= 0
+
+            await RisingEdge(self.dut.clk_i)
+            ctr += 1
+
+    @cocotb.coroutine
+    async def send_intermittent_resets(self):
+        """
+        Randomly send reset signals to FFT.
+        """
+        timestep = min(self.multiclock.clock_periods())
+        while True:
+            self.dut.rst_n <= 0
+            time_on = timestep * np.random.randint(1e2, 1e4, dtype=int)
+            await Timer(time_on)
+            self.dut.rst_n <= 1
+            time_off = timestep * np.random.randint(1e1, 1e2, dtype=int)
+            await Timer(time_off)
+
 
 @cocotb.test()
 async def check_sequence(dut):
@@ -96,10 +129,7 @@ async def check_sequence(dut):
     input_width = 14
     fft = FFTTB(dut, num_samples, input_width)
     await fft.setup()
-
-    # low bound is inclusive and upper bound is exclusive
-    reals = np.real(fft.outputs)
-    imags = np.imag(fft.outputs)
+    cocotb.fork(fft.write_inputs())
 
     # TODO this tolerance is way too high. This is just an initial
     # sanity check.
@@ -107,15 +137,8 @@ async def check_sequence(dut):
     rdiffs = []
     idiffs = []
 
-    glbl_ctr = 0
     i = num_samples
     while i > 0:
-        if glbl_ctr < num_samples:
-            fft.dut.data_re_i <= fft.inputs[glbl_ctr].item()
-        else:
-            fft.dut.data_re_i <= 0
-        glbl_ctr += 1
-        fft.dut.data_im_i <= 0
         await ReadOnly()
         if fft.dut.sync_o.value.integer:
             (rval, ival) = fft.check_outputs(tol)
@@ -144,3 +167,14 @@ async def check_sequence(dut):
             )
             % (np.average(idiffs), avg_tol)
         )
+
+
+# @cocotb.test()
+# async def rand_resets(dut):
+#     """
+#     Test the FFT's behavior when sending intermittent reset signals.
+#     """
+#     num_samples = 1024
+#     input_width = 14
+#     fft = FFTTB(dut, num_samples, input_width)
+#     await fft.setup()
