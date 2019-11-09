@@ -6,7 +6,7 @@ Unit tests for R2^2 SDF FFT.
 import numpy as np
 
 import libdigital.tools.bit as bit
-from libdigital.tools.cocotb_helpers import Clock, MultiClock
+from libdigital.tools.cocotb_helpers import Clock, MultiClock, random_samples
 
 import cocotb
 from cocotb.result import TestFailure
@@ -19,11 +19,13 @@ class FFTTB:
     R22 SDF FFT testbench class.
     """
 
-    def __init__(self, dut):
+    def __init__(self, dut, num_samples, input_width):
         clk = Clock(dut.clk_i, 40)
         clk_3x = Clock(dut.clk_3x_i, 120)
         self.multiclock = MultiClock([clk, clk_3x])
         self.dut = dut
+        self.inputs = random_samples(input_width, num_samples)
+        self.outputs = np.fft.fft(self.inputs)
 
     @cocotb.coroutine
     async def setup(self):
@@ -54,22 +56,14 @@ async def check_sequence(dut):
     """
     Compare the hdl FFT output with numpy, to within some specified tolerance.
     """
-    fft = FFTTB(dut)
-    await fft.setup()
     num_samples = 1024
     input_width = 14
+    fft = FFTTB(dut, num_samples, input_width)
+    await fft.setup()
 
     # low bound is inclusive and upper bound is exclusive
-    input_seq = np.zeros(num_samples)
-    for i, _ in enumerate(input_seq):
-        input_seq[i] = np.random.randint(
-            -2 ** (input_width - 1), 2 ** (input_width - 1)
-        )
-
-    input_seq = input_seq.astype(int)
-    outputs = np.fft.fft(input_seq)
-    reals = outputs.real
-    imags = outputs.imag
+    reals = np.real(fft.outputs)
+    imags = np.imag(fft.outputs)
 
     # TODO this tolerance is way too high. This is just an initial
     # sanity check.
@@ -81,7 +75,7 @@ async def check_sequence(dut):
     i = num_samples
     while i > 0:
         if glbl_ctr < num_samples:
-            fft.dut.data_re_i <= input_seq[glbl_ctr].item()
+            fft.dut.data_re_i <= fft.inputs[glbl_ctr].item()
         else:
             fft.dut.data_re_i <= 0
         glbl_ctr += 1
