@@ -40,6 +40,7 @@ module ft245 #(
    // Write data.
    input wire [DATA_WIDTH-1:0] wrdata,
    output wire                 wrfifo_full,
+   output wire                 wrfifo_empty,
    // Pull high to read data from internal read FIFO. It only makes
    // sense to read data when !rdfifo_empty.
    input wire                  rden,
@@ -101,6 +102,7 @@ module ft245 #(
    ) fifo_write (
       .rst_n  (rst_n                 ),
       .full   (wrfifo_full           ),
+      .empty  (wrfifo_empty          ),
       .rdclk  (slow_ft_clk           ),
       .rden   (oe_n && wr_fifo_rd_en ),
       .rddata (wrfifo_rddata         ),
