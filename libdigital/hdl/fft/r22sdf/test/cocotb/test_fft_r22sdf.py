@@ -50,6 +50,42 @@ class FFTTB:
 
         await Combine(*trigs)
 
+    def check_outputs(self, tolerance):
+        """
+        Check that the measured outputs are within the specified tolerance
+        of the actual outputs. Raise a test failure if not. If the
+        tolerance is satisfied, return a tuple of the difference
+        values.
+        """
+        bit_rev_ctr = self.dut.data_ctr_o.value.integer
+        rval = self.dut.data_re_o.value.signed_integer
+        rexp = np.real(self.outputs)[bit_rev_ctr].item()
+        rdiff = rval - rexp
+        ival = self.dut.data_im_o.value.signed_integer
+        iexp = np.imag(self.outputs)[bit_rev_ctr].item()
+        idiff = ival - iexp
+        if abs(rval - rexp) > tolerance:
+            raise TestFailure(
+                (
+                    "Actual real output differs from expected."
+                    " Actual: %d, expected: %d, difference: %d."
+                    " Tolerance set at %d."
+                )
+                % (rval, rexp, rval - rexp, tolerance)
+            )
+
+        if abs(ival - iexp) > tolerance:
+            raise TestFailure(
+                (
+                    "Actual imaginary output differs from expected."
+                    " Actual: %d, expected: %d, difference: %d."
+                    " Tolerance set at %d."
+                )
+                % (ival, iexp, ival - iexp, tolerance)
+            )
+
+        return (rdiff, idiff)
+
 
 @cocotb.test()
 async def check_sequence(dut):
@@ -82,32 +118,9 @@ async def check_sequence(dut):
         fft.dut.data_im_i <= 0
         await ReadOnly()
         if fft.dut.sync_o.value.integer:
-            bit_rev_ctr = fft.dut.data_ctr_o.value.integer
-            rval = fft.dut.data_re_o.value.signed_integer
-            rexp = reals[bit_rev_ctr].item()
-            rdiffs.append(rval - rexp)
-            ival = fft.dut.data_im_o.value.signed_integer
-            iexp = imags[bit_rev_ctr].item()
-            idiffs.append(ival - iexp)
-            if abs(rval - rexp) > tol:
-                raise TestFailure(
-                    (
-                        "Actual real output differs from expected."
-                        " Actual: %d, expected: %d, difference: %d."
-                        " Tolerance set at %d."
-                    )
-                    % (rval, rexp, rval - rexp, tol)
-                )
-
-            if abs(ival - iexp) > tol:
-                raise TestFailure(
-                    (
-                        "Actual imaginary output differs from expected."
-                        " Actual: %d, expected: %d, difference: %d."
-                        " Tolerance set at %d."
-                    )
-                    % (ival, iexp, ival - iexp, tol)
-                )
+            (rval, ival) = fft.check_outputs(tol)
+            rdiffs.append(rval)
+            idiffs.append(ival)
 
             i -= 1
         await RisingEdge(fft.dut.clk_i)
