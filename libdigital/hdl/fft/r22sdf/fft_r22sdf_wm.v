@@ -108,6 +108,10 @@ module fft_r22sdf_wm #(
               a2_reg <= x_re_reg2 - x_im_reg2;
               b2_reg <= sign_extend_b(w_re_reg);
            end
+         default:
+           begin
+              mul_state <= 2'd0;
+           end
          endcase
       end
    end
@@ -170,6 +174,9 @@ module fft_r22sdf_wm #(
    reg [NLOG2-1:0] ctr_reg3;
    always @(posedge clk_i) begin
       if (!rst_n) begin
+         ctr_reg  <= {NLOG2{1'b0}};
+         ctr_reg2 <= {NLOG2{1'b0}};
+         ctr_reg3 <= {NLOG2{1'b0}};
          ctr_o    <= {NLOG2{1'b0}};
       end else begin
          ctr_reg  <= ctr_i;

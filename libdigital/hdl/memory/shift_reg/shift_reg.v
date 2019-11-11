@@ -5,6 +5,8 @@
 
 `include "ram.v"
 
+// TODO this is broken!!!!!!
+
 // Uses an 18k FIFO (via onboard block RAM) to implement a shift
 // register. Note that this module only supports reading from the end
 // of the shift register due to the fact that it's based on dual-port
@@ -22,18 +24,9 @@ module shift_reg #(
    output wire [DATA_WIDTH-1:0] data_o
 );
 
-   // TODO These should really be conditional on the chosen parameter
-   // values. However, verilog does not allow putting these in a
-   // generate block. Currently, they must be modified by hand until a
-   // better solution is found.
-   localparam ADDR_WIDTH = 9;
-   localparam WE_REPLICATE = 4;
-
    localparam LEN_LOG2 = $clog2(LEN);
-   localparam ADDR_PADDING = ADDR_WIDTH - LEN_LOG2;
 
    reg [LEN_LOG2-1:0]           addr;
-
    always @(posedge clk) begin
       if (!rst_n)
          addr <= {LEN_LOG2{1'b0}};

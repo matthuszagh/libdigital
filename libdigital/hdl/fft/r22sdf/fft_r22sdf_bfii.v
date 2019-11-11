@@ -21,52 +21,72 @@ module fft_r22sdf_bfii #(
    wire signed [DATA_WIDTH-1:0]       sr_re;
    wire signed [DATA_WIDTH-1:0]       sr_im;
 
-   generate
-      if (SHIFT_REG_LEN > 32) begin
-         shift_reg #(
-            .DATA_WIDTH (DATA_WIDTH),
-            .LEN        (SHIFT_REG_LEN)
-         ) shift_reg_re (
-            .clk    (clk_i),
-            .rst_n  (rst_n),
-            .ce     (1'b1),
-            .di     (zsr_re),
-            .data_o (sr_re)
-         );
-
-         shift_reg #(
-            .DATA_WIDTH (DATA_WIDTH),
-            .LEN        (SHIFT_REG_LEN)
-         ) shift_reg_im (
-            .clk    (clk_i),
-            .rst_n  (rst_n),
-            .ce     (1'b1),
-            .di     (zsr_im),
-            .data_o (sr_im)
-         );
-      end else begin
-         reg signed [DATA_WIDTH-1:0]        sr_re_reg [0:SHIFT_REG_LEN-1];
-         reg signed [DATA_WIDTH-1:0]        sr_im_reg [0:SHIFT_REG_LEN-1];
-         integer                    i;
-         always @(posedge clk_i) begin
-            if (!rst_n) begin
-               for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
-                  sr_re_reg[i] <= {DATA_WIDTH{1'b0}};
-                  sr_im_reg[i] <= {DATA_WIDTH{1'b0}};
-               end
-            end else begin
-               sr_re_reg[0] <= zsr_re;
-               sr_im_reg[0] <= zsr_im;
-               for (i=1; i<SHIFT_REG_LEN; i=i+1) begin
-                  sr_re_reg[i] <= sr_re_reg[i-1];
-                  sr_im_reg[i] <= sr_im_reg[i-1];
-               end
-            end
+   reg signed [DATA_WIDTH-1:0]        sr_re_reg [0:SHIFT_REG_LEN-1];
+   reg signed [DATA_WIDTH-1:0]        sr_im_reg [0:SHIFT_REG_LEN-1];
+   integer                            i;
+   always @(posedge clk_i) begin
+      if (!rst_n) begin
+         for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
+            sr_re_reg[i] <= {DATA_WIDTH{1'b0}};
+            sr_im_reg[i] <= {DATA_WIDTH{1'b0}};
          end
-         assign sr_re = sr_re_reg[SHIFT_REG_LEN-1];
-         assign sr_im = sr_im_reg[SHIFT_REG_LEN-1];
+      end else begin
+         sr_re_reg[0] <= zsr_re;
+         sr_im_reg[0] <= zsr_im;
+         for (i=1; i<SHIFT_REG_LEN; i=i+1) begin
+            sr_re_reg[i] <= sr_re_reg[i-1];
+            sr_im_reg[i] <= sr_im_reg[i-1];
+         end
       end
-   endgenerate
+   end
+   assign sr_re = sr_re_reg[SHIFT_REG_LEN-1];
+   assign sr_im = sr_im_reg[SHIFT_REG_LEN-1];
+   // generate
+   //    if (SHIFT_REG_LEN > 32) begin
+   //       shift_reg #(
+   //          .DATA_WIDTH (DATA_WIDTH),
+   //          .LEN        (SHIFT_REG_LEN)
+   //       ) shift_reg_re (
+   //          .clk    (clk_i),
+   //          .rst_n  (rst_n),
+   //          .ce     (1'b1),
+   //          .di     (zsr_re),
+   //          .data_o (sr_re)
+   //       );
+
+   //       shift_reg #(
+   //          .DATA_WIDTH (DATA_WIDTH),
+   //          .LEN        (SHIFT_REG_LEN)
+   //       ) shift_reg_im (
+   //          .clk    (clk_i),
+   //          .rst_n  (rst_n),
+   //          .ce     (1'b1),
+   //          .di     (zsr_im),
+   //          .data_o (sr_im)
+   //       );
+   //    end else begin
+   //       reg signed [DATA_WIDTH-1:0]        sr_re_reg [0:SHIFT_REG_LEN-1];
+   //       reg signed [DATA_WIDTH-1:0]        sr_im_reg [0:SHIFT_REG_LEN-1];
+   //       integer                    i;
+   //       always @(posedge clk_i) begin
+   //          if (!rst_n) begin
+   //             for (i=0; i<SHIFT_REG_LEN; i=i+1) begin
+   //                sr_re_reg[i] <= {DATA_WIDTH{1'b0}};
+   //                sr_im_reg[i] <= {DATA_WIDTH{1'b0}};
+   //             end
+   //          end else begin
+   //             sr_re_reg[0] <= zsr_re;
+   //             sr_im_reg[0] <= zsr_im;
+   //             for (i=1; i<SHIFT_REG_LEN; i=i+1) begin
+   //                sr_re_reg[i] <= sr_re_reg[i-1];
+   //                sr_im_reg[i] <= sr_im_reg[i-1];
+   //             end
+   //          end
+   //       end
+   //       assign sr_re = sr_re_reg[SHIFT_REG_LEN-1];
+   //       assign sr_im = sr_im_reg[SHIFT_REG_LEN-1];
+   //    end
+   // endgenerate
 
    wire signed [DATA_WIDTH-1:0]       xsr_re;
    wire signed [DATA_WIDTH-1:0]       xsr_im;
