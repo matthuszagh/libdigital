@@ -18,6 +18,16 @@ def sub_integral_to_sint(real_val, prec):
     return int_val
 
 
+def sub_integral_to_uint(real_val, prec):
+    """
+    Like `sub_integral_to_sint' but for unsigned values.
+    """
+    int_val = int(round(real_val * (2 ** prec)))
+    if int_val == 2 ** prec:
+        int_val = 2 ** prec - 1
+    return int_val
+
+
 def quantized_real(orig_val, prec):
     """
     Returns a floating-point number quantized for @prec bits of
