@@ -112,11 +112,11 @@ class FFTTB:
         """
         timestep = min(self.multiclock.clock_periods())
         while True:
-            self.dut.rst_n <= 0
+            self.dut.rst_n <= 1
             time_on = timestep * np.random.randint(1e2, 1e4, dtype=int)
             await Timer(time_on)
-            self.dut.rst_n <= 1
-            time_off = timestep * np.random.randint(1e1, 1e2, dtype=int)
+            self.dut.rst_n <= 0
+            time_off = timestep * np.random.randint(1e2, 1e3, dtype=int)
             await Timer(time_off)
 
 
@@ -174,7 +174,11 @@ async def check_sequence(dut):
 #     """
 #     Test the FFT's behavior when sending intermittent reset signals.
 #     """
-#     num_samples = 1024
+#     num_samples = 100000
 #     input_width = 14
 #     fft = FFTTB(dut, num_samples, input_width)
 #     await fft.setup()
+#     cocotb.fork(fft.write_inputs())
+#     cocotb.fork(fft.send_intermittent_resets())
+#     while True:
+#         await RisingEdge(fft.dut.clk_i)

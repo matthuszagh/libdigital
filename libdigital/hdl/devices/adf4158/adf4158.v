@@ -204,7 +204,7 @@ module adf4158 #(
    reg        ramp_en;
 
    /* Configuration registers.
-    *  Initialization sequence: r7, r6_0, r6_1, r5_0, r5_1, r4, r3, r2, r1, r0
+    * Initialization sequence: r7, r6_0, r6_1, r5_0, r5_1, r4, r3, r2, r1, r0
     */
    reg [31:0] r [0:9];
 
@@ -286,6 +286,7 @@ module adf4158 #(
                  bit_ctr <= bit_ctr - 5'd1;
                  le      <= 1'b0;
                  ramp_en <= 1'b1;
+                 config_done <= 1'b0;
                  if (ramp_en) begin
                     if (bit_ctr == 5'd0) begin
                        le_delay <= 1'b1;
@@ -306,6 +307,7 @@ module adf4158 #(
                  bit_ctr <= bit_ctr - 5'd1;
                  le      <= 1'b0;
                  ramp_en <= 1'b0;
+                 config_done <= 1'b0;
                  if (!ramp_en) begin
                     if (bit_ctr == 5'd0) begin
                        le_delay <= 1'b1;
@@ -323,6 +325,7 @@ module adf4158 #(
               end
             IDLE_STATE:
               begin
+                 config_done <= 1'b0;
                  le <= 1'b1;
                  if (enable && !configured)
                    state <= CONFIG_STATE;
