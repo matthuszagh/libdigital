@@ -17,19 +17,20 @@ module ltc2292 #(
    output reg [11:0] dbo
 );
 
-   // When the ADC outputs are multiplexed, channel A should be
-   // sampled on the clock's falling edge and channel B sampled on the
-   // clock's rising edge.
+   // TODO verify this is correct. It's not clear, and Henrik does it
+   // the other way. When the ADC outputs are multiplexed, channel A
+   // should be sampled on the clock's falling edge and channel B
+   // sampled on the clock's rising edge.
 
-   reg signed [11:0]         abuf;
+   reg [11:0] dbuf;
 
    always @(posedge clk) begin
-      dao <= abuf;
+      dao <= dbuf;
       dbo <= di;
    end
 
    always @(negedge clk) begin
-      abuf <= di;
+      dbuf <= di;
    end
 
 endmodule
