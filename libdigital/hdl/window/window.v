@@ -13,6 +13,7 @@ module window #(
    input wire                         rst_n,
    input wire                         en,
    input wire signed [DATA_WIDTH-1:0] di,
+   output reg                         dvalid,
    output reg signed [DATA_WIDTH-1:0] dout
 );
 
@@ -36,20 +37,20 @@ module window #(
       $readmemh("/home/matt/src/libdigital/libdigital/hdl/window/roms/coeffs.hex", coeffs);
    end
 
+   reg en_buf;
    always @(posedge clk) begin
       if (!rst_n) begin
          ctr <= {$clog2(N){1'b0}};
-      end else begin
-         if (en) begin
-            internal <= di * $signed({1'b0, coeffs[ctr]});
-            dout     <= trunc_to_out(round_convergent(internal));
-            if (ctr == N-1) begin
-               ctr <= {$clog2(N){1'b0}};
-            end else begin
-               ctr   <= ctr + 1'b1;
-            end
+         {dvalid, en_buf} <= {1'b0, 1'b0};
+      end else if (en) begin
+         {dvalid, en_buf} <= {en_buf, en};
+
+         internal <= di * $signed({1'b0, coeffs[ctr]});
+         dout <= trunc_to_out(round_convergent(internal));
+         if (ctr == N-1) begin
+            ctr <= {$clog2(N){1'b0}};
          end else begin
-            ctr <= ctr;
+            ctr <= ctr + 1'b1;
          end
       end
    end
