@@ -7,9 +7,10 @@
 module window #(
    parameter N           = 1024,
    parameter DATA_WIDTH  = 14,
-   parameter COEFF_WIDTH = 10
+   parameter COEFF_WIDTH = 16
 ) (
    input wire                         clk,
+   input wire                         rst_n,
    input wire                         en,
    input wire signed [DATA_WIDTH-1:0] di,
    output reg signed [DATA_WIDTH-1:0] dout
@@ -36,18 +37,33 @@ module window #(
    end
 
    always @(posedge clk) begin
-      if (en) begin
-         internal <= di * coeffs[ctr];
-         dout     <= trunc_to_out(round_convergent(internal));
-         if (ctr == N-1) begin
-            ctr <= {$clog2(N){1'b0}};
-         end else begin
-            ctr   <= ctr + 1'b1;
-         end
-      end else begin
+      if (!rst_n) begin
          ctr <= {$clog2(N){1'b0}};
+      end else begin
+         if (en) begin
+            internal <= di * $signed({1'b0, coeffs[ctr]});
+            dout     <= trunc_to_out(round_convergent(internal));
+            if (ctr == N-1) begin
+               ctr <= {$clog2(N){1'b0}};
+            end else begin
+               ctr   <= ctr + 1'b1;
+            end
+         end else begin
+            ctr <= ctr;
+         end
       end
    end
+
+`ifdef COCOTB_SIM
+   // integer i;
+   initial begin
+      $dumpfile ("cocotb/build/window.vcd");
+      $dumpvars (0, window);
+      // for (i=0; i<100; i=i+1)
+      //   $dumpvars (0, coeffs[i]);
+      #1;
+   end
+`endif
 
 endmodule
 `endif /* _WINDOW_V_ */

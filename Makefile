@@ -5,10 +5,11 @@ FIFO_DIR	= $(HDL_ROOT)/memory/fifo
 SHIFT_REG_DIR	= $(HDL_ROOT)/memory/shift_reg
 RAM_DIR		= $(HDL_ROOT)/memory/ram
 FIR_POLY_DIR	= $(HDL_ROOT)/filters/fir_poly
+WINDOW_DIR	= $(HDL_ROOT)/window
 
 # unit tests
 .PHONY: test
-test: test_fft test_fifo test_fir_poly
+test: test_fft test_fifo test_fir_poly test_window
 
 .PHONY: test_fft
 test_fft:
@@ -17,6 +18,10 @@ test_fft:
 .PHONY: test_fifo
 test_fifo:
 	$(MAKE) -C $(FIFO_DIR) test
+
+.PHONY: test_window
+test_window:
+	$(MAKE) -C $(WINDOW_DIR) test
 
 # TODO
 .PHONY: test_shift_reg

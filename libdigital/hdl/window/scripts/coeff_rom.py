@@ -9,7 +9,7 @@ from libdigital.tools.bit import sub_integral_to_uint
 import numpy as np
 
 N = 1024
-COEFF_PREC = 10
+COEFF_PREC = 16
 
 w = np.kaiser(N, 6)
 w_int = [sub_integral_to_uint(i, COEFF_PREC) for i in w]
