@@ -1,5 +1,7 @@
 `ifndef _ADF4158_V_
 `define _ADF4158_V_
+
+`timescale 1ns/1ps
 `default_nettype none
 
 // `adf4158' can be used to configure and control an ADF4158 frequency
@@ -281,6 +283,7 @@ module adf4158 #(
                     end
                  end
               end
+
             ENABLE_STATE:
               begin
                  bit_ctr <= bit_ctr - 5'd1;
@@ -302,6 +305,7 @@ module adf4158 #(
                     end
                  end
               end
+
             DISABLE_STATE:
               begin
                  bit_ctr <= bit_ctr - 5'd1;
@@ -323,6 +327,7 @@ module adf4158 #(
                     end
                  end
               end
+
             IDLE_STATE:
               begin
                  config_done <= 1'b0;
@@ -343,7 +348,6 @@ endmodule
 
 `ifdef ADF4158_SIMULATE
 
-`timescale 1ns/1ps
 module adf4158_tb;
 
    reg clk = 1'b0;
