@@ -1,13 +1,13 @@
 `ifndef _FT245_V_
 `define _FT245_V_
+
 `default_nettype none
+`timescale 1ns/1ps
 
 /** ft245.v
  *
  * An interface for using the FT2232H chip in FT245 synchronous FIFO
  * mode.
- *
- * TODO read words are currently confined to single bytes.
  */
 
 `include "async_fifo.v"
@@ -20,12 +20,12 @@ module ft245 #(
    parameter WRITE_DEPTH  = 1024,
    // A FIFO used to buffer read data from FT2232H to FPGA.
    parameter READ_DEPTH   = 512,
-   // The number of bits in a full word of transmission data.
-   parameter DATA_WIDTH   = 64,
+   // The number of bits a payload (does not include header/tail and
+   // other bits).
+   parameter DATA_WIDTH   = 47,
    // Duplicate all transmission bytes as a form of error
-   // detection. Although inefficient, this is very effective at
-   // avoiding data errors caused by the host PC missing bytes while
-   // reading.
+   // detection. Although inefficient, this is effective at avoiding
+   // data errors caused by the host PC missing bytes while reading.
    parameter DUPLICATE_TX = 1
 ) (
    // ======================== FPGA interface ========================
@@ -82,7 +82,10 @@ module ft245 #(
    inout wire [7:0]            ft_data
 );
 
-   localparam NBYTES = DATA_WIDTH/8;
+   // number of bits in full transmission, including header/tail/meta
+   // data.
+   localparam FULL_WIDTH = 64;
+   localparam NBYTES = FULL_WIDTH/8;
    // TODO this should be parameterized to work with different word
    // sizes.
 `ifndef __ICARUS__
@@ -124,17 +127,20 @@ module ft245 #(
    );
 
    reg [7:0]                    ft_data_reg;
+   wire [FULL_WIDTH-1:0]        wrfifo_rddata_full;
+
+   assign wrfifo_rddata_full = {8'h80, 5'd0, wrfifo_rddata, 4'h0};
 
    always @(*) begin
       case (ctr)
-      3'b000 : ft_data_reg = wrfifo_rddata[63:56];
-      3'b001 : ft_data_reg = wrfifo_rddata[55:48];
-      3'b010 : ft_data_reg = wrfifo_rddata[47:40];
-      3'b011 : ft_data_reg = wrfifo_rddata[39:32];
-      3'b100 : ft_data_reg = wrfifo_rddata[31:24];
-      3'b101 : ft_data_reg = wrfifo_rddata[23:16];
-      3'b110 : ft_data_reg = wrfifo_rddata[15:8];
-      3'b111 : ft_data_reg = wrfifo_rddata[7:0];
+      3'b000 : ft_data_reg = wrfifo_rddata_full[63:56];
+      3'b001 : ft_data_reg = wrfifo_rddata_full[55:48];
+      3'b010 : ft_data_reg = wrfifo_rddata_full[47:40];
+      3'b011 : ft_data_reg = wrfifo_rddata_full[39:32];
+      3'b100 : ft_data_reg = wrfifo_rddata_full[31:24];
+      3'b101 : ft_data_reg = wrfifo_rddata_full[23:16];
+      3'b110 : ft_data_reg = wrfifo_rddata_full[15:8];
+      3'b111 : ft_data_reg = wrfifo_rddata_full[7:0];
       endcase
    end
 
