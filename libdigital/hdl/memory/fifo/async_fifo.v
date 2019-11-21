@@ -63,17 +63,17 @@ module async_fifo #(
    // for this is that the underlying RAM module prevents simultaneous
    // access to the same data.
    ram #(
-      .WIDTH (WIDTH),
-      .SIZE  (SIZE)
+      .WIDTH (WIDTH ),
+      .SIZE  (SIZE  )
    ) ram (
-      .rdclk  (rdclk),
-      .rden   (rden && !empty),
-      .rdaddr (rdaddr),
-      .rddata (rddata),
-      .wrclk  (wrclk),
-      .wren   (wren && !full),
-      .wraddr (wraddr),
-      .wrdata (wrdata)
+      .rdclk  (rdclk          ),
+      .rden   (rden && !empty ),
+      .rdaddr (rdaddr         ),
+      .rddata (rddata         ),
+      .wrclk  (wrclk          ),
+      .wren   (wren && !full  ),
+      .wraddr (wraddr         ),
+      .wrdata (wrdata         )
    );
 
 `ifdef FORMAL
