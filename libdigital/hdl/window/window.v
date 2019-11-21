@@ -18,6 +18,7 @@ module window #(
 );
 
    localparam INTERNAL_WIDTH = DATA_WIDTH + COEFF_WIDTH;
+   localparam [$clog2(N)-1:0] N_CMP = N[$clog2(N)-1:0];
 
    function [INTERNAL_WIDTH-1:0] round_convergent(input [INTERNAL_WIDTH-1:0] expr);
       round_convergent = expr + {{DATA_WIDTH{1'b0}},
@@ -47,7 +48,7 @@ module window #(
 
          internal <= di * $signed({1'b0, coeffs[ctr]});
          dout <= trunc_to_out(round_convergent(internal));
-         if (ctr == N-1) begin
+         if (ctr == N_CMP-1'b1) begin
             ctr <= {$clog2(N){1'b0}};
          end else begin
             ctr <= ctr + 1'b1;
