@@ -1,7 +1,8 @@
-`default_nettype none
-
 `ifndef _ASYNC_FIFO_V_
 `define _ASYNC_FIFO_V_
+
+`default_nettype none
+`timescale 1ns/1ps
 
 `include "ram.v"
 
@@ -13,8 +14,6 @@
  * must be asserted for a minimum of one full period of the slowest
  * clock.
  */
-
-`timescale 1ns/1ps
 module async_fifo #(
    parameter WIDTH = 64,
    parameter SIZE  = 1024
