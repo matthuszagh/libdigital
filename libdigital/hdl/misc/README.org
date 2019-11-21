@@ -1,0 +1,4 @@
+* About
+A collection of modules that don't seem to fit anywhere else. Ideally,
+these should be relocated, but this is ok as a temporary home, or if
+they really don't fit in another category.
