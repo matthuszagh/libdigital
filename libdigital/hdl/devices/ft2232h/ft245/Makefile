@@ -4,6 +4,8 @@ HDL_ROOT	?= /home/matt/src/libdigital/libdigital/hdl
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/fifo
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
+VERILOG_DIRS	+= $(HDL_ROOT)/memory/dual_ff
+VERILOG_DIRS	+= $(HDL_ROOT)/misc/pll_sync_ctr
 
 VERILOG_INCS	= $(addprefix -I,$(VERILOG_DIRS))
 VERILOG_SRCS	:= $(shell find $(VERILOG_DIRS) -maxdepth 1 -name '*.v')

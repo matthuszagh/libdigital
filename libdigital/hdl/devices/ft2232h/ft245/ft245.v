@@ -11,6 +11,7 @@
  */
 
 `include "async_fifo.v"
+`include "pll_sync_ctr.v"
 
 module ft245 #(
    // The FIFO is used to buffer write data when the FT2232H's
@@ -112,15 +113,15 @@ module ft245 #(
    );
    /* verilator lint_on PINMISSING */
 
-   reg [CTR_WIDTH-1:0]          ctr;
-
-   always @(posedge ft_clk) begin
-      if (!rst_n) begin
-         ctr <= {CTR_WIDTH{1'b0}};
-      end else if (oe_n) begin
-         ctr <= ctr + 1'b1;
-      end
-   end
+   wire [CTR_WIDTH-1:0]         ctr;
+   pll_sync_ctr #(
+      .RATIO (NBYTES)
+   ) pll_sync_ctr (
+      .fst_clk (ft_clk      ),
+      .slw_clk (slow_ft_clk ),
+      .rst_n   (rst_n       ),
+      .ctr     (ctr         )
+   );
 
    reg [7:0]                    ft_data_reg;
 
@@ -217,51 +218,3 @@ module ft245 #(
 
 endmodule
 `endif
-
-// `ifdef FT245_ICARUS
-// `timescale 1ns/1ps
-// module ft245_tb (
-//    input wire  ft_clk,
-//    input wire  rxf_n,
-//    input wire  txe_n,
-//    output wire rd_n,
-//    output wire wr_n,
-//    output wire oe_n,
-//    input wire  suspend_n,
-//    output wire ft_siwua_n
-// );
-
-//    reg rst_n = 1'b0;
-//    reg clk = 0;
-
-//    initial begin
-//       #10 rst_n = 1'b1;
-//    end
-
-//    ft245 #(
-//       .WRITE_DEPTH (1024),
-//       .READ_DEPTH  (512),
-//       .DATA_WIDTH  (64),
-//    ) dut (
-//       .rst_n        (rst_n),
-//       .clk          (),
-//       .wren         (),
-//       .wrdata       (),
-//       .wrfifo_full  (),
-//       .rden         (),
-//       .rddata       (),
-//       .rdfifo_full  (),
-//       .rdfifo_empty (),
-//       .ft_clk       (ft_clk),
-//       .rxf_n        (rxf_n),
-//       .txe_n        (txe_n),
-//       .rd_n         (rd_n),
-//       .wr_n         (wr_n),
-//       .oe_n         (oe_n),
-//       .suspend_n    (suspend_n),
-//       .ft_siwua_n   (ft_siwua_n),
-//       .ft_data      ()
-//    );
-
-// endmodule
-// `endif

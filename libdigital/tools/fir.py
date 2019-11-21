@@ -2,11 +2,11 @@
 Finite-impulse response filter.
 """
 
+import math
 from scipy import signal
 import bitstring
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 
 from libdigital.tools import bit
 
