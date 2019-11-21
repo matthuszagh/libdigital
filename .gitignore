@@ -13,3 +13,4 @@
 **/results.xml
 **/taps
 libdigital/hdl/window/roms/coeffs.hex
+/libdigital/hdl/filters/fir_poly/scripts/freq_response.png
