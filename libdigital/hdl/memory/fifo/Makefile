@@ -1,4 +1,5 @@
 export
+HDL_ROOT	?= $(abspath ../../../hdl)
 # Source files
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
