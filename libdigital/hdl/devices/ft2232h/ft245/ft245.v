@@ -104,15 +104,17 @@ module ft245 #(
       .WIDTH (DATA_WIDTH  ),
       .SIZE  (WRITE_DEPTH )
    ) fifo_write (
-      .rst_n  (rst_n                 ),
-      .full   (wrfifo_full           ),
-      .empty  (wrfifo_empty          ),
-      .rdclk  (slow_ft_clk           ),
-      .rden   (oe_n && wr_fifo_rd_en ),
-      .rddata (wrfifo_rddata         ),
-      .wrclk  (clk                   ),
-      .wren   (wren && !wrfifo_full  ),
-      .wrdata (wrdata                )
+      .rst_n  (rst_n                           ),
+      .full   (wrfifo_full                     ),
+      .empty  (wrfifo_empty                    ),
+      .rdclk  (slow_ft_clk                     ),
+      /* txe_n is a guard against writes to a full buffer, since
+      /* FT2232H can take up to 7.15ns to report a full buffer. */
+      .rden   (oe_n && wr_fifo_rd_en && !txe_n ),
+      .rddata (wrfifo_rddata                   ),
+      .wrclk  (clk                             ),
+      .wren   (wren && !wrfifo_full            ),
+      .wrdata (wrdata                          )
    );
    /* verilator lint_on PINMISSING */
 
@@ -190,6 +192,10 @@ module ft245 #(
                rd_n <= 1'b1;
                if (oe_n)
                  wr_n <= 1'b0;
+            end else begin
+               oe_n <= 1'b1;
+               rd_n <= 1'b1;
+               wr_n <= 1'b1;
             end
          end
       end else begin
@@ -208,6 +214,12 @@ module ft245 #(
                end
             end else if (!txe_n) begin
                oe_n <= 1'b1;
+               rd_n <= 1'b1;
+               if (oe_n)
+                 wr_n <= 1'b0;
+            end else begin
+               oe_n <= 1'b1;
+               rd_n <= 1'b1;
                wr_n <= 1'b1;
             end
          end
