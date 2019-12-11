@@ -18,7 +18,9 @@ module window #(
 );
 
    localparam INTERNAL_WIDTH = DATA_WIDTH + COEFF_WIDTH;
-   localparam [$clog2(N)-1:0] N_CMP = N[$clog2(N)-1:0];
+   /* verilator lint_off WIDTH */
+   localparam [$clog2(N-1)-1:0] N_CMP = N - 1;
+   /* verilator lint_on WIDTH */
 
    function [INTERNAL_WIDTH-1:0] round_convergent(input [INTERNAL_WIDTH-1:0] expr);
       round_convergent = expr + {{DATA_WIDTH{1'b0}},
@@ -34,6 +36,7 @@ module window #(
    reg [COEFF_WIDTH-1:0]                   coeffs [0:N-1];
    reg [$clog2(N)-1:0]                     ctr;
 
+   // TODO shouldn't use a full path
    initial begin
       $readmemh("/home/matt/src/libdigital/libdigital/hdl/window/roms/coeffs.hex", coeffs);
    end
@@ -48,7 +51,7 @@ module window #(
 
          internal <= di * $signed({1'b0, coeffs[ctr]});
          dout <= trunc_to_out(round_convergent(internal));
-         if (ctr == N_CMP-1'b1) begin
+         if (ctr == N_CMP) begin
             ctr <= {$clog2(N){1'b0}};
          end else begin
             ctr <= ctr + 1'b1;
