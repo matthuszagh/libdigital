@@ -17,16 +17,19 @@ module ft245 #(
    // The FIFO is used to buffer write data when the FT2232H's
    // internal buffer is full. It also prevents CDC issues since `clk'
    // and `ft_clk' are asynchronous.
-   parameter WRITE_DEPTH  = 1024,
+   parameter WRITE_DEPTH    = 1024,
    // A FIFO used to buffer read data from FT2232H to FPGA.
-   parameter READ_DEPTH   = 512,
+   parameter READ_DEPTH     = 512,
    // The number of bits a payload (does not include header/tail and
-   // other bits).
-   parameter DATA_WIDTH   = 47,
+   // other bits). This must be less than or equal to 52. For any
+   // number less than 52, the remaining bits will be set to 0. The
+   // zero bits will appear as the most significant bits in the 52 bit
+   // range.
+   parameter DATA_WIDTH     = 39,
    // Duplicate all transmission bytes as a form of error
    // detection. Although inefficient, this is effective at avoiding
    // data errors caused by the host PC missing bytes while reading.
-   parameter DUPLICATE_TX = 1
+   parameter DUPLICATE_TX   = 1
 ) (
    // ======================== FPGA interface ========================
 
@@ -86,6 +89,8 @@ module ft245 #(
    // data.
    localparam FULL_WIDTH = 64;
    localparam NBYTES = FULL_WIDTH/8;
+   localparam LEADING_BLANKS = 52 - DATA_WIDTH;
+
    // TODO this should be parameterized to work with different word
    // sizes.
 `ifndef __ICARUS__
@@ -131,7 +136,7 @@ module ft245 #(
    reg [7:0]                    ft_data_reg;
    wire [FULL_WIDTH-1:0]        wrfifo_rddata_full;
 
-   assign wrfifo_rddata_full = {8'h80, 5'd0, wrfifo_rddata, 4'h0};
+   assign wrfifo_rddata_full = {8'h80, {LEADING_BLANKS{1'b0}}, wrfifo_rddata, 4'h0};
 
    always @(*) begin
       case (ctr)
