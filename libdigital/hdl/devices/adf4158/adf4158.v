@@ -29,25 +29,36 @@
 // (4) f_DEV = (f_PFD / 2^25) x (DEV x 2^DEV_OFFSET)
 //     f_DEV determines the frequency increment in each ramp step.
 //     default params: 300kHz
+//
+// (5) Delay = (1 / f_PFD) x CLK1_DIV x Delay Start Word
+//     The delay between ramps (this version uses CLK1_DIV for an
+//     additional delay).
+//     default params: 2ms
 
 // Ports:
-// clk       : A 40MHz input reference clock.
-// clk_20mhz : 20MHz clock used to synchronize configuration data.
-// rst_n     : Active low reset. After performing a reset, the device
-//             must be fully reconfigured.
-// enable    : 1 activates the frequency ramp and 0 disables it. You
-//             must wait for `config_done' to go high before the ramp
-//             is active.
-// le        : Low when writing data to ADF4158 and high to flush the
-//             data. This should be connected directly to the
-//             corresponding pin on the device.
-// ce        : 0 powers down the device. This is triggered when an
-//             active low reset is called. If you simply wish to
-//             disable the device, use `enable' rather than `rst_n'.
-// muxout    : TODO
-// txdata    : TODO
-// data      : Serial configuration data for ADF4158 internal
-//             registers. Connect directly to corresponding device pin.
+// clk        : A 40MHz input reference clock.
+// clk_20mhz  : 20MHz clock used to synchronize configuration data.
+// rst_n      : Active low reset. After performing a reset, the device
+//              must be fully reconfigured.
+// enable     : 1 activates the frequency ramp and 0 disables it. You
+//              must wait for `config_done' to go high before the ramp
+//              is active.
+// le         : Low when writing data to ADF4158 and high to flush the
+//              data. This should be connected directly to the
+//              corresponding pin on the device.
+// ce         : 0 powers down the device. This is triggered when an
+//              active low reset is called. If you simply wish to
+//              disable the device, use `enable' rather than `rst_n'.
+// muxout     : Pulses high at the end of the ramp period (see p.30 of
+//              the datasheet). This is used to synchronize data
+//              acquisition with the frequency ramp, based on the fact
+//              we've scheduled a delay between ramps of 2ms.
+// ramp_start : Pulses high for one clk period to signal the start of the
+//              ramp period.
+// ramp_on    : High when the ramp is on and low when off.
+// txdata     : TODO
+// data       : Serial configuration data for ADF4158 internal
+//              registers. Connect directly to corresponding device pin.
 
 // To determine the internal state of the ADF4158, look at the
 // descriptions next to MUXOUT, INTERRUPT and READBACK_MUXOUT. Also
@@ -65,7 +76,7 @@ module adf4158 #(
    // whether the PLL frequency is locked. If using READBACK_MUXOUT,
    // this must be set to 4'b1111. For other values, see the
    // datasheet.
-   parameter [3:0] MUXOUT           = 4'b0110,
+   parameter [3:0] MUXOUT           = 4'b1111,
    // Frequency multiplier for VCO output frequency. See eqn (2).
    parameter [11:0] INT             = 12'd265,
    // Fractional value used in determining the VCO output
@@ -133,10 +144,10 @@ module adf4158 #(
    // negative bleed current which ensures the charge pump operates
    // outside its dead zone. Set this to 2'b00 to disable it. If this
    // is enabled, READBACK_MUXOUT must be disabled.
-   parameter [1:0] BLEED_CURRENT    = 2'b11,
+   parameter [1:0] BLEED_CURRENT    = 2'b00,
    // Enables reading back the synthesizer's frequency at the moment
    // of interrupt. Set this to 2'b00 to disable, or 2'b10 to enable.
-   parameter [1:0] READBACK_MUXOUT = 2'b00,
+   parameter [1:0] READBACK_MUXOUT = 2'b11,
    // Setting clock divider mode to 2'b11 enables ramping. If instead
    // you want the fast-lock mode, set this to 2'b01.
    parameter [1:0] CLK_DIV_MODE    = 2'b11,
@@ -173,14 +184,15 @@ module adf4158 #(
    // Setting this to 1 enables a delay between ramp bursts. Note that
    // this does not disable frequency output (use PWR_DWN_INIT for
    // that), it simply holds the frequency output at its RF_OUT value.
-   parameter [0:0] RAMP_DELAY       = 1'b0,
+   parameter [0:0] RAMP_DELAY       = 1'b1,
    // Setting this to 0 selects the f_PFD clock as the delay
-   // clock. Setting this 1 uses f_PFD x CLK1_DIV.
-   parameter [0:0] DELAY_CLK_SEL    = 1'b0,
+   // clock. Setting this 1 uses f_PFD / CLK1_DIV as delay clock
+   // frequency.
+   parameter [0:0] DELAY_CLK_SEL    = 1'b1,
    // 1 enables a delayed start.
    parameter [0:0] DELAY_START_EN   = 1'b0,
    // Sets the number of steps in a delay.
-   parameter [11:0] DELAY_STEPS     = 12'd0
+   parameter [11:0] DELAY_STEPS     = 12'd4000
 ) (
    input wire clk,
    input wire clk_20mhz,
@@ -189,7 +201,9 @@ module adf4158 #(
    output reg config_done,
    output reg le,
    output reg ce,
-   input wire muxout, // TODO this should be connected to see when PLL locks
+   input wire muxout,
+   output reg ramp_start,
+   output reg ramp_on,
    output reg txdata,
    output reg data
 );
@@ -225,6 +239,42 @@ module adf4158 #(
 
    always @(posedge clk) begin
       r[0] <= {ramp_en, r[0][30:0]};
+   end
+
+   // signal ramp start signal for control logic.
+
+   // TODO this isn't properly parameterized because it isn't
+   // necessarily consistent with the module parameters.
+   localparam DELAY_PERIODS = 80000;
+   localparam [$clog2(DELAY_PERIODS-1)-1:0] DELAY_PERIODS_CMP = DELAY_PERIODS - 1;
+   reg [$clog2(DELAY_PERIODS)-1:0] delay_ctr;
+
+   always @(posedge clk) begin
+      if (!rst_n) begin
+         delay_ctr  <= {$clog2(DELAY_PERIODS){1'b0}};
+         ramp_start <= 1'b0;
+         ramp_on    <= 1'b0;
+      end else begin
+         if (delay_ctr == {$clog2(DELAY_PERIODS){1'b0}}) begin
+            ramp_start <= 1'b0;
+            ramp_on    <= 1'b1;
+            if (muxout) begin
+               delay_ctr <= {{$clog2(DELAY_PERIODS)-1{1'b0}}, 1'b1};
+            end else begin
+               delay_ctr <= {$clog2(DELAY_PERIODS){1'b0}};
+            end
+         end else begin
+            if (delay_ctr == DELAY_PERIODS_CMP) begin
+               delay_ctr  <= {$clog2(DELAY_PERIODS){1'b0}};
+               ramp_start <= 1'b1;
+               ramp_on    <= 1'b1;
+            end else begin
+               delay_ctr  <= delay_ctr + 1'b1;
+               ramp_start <= 1'b0;
+               ramp_on    <= 1'b0;
+            end
+         end
+      end
    end
 
    reg [3:0]  reg_ctr;
@@ -330,14 +380,23 @@ module adf4158 #(
 
             IDLE_STATE:
               begin
-                 config_done <= 1'b0;
                  le <= 1'b1;
-                 if (enable && !configured)
-                   state <= CONFIG_STATE;
-                 else if (enable && !enabled)
-                   state <= ENABLE_STATE;
-                 else if (!enable && enabled)
-                   state <= DISABLE_STATE;
+                 if (enable && !configured) begin
+                    state <= CONFIG_STATE;
+                    config_done <= 1'b0;
+                 end else if (enable && !enabled) begin
+                    state <= ENABLE_STATE;
+                    config_done <= 1'b0;
+                 end else if (enable && enabled) begin
+                    state <= IDLE_STATE;
+                    config_done <= 1'b1;
+                 end else if (!enable && enabled) begin
+                    state <= DISABLE_STATE;
+                    config_done <= 1'b0;
+                 end else if (!enable && !enabled) begin
+                    state <= IDLE_STATE;
+                    config_done <= 1'b1;
+                 end
               end
             endcase
          end
