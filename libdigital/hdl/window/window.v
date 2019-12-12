@@ -12,6 +12,7 @@ module window #(
    input wire                         clk,
    input wire                         rst_n,
    input wire                         en,
+   input wire                         clk_en,
    input wire signed [DATA_WIDTH-1:0] di,
    output reg                         dvalid,
    output reg signed [DATA_WIDTH-1:0] dout
@@ -32,9 +33,9 @@ module window #(
       trunc_to_out = expr[INTERNAL_WIDTH-1:INTERNAL_WIDTH-DATA_WIDTH];
    endfunction
 
-   reg signed [DATA_WIDTH+COEFF_WIDTH-1:0] internal;
-   reg [COEFF_WIDTH-1:0]                   coeffs [0:N-1];
-   reg [$clog2(N)-1:0]                     ctr;
+   reg signed [INTERNAL_WIDTH-1:0]    internal;
+   reg [COEFF_WIDTH-1:0]              coeffs [0:N-1];
+   reg [$clog2(N)-1:0]                ctr;
 
    // TODO shouldn't use a full path
    initial begin
@@ -46,26 +47,31 @@ module window #(
       if (!rst_n) begin
          ctr <= {$clog2(N){1'b0}};
          {dvalid, en_buf} <= {1'b0, 1'b0};
-      end else if (en) begin
+      end else if (clk_en) begin
          {dvalid, en_buf} <= {en_buf, en};
-
-         internal <= di * $signed({1'b0, coeffs[ctr]});
-         dout <= trunc_to_out(round_convergent(internal));
-         if (ctr == N_CMP) begin
-            ctr <= {$clog2(N){1'b0}};
+         internal         <= di * $signed({1'b0, coeffs[ctr]});
+         dout             <= trunc_to_out(round_convergent(internal));
+         if (ctr == {$clog2(N){1'b0}}) begin
+            if (en) begin
+               ctr <= {{$clog2(N)-1{1'b0}}, 1'b1};
+            end
          end else begin
-            ctr <= ctr + 1'b1;
+            if (ctr == N_CMP) begin
+               ctr <= {$clog2(N){1'b0}};
+            end else begin
+               ctr <= ctr + 1'b1;
+            end
          end
       end
    end
 
 `ifdef COCOTB_SIM
-   // integer i;
+   integer i;
    initial begin
       $dumpfile ("cocotb/build/window.vcd");
       $dumpvars (0, window);
-      // for (i=0; i<100; i=i+1)
-      //   $dumpvars (0, coeffs[i]);
+      for (i=0; i<100; i=i+1)
+        $dumpvars (0, coeffs[i]);
       #1;
    end
 `endif
