@@ -35,30 +35,30 @@ module fft_r22sdf_bf #(
    assign sel2 = ctrii[FFT_NLOG2-2-2*STAGE];
 
    fft_r22sdf_bfi #(
-      .DATA_WIDTH    (DATA_WIDTH),
-      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-1))
+      .DATA_WIDTH    (DATA_WIDTH              ),
+      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-1) )
    ) bfi (
-      .clk_i  (clk_i),
-      .rst_n  (rst_n),
-      .sel_i  (sel1),
-      .x_re_i (x_re_i),
-      .x_im_i (x_im_i),
-      .z_re_o (z_re),
-      .z_im_o (z_im)
+      .clk_i  (clk_i  ),
+      .rst_n  (rst_n  ),
+      .sel_i  (sel1   ),
+      .x_re_i (x_re_i ),
+      .x_im_i (x_im_i ),
+      .z_re_o (z_re   ),
+      .z_im_o (z_im   )
    );
 
    fft_r22sdf_bfii #(
-      .DATA_WIDTH    (DATA_WIDTH),
-      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-2))
+      .DATA_WIDTH    (DATA_WIDTH              ),
+      .SHIFT_REG_LEN (2**(2*(STAGES-STAGE)-2) )
    ) bfii (
-      .clk_i  (clk_i),
-      .rst_n  (rst_n),
-      .sel_i  (sel2),
-      .tsel_i (sel1),
-      .x_re_i (z_re),
-      .x_im_i (z_im),
-      .z_re_o (z_re_o),
-      .z_im_o (z_im_o)
+      .clk_i  (clk_i  ),
+      .rst_n  (rst_n  ),
+      .sel_i  (sel2   ),
+      .tsel_i (sel1   ),
+      .x_re_i (z_re   ),
+      .x_im_i (z_im   ),
+      .z_re_o (z_re_o ),
+      .z_im_o (z_im_o )
    );
 
    always @(posedge clk_i) begin

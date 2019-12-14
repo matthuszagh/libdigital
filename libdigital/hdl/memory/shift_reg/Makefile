@@ -1,4 +1,7 @@
 export
+
+HDL_ROOT	?= /home/matt/src/libdigital/libdigital/hdl
+
 # source files
 VERILOG_DIRS	:= $(shell pwd)
 VERILOG_DIRS	+= $(HDL_ROOT)/memory/ram
